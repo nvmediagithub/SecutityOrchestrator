@@ -1,0 +1,36 @@
+# Ignore the entire LLMSecurity folder
+LLMSecurity/
+
+# Backend (Java/Gradle) patterns
+Backend/build/
+Backend/.gradle/
+Backend/gradle/wrapper/gradle-wrapper.jar
+Backend/gradle/wrapper/gradle-wrapper.properties
+Backend/.gradle/build/
+Backend/.gradle/gradle.properties
+Backend/.gradle/libs.versions.toml
+Backend/gradle.properties
+
+# Frontend (Flutter) patterns
+Frontend/.dart_tool/
+Frontend/.packages
+Frontend/.pub/
+Frontend/build/
+Frontend/.flutter-plugins
+Frontend/.flutter-plugins-dependencies
+Frontend/android/app/src/main/AndroidManifest.xml~
+Frontend/android/gradle/wrapper/gradle-wrapper.jar~
+Frontend/android/gradle/wrapper/gradle-wrapper.properties~
+Frontend/ios/Flutter/AppFrameworkInfo.plist~
+Frontend/ios/Flutter/Debug.xcconfig~
+Frontend/ios/Flutter/Release.xcconfig~
+
+# Common global ignores
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
