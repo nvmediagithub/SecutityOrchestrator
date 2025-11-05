@@ -1,7 +1,7 @@
 # SecurityOrchestrator
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://openjdk.java.net/)
+[![Java](https://img.shields.io/badge/Java-21+-blue.svg)](https://openjdk.java.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)]()
@@ -202,7 +202,7 @@ SecurityOrchestrator follows Clean Architecture with clear separation of concern
 ### Technology Stack
 
 **Backend:**
-- **Framework**: Spring Boot 3.x with Java 17+
+- **Framework**: Spring Boot 3.x with Java 21+
 - **Architecture**: Clean Architecture (Hexagonal)
 - **Database**: H2 (file-based for local operation)
 - **Build Tool**: Gradle with Kotlin DSL
@@ -260,7 +260,7 @@ SecurityOrchestrator follows Clean Architecture with clear separation of concern
 
 1. **Prerequisites**
    ```bash
-   # Install Java 17+
+   # Install Java 21+
    # Install Git
    # Install Gradle (or use wrapper)
    ```

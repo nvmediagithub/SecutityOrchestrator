@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/models/process_dto.dart';
 import '../providers/process_provider.dart';
 import '../widgets/process_list_item.dart';
 import 'process_creation_screen.dart';
@@ -24,7 +25,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final processesAsync = ref.watch(processesProvider);
 
     return Scaffold(

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/workflow_dto.dart';
-import '../../core/network/websocket_client.dart';
+import '../providers/process_provider.dart';
+import 'results_screen.dart';
 
 class ExecutionMonitoringScreen extends ConsumerStatefulWidget {
   final String workflowId;
@@ -310,7 +311,7 @@ class _ExecutionMonitoringScreenState extends ConsumerState<ExecutionMonitoringS
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
         borderRadius: BorderRadius.circular(8),
         color: step.state == ExecutionState.running ? Colors.blue[50] : null,
       ),
@@ -386,14 +387,14 @@ class _ExecutionMonitoringScreenState extends ConsumerState<ExecutionMonitoringS
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.green[50],
-                border: Border.all(color: Colors.green[200]!),
+                color: const Color(0xFFE8F5E8),
+                border: Border.all(color: const Color(0xFFB8E6B8)),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 step.result!,
-                style: const TextStyle(
-                  color: Colors.green[800],
+                style: TextStyle(
+                  color: Colors.green.shade800,
                   fontFamily: 'monospace',
                   fontSize: 12,
                 ),
@@ -405,14 +406,14 @@ class _ExecutionMonitoringScreenState extends ConsumerState<ExecutionMonitoringS
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red[50],
-                border: Border.all(color: Colors.red[200]!),
+                color: const Color(0xFFFCE4EC),
+                border: Border.all(color: const Color(0xFFF5B7B7)),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 'Error: ${step.error}',
-                style: const TextStyle(
-                  color: Colors.red[800],
+                style: TextStyle(
+                  color: Colors.red.shade800,
                   fontFamily: 'monospace',
                   fontSize: 12,
                 ),

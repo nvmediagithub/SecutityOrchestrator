@@ -229,7 +229,7 @@ class ResultsScreen extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -309,7 +309,7 @@ class ResultsScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.red[50],
-                border: Border.all(color: Colors.red[200]!),
+                border: Border.all(color: const Color(0xFFF5B7B7)),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(

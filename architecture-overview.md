@@ -149,7 +149,7 @@ sequenceDiagram
 
 ## Technology Stack
 
-### Backend (Java 17+)
+### Backend (Java 21+)
 - **Framework**: Spring Boot 3.x
 - **Architecture**: Clean Architecture (Hexagonal)
 - **Build Tool**: Gradle

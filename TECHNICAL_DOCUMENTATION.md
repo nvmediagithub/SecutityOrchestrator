@@ -168,7 +168,7 @@ An intelligent platform that orchestrates end-to-end security testing workflows 
 
 ### Prerequisites
 
-- **Java 17+** - Download from [OpenJDK](https://openjdk.java.net/)
+- **Java 21+** - Download from [OpenJDK](https://openjdk.java.net/)
 - **Git** - Version control system
 
 ### Installation
@@ -225,7 +225,7 @@ An intelligent platform that orchestrates end-to-end security testing workflows 
 - **CPU**: Quad-core processor
 - **RAM**: 8 GB
 - **Storage**: 20 GB available space
-- **Java**: OpenJDK 17+
+- **Java**: OpenJDK 21+
 
 ## 🔧 Configuration
 
