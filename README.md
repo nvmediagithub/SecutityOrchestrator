@@ -74,7 +74,7 @@ For **Organizations**:
 
 **System Requirements:**
 - **Operating System**: Windows 10+, macOS Monterey+, Ubuntu 20.04+
-- **Java**: OpenJDK 17 or higher ([Download here](https://openjdk.java.net/))
+- **Java**: OpenJDK 21 or higher ([Download here](https://openjdk.java.net/))
 - **Memory**: 8GB RAM minimum, 16GB recommended
 - **Storage**: 20GB available space
 - **Git**: Version control system ([Download here](https://git-scm.com/))
@@ -297,7 +297,7 @@ src/main/java/com/securityorchestrator/
 
 ### Coding Standards
 
-- **Language**: Java 17 with preview features where beneficial
+- **Language**: Java 21 with preview features where beneficial
 - **Style**: Google Java Style Guide
 - **Documentation**: Comprehensive JavaDoc for public APIs
 - **Testing**: Minimum 80% code coverage required

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Create Process - Security Orchestrator</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="material-icons">add</i> Create New Process</h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/processes/create}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="file" class="form-label">BPMN/OpenAPI File</label>
+                                <input type="file" class="form-control" id="file" name="file" accept=".bpmn,.xml,.json,.yaml,.yml" required>
+                                <div class="form-text">Upload a BPMN process file or OpenAPI specification file.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Process Name (Optional)</label>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Leave empty to use filename">
+                                <div class="form-text">If not provided, the filename will be used as the process name.</div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="material-icons">upload</i> Upload & Create Process
+                                </button>
+                                <a href="/processes" th:href="@{/processes}" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5>File Format Guidelines</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="material-icons text-primary">description</i> BPMN Files</h6>
+                                <ul class="small">
+                                    <li>Standard BPMN 2.0 XML format</li>
+                                    <li>File extensions: .bpmn, .xml</li>
+                                    <li>Should contain executable processes</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="material-icons text-success">api</i> OpenAPI Specifications</h6>
+                                <ul class="small">
+                                    <li>OpenAPI 3.0+ JSON or YAML format</li>
+                                    <li>File extensions: .json, .yaml, .yml</li>
+                                    <li>Should define REST API endpoints</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div layout:fragment="scripts">
+        <script>
+            // File validation
+            document.getElementById('file').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const allowedExtensions = ['.bpmn', '.xml', '.json', '.yaml', '.yml'];
+                    const fileName = file.name.toLowerCase();
+                    const isValid = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+                    if (!isValid) {
+                        alert('Please select a valid file type: BPMN (.bpmn, .xml) or OpenAPI (.json, .yaml, .yml)');
+                        e.target.value = '';
+                    }
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

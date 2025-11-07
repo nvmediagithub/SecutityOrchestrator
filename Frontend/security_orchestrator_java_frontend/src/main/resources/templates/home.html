@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Home - Security Orchestrator</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1><i class="material-icons-outlined">dashboard</i> Security Orchestrator</h1>
+                    <div>
+                        <button type="button" class="fab" onclick="showCreateOptions()" title="Create New">
+                            <i class="material-icons">add</i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search and Filter Bar -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="search-container">
+                            <i class="material-icons search-icon">search</i>
+                            <input type="text" id="searchInput" class="form-control search-input" placeholder="Search processes..." onkeyup="filterProcesses()">
+                        </div>
+                        <div class="filter-chips">
+                            <button type="button" class="chip badge bg-secondary" onclick="setFilter('all')">All</button>
+                            <button type="button" class="chip badge status-active" onclick="setFilter('active')">Active</button>
+                            <button type="button" class="chip badge status-pending" onclick="setFilter('inactive')">Inactive</button>
+                            <button type="button" class="chip badge bg-secondary" onclick="setFilter('archived')">Archived</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="material-icons text-primary" style="font-size: 48px;">description</i>
+                        <h3 class="card-title" th:text="${#lists.size(processes)}">0</h3>
+                        <p class="card-text">Total Processes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="material-icons text-success" style="font-size: 48px;">timeline</i>
+                        <h3 class="card-title" th:text="${#lists.size(workflows)}">0</h3>
+                        <p class="card-text">Total Workflows</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="material-icons text-warning" style="font-size: 48px;">play_circle</i>
+                        <h3 class="card-title">0</h3>
+                        <p class="card-text">Active Executions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Process List -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="material-icons-outlined">list</i> Processes</h5>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="refreshProcesses()">
+                                <i class="material-icons">refresh</i>
+                            </button>
+                            <a href="/processes" th:href="@{/processes}" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                    </div>
+                    <div class="card-body" id="processList">
+                        <div th:if="${#lists.isEmpty(processes)}" class="text-center text-muted py-5">
+                            <i class="material-icons" style="font-size: 64px; color: #e0e0e0;">search_off</i>
+                            <h4 class="mt-3">No processes found</h4>
+                            <p>Try adjusting your search or filter criteria</p>
+                        </div>
+                        <div th:if="${!#lists.isEmpty(processes)}">
+                            <div th:each="process : ${processes}" class="process-card mb-3 p-3 border rounded" onclick="openProcess('${process.id}')">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="d-flex align-items-center">
+                                        <div class="status-indicator me-3" th:classappend="${process.status == 'ACTIVE' ? 'status-active' : process.status == 'INACTIVE' ? 'status-pending' : 'bg-secondary'}"></div>
+                                        <div>
+                                            <h6 class="mb-1 fw-bold" th:text="${process.name}">Process Name</h6>
+                                            <small class="text-muted" th:text="'Created: ' + ${#temporals.format(process.createdAt, 'dd/MM/yyyy HH:mm')}">Created</small>
+                                            <br>
+                                            <small class="text-muted" th:text="'Elements: ' + ${process.elementCount}">Elements</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge me-2" th:classappend="${process.status == 'ACTIVE' ? 'status-active' : process.status == 'INACTIVE' ? 'status-pending' : 'bg-secondary'}"
+                                              th:text="${process.status}">Status</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="showProcessMenu(event, '${process.id}')" title="More options">
+                                            <i class="material-icons">more_vert</i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <!-- Recent Workflows -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="material-icons">timeline</i> Recent Workflows</h5>
+                        <a href="/workflows" th:href="@{/workflows}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(workflows)}" class="text-center text-muted">
+                            <p>No workflows found.</p>
+                            <a href="/workflows/create" th:href="@{/workflows/create}" class="btn btn-success btn-sm">Create First Workflow</a>
+                        </div>
+                        <div th:if="${!#lists.isEmpty(workflows)}">
+                            <div th:each="workflow : ${workflows}" class="mb-3 p-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <a th:href="@{'/workflows/' + ${workflow.id}}" th:text="${workflow.name}">Workflow Name</a>
+                                        </h6>
+                                        <small class="text-muted" th:text="'Process ID: ' + ${workflow.processId}">Process</small>
+                                    </div>
+                                    <span class="badge" th:classappend="${workflow.status == 'ACTIVE' ? 'bg-success' : workflow.status == 'COMPLETED' ? 'bg-info' : 'bg-secondary'}"
+                                          th:text="${workflow.status}">Status</span>
+                                </div>
+                                <small class="text-muted" th:text="${#temporals.format(workflow.createdAt, 'dd/MM/yyyy HH:mm')}">Created</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

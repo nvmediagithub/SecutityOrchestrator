@@ -48,7 +48,7 @@ echo ""
 echo "Checking for Java..."
 if ! command -v java >/dev/null 2>&1; then
     echo "❌ Error: Java is not installed or not in PATH."
-    echo "   Please install Java (JDK 17 or later recommended) and try again."
+    echo "   Please install Java (JDK 21 or later recommended) and try again."
     exit 1
 fi
 echo "✅ Java found."

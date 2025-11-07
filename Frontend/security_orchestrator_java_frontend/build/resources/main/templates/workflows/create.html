@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Create Workflow - Security Orchestrator</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="material-icons">add</i> Create New Workflow</h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/workflows/create}" method="post">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Workflow Name</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                                <div class="form-text">Enter a descriptive name for your workflow.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="processId" class="form-label">Select Process</label>
+                                <select class="form-select" id="processId" name="processId" required>
+                                    <option value="">Choose a process...</option>
+                                    <option th:each="process : ${processes}"
+                                            th:value="${process.id}"
+                                            th:text="${process.name + ' (v' + process.version + ')'}">Process Name</option>
+                                </select>
+                                <div class="form-text">The process that this workflow will orchestrate.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="testCaseIds" class="form-label">Test Case IDs (Optional)</label>
+                                <input type="text" class="form-control" id="testCaseIds" name="testCaseIds"
+                                       placeholder="test-case-1,test-case-2,test-case-3">
+                                <div class="form-text">Comma-separated list of test case IDs to include in this workflow.</div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="material-icons">save</i> Create Workflow
+                                </button>
+                                <a href="/workflows" th:href="@{/workflows}" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5>Workflow Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="material-icons text-info">info</i> What is a Workflow?</h6>
+                                <p class="small">A workflow orchestrates the execution of processes with specific test cases and configurations. It defines how and when processes should be executed.</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="material-icons text-warning">build</i> Next Steps</h6>
+                                <ul class="small mb-0">
+                                    <li>Create the workflow</li>
+                                    <li>Execute it to run the process</li>
+                                    <li>Monitor execution in real-time</li>
+                                    <li>View detailed results</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

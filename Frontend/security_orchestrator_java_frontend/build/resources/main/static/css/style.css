@@ -1,0 +1,314 @@
+/* Custom styles for Security Orchestrator - Material Design inspired */
+
+:root {
+    --primary-color: #2196f3;
+    --primary-dark: #1976d2;
+    --secondary-color: #424242;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --error-color: #f44336;
+    --surface-color: #ffffff;
+    --background-color: #fafafa;
+    --on-surface: #212121;
+    --on-background: #424242;
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --shadow-elevation-1: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-elevation-2: 0 4px 8px rgba(0, 0, 0, 0.12);
+    --shadow-elevation-3: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+body {
+    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--on-background);
+    line-height: 1.5;
+}
+
+.navbar-brand .material-icons {
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+/* Material Design inspired navigation */
+.navbar {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    box-shadow: var(--shadow-elevation-2);
+    border: none;
+}
+
+.navbar-brand {
+    font-weight: 500;
+    color: white !important;
+}
+
+/* Material Design cards */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-elevation-1);
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    background-color: var(--surface-color);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevation-3);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* Material Design buttons */
+.btn {
+    border-radius: 20px;
+    padding: 12px 24px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    text-transform: none;
+    box-shadow: none;
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-elevation-2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+}
+
+.btn-success {
+    background-color: var(--success-color);
+}
+
+.btn-danger {
+    background-color: var(--error-color);
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    color: var(--on-surface);
+}
+
+/* Material Design form controls */
+.form-control, .form-select {
+    border-radius: var(--border-radius-sm);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    background-color: var(--surface-color);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    outline: none;
+}
+
+/* Material Design chips/badges */
+.badge, .chip {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.alert {
+    border-radius: var(--border-radius-sm);
+    border: none;
+    box-shadow: var(--shadow-elevation-1);
+}
+
+.material-icons {
+    vertical-align: middle;
+    margin-right: 4px;
+    font-size: 1.1em;
+}
+
+/* Material Design status indicators */
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.status-active, .badge.bg-success {
+    background-color: var(--success-color) !important;
+    color: white !important;
+}
+
+.status-completed, .badge.bg-info {
+    background-color: #2196f3 !important; /* Blue */
+    color: white !important;
+}
+
+.status-running, .badge.bg-warning {
+    background-color: var(--warning-color) !important;
+    color: var(--on-surface) !important;
+}
+
+.status-failed, .badge.bg-danger {
+    background-color: var(--error-color) !important;
+    color: white !important;
+}
+
+.status-pending, .badge.bg-secondary {
+    background-color: var(--secondary-color) !important;
+    color: white !important;
+}
+
+/* File upload styling - Material Design */
+.file-upload-area {
+    border: 2px dashed rgba(0, 0, 0, 0.12);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background-color: rgba(33, 150, 243, 0.02);
+    cursor: pointer;
+}
+
+.file-upload-area:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(33, 150, 243, 0.05);
+}
+
+.file-upload-area.dragover {
+    border-color: var(--primary-color);
+    background-color: rgba(33, 150, 243, 0.1);
+}
+
+input[type="file"] {
+    display: none;
+}
+
+/* Process and workflow cards */
+.process-card, .workflow-card {
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    cursor: pointer;
+}
+
+.process-card:hover, .workflow-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elevation-3);
+}
+
+/* Progress bars and loading states */
+.progress-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+}
+
+/* Loading animation */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Search and filter components */
+.search-container {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.search-input {
+    padding-left: 48px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.filter-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+/* Floating Action Button (FAB) */
+.fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border: none;
+    box-shadow: var(--shadow-elevation-3);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    z-index: 1000;
+}
+
+.fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 24px rgba(33, 150, 243, 0.3);
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+    background-color: var(--surface-color);
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .d-flex.gap-2 {
+        flex-direction: column;
+    }
+
+    .d-flex.gap-2 .btn {
+        margin-bottom: 8px;
+        width: 100%;
+    }
+
+    .filter-chips {
+        justify-content: center;
+    }
+
+    .fab {
+        bottom: 16px;
+        right: 16px;
+    }
+}
