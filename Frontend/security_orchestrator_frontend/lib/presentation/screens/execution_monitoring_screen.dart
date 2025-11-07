@@ -81,19 +81,22 @@ class _ExecutionMonitoringScreenState extends ConsumerState<ExecutionMonitoringS
   }
 
   void _connectToWebSocket() {
-    final webSocketClient = ref.read(webSocketClientProvider);
+    final stompClient = ref.read(stompClientProvider);
 
-    webSocketClient.connect();
+    stompClient.connect();
 
-    webSocketClient.onConnected = () {
+    stompClient.onConnected = () {
       if (mounted) {
         setState(() {
           _isConnected = true;
         });
+        // Subscribe to execution updates
+        stompClient.subscribeToExecution(widget.executionId);
+        stompClient.send({'type': 'SUBSCRIBE', 'executionId': widget.executionId});
       }
     };
 
-    webSocketClient.onDisconnected = () {
+    stompClient.onDisconnected = () {
       if (mounted) {
         setState(() {
           _isConnected = false;
@@ -101,20 +104,20 @@ class _ExecutionMonitoringScreenState extends ConsumerState<ExecutionMonitoringS
       }
     };
 
-    webSocketClient.onMessage = (message) {
+    stompClient.onMessage = (message) {
       if (mounted && message['executionId'] == widget.executionId) {
         _handleExecutionUpdate(message);
       }
     };
 
-    webSocketClient.onError = (error) {
+    stompClient.onError = (error) {
       print('WebSocket error: $error');
     };
   }
 
   void _disconnectWebSocket() {
-    final webSocketClient = ref.read(webSocketClientProvider);
-    webSocketClient.disconnect();
+    final stompClient = ref.read(stompClientProvider);
+    stompClient.disconnect();
   }
 
   void _handleExecutionUpdate(Map<String, dynamic> message) {

@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # HTTP client
+  dio: ^5.4.4
   http: ^1.2.1
 
   # WebSocket client
@@ -48,6 +49,7 @@ dependencies:
   # JSON serialization
   json_annotation: ^4.9.0
   json_serializable: ^6.8.0
+  equatable: ^2.0.5
 
   # Navigation
   go_router: ^14.2.0

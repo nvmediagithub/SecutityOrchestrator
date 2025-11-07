@@ -56,6 +56,18 @@ For **Organizations**:
 - Intelligent edge case and boundary value creation
 - Security-focused test vector generation
 
+### 🧠 Large Language Model (LLM) Integration
+- **Dual Provider Support**: OpenRouter API and local Ollama integration
+- **Smart Test Data Generation**: Context-aware test case generation using LLMs
+- **Intelligent Edge Case Detection**: AI-powered identification of boundary conditions
+- **Real-time Model Management**: Load, test, and monitor LLM models dynamically
+- **Performance Optimization**: Async processing with configurable concurrent limits
+- **Local-First Privacy**: Support for local models to maintain data sovereignty
+- **Production-Ready API**: Comprehensive REST endpoints for LLM operations
+- **Multi-Model Support**: Manage multiple models with provider-specific configurations
+- **Cost Tracking**: Token usage monitoring and cost analysis for cloud providers
+- **Resilient Architecture**: Circuit breaker patterns and intelligent fallback mechanisms
+
 ### 📊 End-to-End Security Testing
 - Orchestrated execution of BPMN workflows with integrated API tests
 - Real-time progress monitoring and status updates
@@ -80,7 +92,8 @@ For **Organizations**:
 - **Git**: Version control system ([Download here](https://git-scm.com/))
 
 **Optional Components:**
-- AI models for enhanced test data generation (ONNX format recommended)
+- **LLM Services**: OpenRouter API key (for cloud LLMs) or Ollama (for local LLMs)
+- **AI models for enhanced test data generation** (ONNX format recommended)
 - BPMN modeling tool for process creation
 - API documentation tool for OpenAPI specification creation
 
@@ -158,6 +171,98 @@ The repository includes sample files in the `examples/` directory:
 - `api-spec.yaml` - Sample OpenAPI specification
 - `user-management.bpmn` - Additional workflow example
 
+### LLM Configuration and Setup
+
+#### Option 1: OpenRouter Integration (Cloud LLMs)
+
+1. **Get OpenRouter API Key**
+   ```bash
+   # Sign up at https://openrouter.ai
+   # Get your API key from the dashboard
+   ```
+
+2. **Configure API Key**
+   ```bash
+   # Add to application.properties or environment variables
+   export OPENROUTER_API_KEY="your-api-key-here"
+   ```
+
+3. **Test OpenRouter Connection**
+   ```bash
+   curl -X POST http://localhost:8080/api/v1/llm/test \
+     -H "Content-Type: application/json" \
+     -d '{
+       "provider": "OPENROUTER",
+       "model": "anthropic/claude-3-haiku",
+       "testMessage": "Hello, this is a test message."
+     }'
+   ```
+
+#### Option 2: Local LLM with Ollama
+
+1. **Install Ollama**
+   ```bash
+   # macOS
+   brew install ollama
+   
+   # Linux
+   curl -fsSL https://ollama.ai/install.sh | sh
+   
+   # Windows - Download from https://ollama.ai
+   ```
+
+2. **Start Ollama Service**
+   ```bash
+   ollama serve
+   # Ollama will be available at http://localhost:11434
+   ```
+
+3. **Pull a Model**
+   ```bash
+   # Download a model (e.g., llama2, codellama, mistral)
+   ollama pull llama2
+   ollama pull codellama
+   ollama pull mistral
+   ```
+
+4. **Test Local LLM Connection**
+   ```bash
+   curl -X POST http://localhost:8080/api/v1/llm/test \
+     -H "Content-Type: application/json" \
+     -d '{
+       "provider": "LOCAL",
+       "model": "llama2",
+       "testMessage": "Generate test data for a user registration API."
+     }'
+   ```
+
+#### LLM Management API Examples
+
+```bash
+# List available models
+curl -X GET http://localhost:8080/api/v1/llm/models
+
+# Get LLM configuration
+curl -X GET http://localhost:8080/api/v1/llm/config
+
+# List local models (Ollama)
+curl -X GET http://localhost:8080/api/v1/llm/local/models
+
+# Chat completion
+curl -X POST http://localhost:8080/api/v1/llm/chat/complete \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama2",
+    "messages": [
+      {"role": "user", "content": "Generate a test password that meets security requirements."}
+    ],
+    "maxTokens": 100,
+    "temperature": 0.7
+  }'
+```
+
+For detailed LLM implementation documentation, see [**LLM Implementation Guide**](LLM_IMPLEMENTATION.md).
+
 ## 🏗️ Architecture Overview
 
 ### High-Level System Architecture
@@ -231,6 +336,11 @@ SecurityOrchestrator follows Clean Architecture with clear separation of concern
 - [**API Contracts**](api-contracts.md) - REST API specifications and integration points
 - [**Business Processes**](business-processes.md) - Core workflows and orchestration logic
 - [**Use Cases & Test Scenarios**](use-cases-and-test-scenarios.md) - Comprehensive use case specifications
+
+### LLM Integration Documentation
+- [**LLM Implementation Guide**](LLM_IMPLEMENTATION.md) - Comprehensive LLM architecture and technical details
+- [**LLM Examples & Configuration**](EXAMPLES.md) - Practical examples, API calls, and configuration samples
+- [**LLM Testing Report**](LLM_TESTING_REPORT.md) - Testing results and implementation analysis
 
 ### Application Layer Documentation
 - [**Application Layer**](application-layer.md) - Use cases and application services

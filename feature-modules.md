@@ -292,6 +292,93 @@ features/orchestration/
 - **Exposed interfaces**: WorkflowEngine, WorkflowRepository
 - **External libraries**: Reactor (for reactive execution)
 
+## LLM Feature Module
+
+### Structure
+```
+features/llm-integration/
+├── domain/
+│   ├── entities/
+│   │   ├── LLMProvider.java
+│   │   ├── LLMModel.java
+│   │   ├── AiModel.java
+│   │   └── PerformanceMetrics.java
+│   ├── valueobjects/
+│   │   ├── ModelId.java
+│   │   └── ModelStatus.java
+│   ├── services/
+│   ├── repository/
+│   └── event/
+├── application/
+│   ├── usecase/
+│   ├── dto/
+│   │   └── llm/
+│   │       ├── ChatCompletionRequest.java
+│   │       ├── ChatCompletionResponse.java
+│   │       ├── LLMConfigResponse.java
+│   │       ├── LLMTestRequest.java
+│   │       ├── LLMTestResponse.java
+│   │       ├── LocalModelInfo.java
+│   │       └── PerformanceReportResponse.java
+│   └── service/
+├── infrastructure/
+│   ├── services/
+│   │   ├── OpenRouterClient.java
+│   │   └── LocalLLMService.java
+│   ├── config/
+│   │   └── LLMConfig.java
+│   ├── persistence/
+│   └── config/
+└── presentation/
+    ├── controllers/
+    │   └── LLMController.java
+    └── dto/
+```
+
+### Core Components
+
+#### Domain Layer
+**Entities:**
+- `LLMProvider` - Provider enumeration (LOCAL, OPENROUTER)
+- `LLMModel` - LLM model configuration and metadata
+- `AiModel` - AI model entity for test generation
+- `PerformanceMetrics` - Performance tracking and cost analysis
+
+**Value Objects:**
+- `ModelId` - Type-safe model identification
+- `ModelStatus` - Model lifecycle states (LOADING, LOADED, ERROR, etc.)
+
+#### Infrastructure Layer
+**Services:**
+- `OpenRouterClient` - Cloud LLM integration with OpenRouter API
+- `LocalLLMService` - Local LLM integration with Ollama
+- `LLMConfig` - Comprehensive configuration management
+
+**Key Features:**
+- Async processing with `@Async` annotations
+- Circuit breaker patterns for resilience
+- Connection pooling and retry logic
+- Performance monitoring and cost tracking
+
+#### Application Layer
+**DTOs:**
+- Chat completion request/response for API communication
+- Configuration management DTOs
+- Testing and validation DTOs
+- Performance reporting DTOs
+
+### Module Dependencies
+- **Depends on**: core
+- **Exposed interfaces**: LLMService, ModelManager, PerformanceTracker
+- **External libraries**: WebFlux, RestTemplate, Jackson
+
+## Integration with LLM Module
+The LLM feature integrates with AI Test Generation to provide:
+- **Intelligent Test Data Generation**: LLM-powered test case creation
+- **Context-Aware Testing**: API schema and BPMN process analysis
+- **Security-Focused Generation**: LLM-enhanced security test scenarios
+- **Edge Case Detection**: AI-powered boundary condition identification
+
 ## AI Test Generation Feature
 
 ### Structure

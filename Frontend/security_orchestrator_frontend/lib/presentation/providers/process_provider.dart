@@ -11,7 +11,7 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 });
 
 // WebSocket client provider
-final webSocketClientProvider = Provider<WebSocketClient>((ref) {
+final stompClientProvider = Provider<WebSocketClient>((ref) {
   return WebSocketClient();
 });
 
@@ -23,8 +23,8 @@ final processRepositoryProvider = Provider<ProcessRepository>((ref) {
 
 final processesProvider = StateNotifierProvider<ProcessesNotifier, AsyncValue<List<ProcessSummaryDto>>>((ref) {
   final repository = ref.watch(processRepositoryProvider);
-  final webSocketClient = ref.watch(webSocketClientProvider);
-  return ProcessesNotifier(repository, webSocketClient);
+  final stompClient = ref.watch(stompClientProvider);
+  return ProcessesNotifier(repository, stompClient);
 });
 
 // Enhanced provider for full process details
@@ -62,17 +62,17 @@ final workflowDetailsProvider = FutureProvider.family<WorkflowDto, String>((ref,
 
 // Provider for execution status
 final executionStatusProvider = StateNotifierProvider.family<ExecutionNotifier, AsyncValue<ExecutionStatusDto>, String>((ref, executionId) {
-  final webSocketClient = ref.watch(webSocketClientProvider);
-  return ExecutionNotifier(executionId, webSocketClient);
+  final stompClient = ref.watch(stompClientProvider);
+  return ExecutionNotifier(executionId, stompClient);
 });
 
 class ProcessesNotifier extends StateNotifier<AsyncValue<List<ProcessSummaryDto>>> {
   final ProcessRepository _repository;
-  final WebSocketClient _webSocketClient;
+  final WebSocketClient _stompClient;
 
-  ProcessesNotifier(this._repository, this._webSocketClient) : super(const AsyncValue.loading()) {
+  ProcessesNotifier(this._repository, this._stompClient) : super(const AsyncValue.loading()) {
     loadProcesses();
-    _connectWebSocket();
+    _connectStomp();
   }
 
   Future<void> loadProcesses() async {
@@ -117,10 +117,10 @@ class ProcessesNotifier extends StateNotifier<AsyncValue<List<ProcessSummaryDto>
     ];
   }
 
-  void _connectWebSocket() {
-    _webSocketClient.connect();
+  void _connectStomp() {
+    _stompClient.connect();
 
-    _webSocketClient.onMessage = (message) {
+    _stompClient.onMessage = (message) {
       // Handle real-time updates from WebSocket
       if (message['type'] == 'PROCESS_UPDATED' && mounted) {
         // Refresh processes when a process is updated
@@ -128,16 +128,18 @@ class ProcessesNotifier extends StateNotifier<AsyncValue<List<ProcessSummaryDto>
       }
     };
 
-    _webSocketClient.onConnected = () {
+    _stompClient.onConnected = () {
       // WebSocket connected successfully
-      print('WebSocket connected for process updates');
+      print('STOMP connected for process updates');
+      // Subscribe to process updates
+      _stompClient.send({'type': 'SUBSCRIBE', 'topic': 'processes'});
     };
 
-    _webSocketClient.onError = (error) {
+    _stompClient.onError = (error) {
       print('WebSocket error: $error');
     };
 
-    _webSocketClient.onDisconnected = () {
+    _stompClient.onDisconnected = () {
       print('WebSocket disconnected');
     };
   }
@@ -148,7 +150,7 @@ class ProcessesNotifier extends StateNotifier<AsyncValue<List<ProcessSummaryDto>
 
   @override
   void dispose() {
-    _webSocketClient.disconnect();
+    _stompClient.disconnect();
     super.dispose();
   }
 }
@@ -190,11 +192,11 @@ class WorkflowsNotifier extends StateNotifier<AsyncValue<List<WorkflowSummaryDto
 
 class ExecutionNotifier extends StateNotifier<AsyncValue<ExecutionStatusDto>> {
   final String executionId;
-  final WebSocketClient _webSocketClient;
+  final WebSocketClient _stompClient;
 
-  ExecutionNotifier(this.executionId, this._webSocketClient) : super(const AsyncValue.loading()) {
+  ExecutionNotifier(this.executionId, this._stompClient) : super(const AsyncValue.loading()) {
     loadExecutionStatus();
-    _connectWebSocket();
+    _connectStomp();
   }
 
   Future<void> loadExecutionStatus() async {
@@ -237,20 +239,79 @@ class ExecutionNotifier extends StateNotifier<AsyncValue<ExecutionStatusDto>> {
     state = AsyncValue.data(execution);
   }
 
-  void _connectWebSocket() {
-    _webSocketClient.onMessage = (message) {
+  void _connectStomp() {
+    _stompClient.onMessage = (message) {
       if (message['executionId'] == executionId && mounted) {
-        // Update execution status from WebSocket
+        // Update execution status from STOMP
         if (state.value != null) {
-          state = AsyncValue.data(ExecutionStatusDto.fromJson(message['data']));
+          // Parse the STOMP message and update the execution status
+          final type = message['type'];
+          final stepId = message['stepId'];
+          final statusMessage = message['message'];
+          
+          final currentExecution = state.value!;
+          if (type == 'STEP_COMPLETED' && stepId != null) {
+            // Update specific step
+            final updatedSteps = currentExecution.steps.map((step) {
+              if (step.stepId == stepId) {
+                return StepExecutionDto(
+                  stepId: step.stepId,
+                  stepName: step.stepName,
+                  state: ExecutionState.completed,
+                  startedAt: step.startedAt,
+                  completedAt: DateTime.now(),
+                  result: statusMessage ?? 'Step completed',
+                );
+              }
+              return step;
+            }).toList();
+            
+            // Calculate new progress
+            final completedSteps = updatedSteps.where((s) => s.state == ExecutionState.completed).length;
+            final progress = completedSteps / updatedSteps.length;
+            
+            // Create updated execution status
+            final updatedExecution = ExecutionStatusDto(
+              workflowId: currentExecution.workflowId,
+              executionId: currentExecution.executionId,
+              state: currentExecution.state,
+              progress: progress,
+              steps: updatedSteps,
+              startedAt: currentExecution.startedAt,
+              completedAt: currentExecution.completedAt,
+              error: currentExecution.error,
+            );
+            
+            state = AsyncValue.data(updatedExecution);
+          } else if (type == 'EXECUTION_COMPLETED') {
+            // Mark execution as completed
+            final updatedExecution = ExecutionStatusDto(
+              workflowId: currentExecution.workflowId,
+              executionId: currentExecution.executionId,
+              state: ExecutionState.completed,
+              progress: 1.0,
+              steps: currentExecution.steps,
+              startedAt: currentExecution.startedAt,
+              completedAt: DateTime.now(),
+              error: currentExecution.error,
+            );
+            state = AsyncValue.data(updatedExecution);
+          }
         }
       }
     };
   }
 
+  void subscribeToExecution() {
+    if (_stompClient.isConnected) {
+      _stompClient.subscribeToExecution(executionId);
+      _stompClient.send({'type': 'SUBSCRIBE', 'executionId': executionId});
+    }
+  }
+
   @override
   void dispose() {
-    // WebSocket cleanup handled by parent provider
+    // STOMP cleanup handled by parent provider
     super.dispose();
   }
 }

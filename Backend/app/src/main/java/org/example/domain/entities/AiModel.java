@@ -57,7 +57,7 @@ public class AiModel {
     // Mock data for testing
     public static AiModel createMockModel() {
         return new AiModel(
-            new org.example.domain.valueobjects.ModelId("mock-model-1"),
+            org.example.domain.valueobjects.ModelId.fromString("mock-model-1"),
             "Mock AI Model",
             org.example.domain.valueobjects.ModelType.ONNX,
             null, // No model path for mock

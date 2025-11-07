@@ -5,6 +5,7 @@ import '../providers/process_provider.dart';
 import '../widgets/process_list_item.dart';
 import 'process_creation_screen.dart';
 import 'workflow_creation_screen.dart';
+import 'llm_dashboard_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -240,6 +241,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     builder: (context) => const WorkflowCreationScreen(),
                   ),
                 );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.smart_toy),
+              title: const Text('LLM Dashboard'),
+              subtitle: const Text('Configure and manage LLM providers and models'),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/llm-dashboard');
               },
             ),
           ],

@@ -227,6 +227,190 @@ public class DefaultWorkflowEngine implements WorkflowEngine {
 }
 ```
 
+### LLM Integration Infrastructure
+
+#### LLM Configuration Management
+```java
+@Configuration
+@ConfigurationProperties(prefix = "llm")
+public class LLMConfig {
+    
+    // OpenRouter settings
+    private String openRouterApiKey;
+    private String openRouterBaseUrl = "https://openrouter.ai/api/v1";
+    private int openRouterTimeout = 30;
+    
+    // Local LLM settings
+    private String localServerUrl = "http://localhost:11434";
+    private int localTimeout = 300;
+    private int maxLocalModels = 3;
+    
+    // Performance settings
+    private int maxRetries = 3;
+    private int connectionPoolSize = 10;
+    private int maxConcurrentRequests = 5;
+    
+    // Model configurations
+    private Map<String, ModelConfig> models = new HashMap<>();
+    
+    public static class ModelConfig {
+        private String provider = "LOCAL";
+        private int contextWindow = 4096;
+        private int maxTokens = 2048;
+        private double temperature = 0.7;
+        // ... additional configuration
+    }
+}
+```
+
+#### OpenRouter Client Implementation
+```java
+@Service
+public class OpenRouterClient {
+    
+    private final LLMConfig config;
+    private final RestTemplate restTemplate;
+    private final CircuitBreaker circuitBreaker;
+    
+    @Async
+    public CompletableFuture<ChatCompletionResponse> createChatCompletion(
+            ChatCompletionRequest request) {
+        
+        return circuitBreaker.executeSupplier(() -> {
+            try {
+                HttpHeaders headers = createHeaders();
+                HttpEntity<ChatCompletionRequest> entity =
+                    new HttpEntity<>(request, headers);
+                
+                ResponseEntity<ChatCompletionResponse> response = restTemplate
+                    .postForEntity(config.getOpenRouterBaseUrl() + "/chat/completions",
+                                  entity,
+                                  ChatCompletionResponse.class);
+                
+                return response.getBody();
+                
+            } catch (HttpClientErrorException e) {
+                throw new OpenRouterException("OpenRouter request failed: " +
+                    extractErrorMessage(e), e);
+            }
+        });
+    }
+    
+    @Async
+    public CompletableFuture<List<String>> listModels() {
+        return circuitBreaker.executeSupplier(() -> {
+            // Implementation for listing available models
+        });
+    }
+    
+    private HttpHeaders createHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + config.getOpenRouterApiKey());
+        headers.set("Content-Type", "application/json");
+        headers.set("X-Title", config.getOpenRouterAppName());
+        if (config.getOpenRouterReferer() != null) {
+            headers.set("HTTP-Referer", config.getOpenRouterReferer());
+        }
+        return headers;
+    }
+}
+```
+
+#### Local LLM Service Implementation
+```java
+@Service
+public class LocalLLMService {
+    
+    private final LLMConfig config;
+    private final RestTemplate restTemplate;
+    private final Map<String, Boolean> loadedModels = new ConcurrentHashMap<>();
+    
+    @Async
+    public CompletableFuture<ChatCompletionResponse> generateCompletion(
+            String model, String prompt, Map<String, Object> parameters) {
+        
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                if (!isOllamaRunning()) {
+                    throw new LocalLLMNotRunningException("Ollama service is not running");
+                }
+                
+                Map<String, Object> request = buildOllamaRequest(model, prompt, parameters);
+                
+                ResponseEntity<OllamaResponse> response = restTemplate
+                    .postForEntity(config.getLocalServerUrl() + "/api/generate",
+                                  request,
+                                  OllamaResponse.class);
+                
+                return convertToChatResponse(response.getBody());
+                
+            } catch (Exception e) {
+                throw new LocalLLMException("Local LLM request failed", e);
+            }
+        });
+    }
+    
+    @Async
+    public CompletableFuture<List<LocalModelInfo>> listLocalModels() {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                ResponseEntity<OllamaModelsResponse> response = restTemplate
+                    .getForEntity(config.getLocalServerUrl() + "/api/tags",
+                                  OllamaModelsResponse.class);
+                
+                return response.getBody().getModels().stream()
+                    .map(this::convertToLocalModelInfo)
+                    .collect(Collectors.toList());
+                    
+            } catch (Exception e) {
+                throw new LocalLLMException("Failed to list local models", e);
+            }
+        });
+    }
+    
+    private boolean isOllamaRunning() {
+        try {
+            restTemplate.getForEntity(config.getLocalServerUrl() + "/api/tags", String.class);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}
+```
+
+#### Circuit Breaker Configuration
+```java
+@Configuration
+public class LLMResilienceConfiguration {
+    
+    @Bean
+    public CircuitBreakerRegistry circuitBreakerRegistry() {
+        return CircuitBreakerRegistry.ofDefaults();
+    }
+    
+    @Bean
+    public CircuitBreaker openRouterCircuitBreaker(CircuitBreakerRegistry registry) {
+        return registry.circuitBreaker("openRouter",
+            CircuitBreakerConfig.custom()
+                .failureRateThreshold(50)
+                .waitDurationInOpenState(Duration.ofSeconds(30))
+                .slidingWindowSize(10)
+                .build());
+    }
+    
+    @Bean
+    public CircuitBreaker localLLMCircuitBreaker(CircuitBreakerRegistry registry) {
+        return registry.circuitBreaker("localLLM",
+            CircuitBreakerConfig.custom()
+                .failureRateThreshold(30)
+                .waitDurationInOpenState(Duration.ofSeconds(60))
+                .slidingWindowSize(5)
+                .build());
+    }
+}
+```
+
 ### AI Integration Infrastructure
 
 #### ONNX Model Loader

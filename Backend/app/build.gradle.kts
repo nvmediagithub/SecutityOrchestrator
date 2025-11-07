@@ -25,6 +25,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     // Database
     runtimeOnly("com.h2database:h2")
@@ -32,14 +33,31 @@ dependencies {
     // JSON Processing
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+    // HTTP Client (Reactive)
+    implementation("io.projectreactor.netty:reactor-netty")
+    implementation("org.springframework:spring-webflux")
+
+    // ONNX Runtime for Java
+    implementation("com.microsoft.onnxruntime:onnxruntime:1.17.0")
+
+    // Process Management and Utilities
+    implementation("org.zeroturnaround:zt-exec:1.12")
+    implementation("org.apache.commons:commons-lang3:3.14.0")
+    implementation("commons-io:commons-io:2.15.1")
 
     // File Upload
     implementation("commons-fileupload:commons-fileupload:1.5")
+
+    // Logging
+    implementation("ch.qos.logback:logback-classic:1.4.14")
 
     // Use JUnit Jupiter for testing.
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("io.projectreactor:reactor-test")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

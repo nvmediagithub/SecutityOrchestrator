@@ -106,7 +106,43 @@ orchestration/
     └── persistence/
 ```
 
-#### 4. AI Test Generation Feature
+#### 4. LLM Integration Feature
+```
+llm-integration/
+├── domain/
+│   ├── entities/
+│   │   ├── LLMProvider.java
+│   │   ├── LLMModel.java
+│   │   ├── AiModel.java
+│   │   └── PerformanceMetrics.java
+│   ├── valueobjects/
+│   │   ├── ModelId.java
+│   │   └── ModelStatus.java
+│   ├── services/
+│   ├── repository/
+│   └── event/
+├── application/
+│   ├── usecase/
+│   ├── dto/llm/
+│   │   ├── ChatCompletionRequest.java
+│   │   ├── ChatCompletionResponse.java
+│   │   ├── LLMConfigResponse.java
+│   │   └── PerformanceReportResponse.java
+│   └── service/
+├── infrastructure/
+│   ├── services/
+│   │   ├── OpenRouterClient.java
+│   │   └── LocalLLMService.java
+│   ├── config/
+│   │   └── LLMConfig.java
+│   └── persistence/
+└── presentation/
+    ├── controllers/
+    │   └── LLMController.java
+    └── dto/
+```
+
+#### 5. AI Test Generation Feature
 ```
 ai-test-generation/
 ├── domain/
@@ -122,6 +158,61 @@ ai-test-generation/
     └── persistence/
 ```
 
+## LLM Integration Architecture
+
+The LLM feature provides dual-provider support with clean separation between cloud and local LLM services:
+
+```mermaid
+graph TB
+    subgraph "LLM Feature Module"
+        API[LLM API Layer]
+        APP[Application Services]
+        DOM[Domain Layer]
+    end
+    
+    subgraph "Infrastructure Adapters"
+        OR_CLIENT[OpenRouter Client]
+        LOCAL_SERVICE[Local LLM Service]
+        CONFIG[Configuration]
+    end
+    
+    subgraph "External Providers"
+        OPENROUTER[OpenRouter API]
+        OLLAMA[Local Ollama]
+    end
+    
+    API --> APP
+    APP --> DOM
+    DOM --> OR_CLIENT
+    DOM --> LOCAL_SERVICE
+    OR_CLIENT --> OPENROUTER
+    LOCAL_SERVICE --> OLLAMA
+    OR_CLIENT --> CONFIG
+    LOCAL_SERVICE --> CONFIG
+    
+    style OR_CLIENT fill:#fff3e0
+    style LOCAL_SERVICE fill:#e8f5e8
+    style OPENROUTER fill:#f3e5f5
+    style OLLAMA fill:#e1f5fe
+```
+
+### Key LLM Components
+
+**Domain Layer:**
+- `LLMProvider` - Provider enumeration (LOCAL, OPENROUTER)
+- `LLMModel` - Model configuration and metadata
+- `PerformanceMetrics` - Cost and performance tracking
+
+**Infrastructure Layer:**
+- `OpenRouterClient` - Cloud LLM integration with circuit breaker
+- `LocalLLMService` - Ollama integration for local models
+- `LLMConfig` - Comprehensive configuration management
+
+**Integration Points:**
+- BPMN processing for intelligent workflow analysis
+- API testing for context-aware test generation
+- Orchestration for LLM-powered workflow execution
+
 ## Component Interactions
 
 ```mermaid
@@ -131,6 +222,7 @@ sequenceDiagram
     participant ORCH as Orchestration Service
     participant BPMN as BPMN Processor
     participant API_TEST as API Testing Service
+    participant LLM as LLM Service
     participant AI as AI Generator
 
     UI->>API: Submit Workflow Request
@@ -139,8 +231,17 @@ sequenceDiagram
     BPMN-->>ORCH: Parsed Workflow
     ORCH->>API_TEST: Load API Specifications
     API_TEST-->>ORCH: API Models
-    ORCH->>AI: Generate Test Data
-    AI-->>ORCH: Generated Data
+    
+    % LLM integration for intelligent test generation
+    ORCH->>LLM: Generate Test Data
+    LLM->>LLM: Choose Provider (Local/Cloud)
+    alt Local LLM
+        LLM->>Ollama: API Call
+    else Cloud LLM
+        LLM->>OpenRouter: API Call
+    end
+    LLM-->>ORCH: Generated Test Data
+    
     ORCH->>API_TEST: Execute Tests
     API_TEST-->>ORCH: Test Results
     ORCH->>API: Return Results

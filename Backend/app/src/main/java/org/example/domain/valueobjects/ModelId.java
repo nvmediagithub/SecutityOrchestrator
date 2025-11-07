@@ -3,8 +3,16 @@ package org.example.domain.valueobjects;
 public class ModelId {
     private final String value;
 
-    public ModelId(String value) {
+    private ModelId(String value) {
         this.value = value;
+    }
+
+    public static ModelId generate() {
+        return new ModelId("model-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 1000));
+    }
+
+    public static ModelId fromString(String value) {
+        return new ModelId(value);
     }
 
     public String getValue() {
