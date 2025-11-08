@@ -1,0 +1,81 @@
+package org.example.infrastructure.services.bpmn;
+
+import org.springframework.stereotype.Service;
+
+/**
+ * Анализатор структуры BPMN диаграмм
+ */
+@Service
+public class StructureAnalyzer {
+    
+    /**
+     * Анализирует структуру BPMN процесса
+     */
+    public StructureAnalysisResult analyzeStructure(BpmnParsedData parsedData) {
+        StructureAnalysisResult result = new StructureAnalysisResult();
+        
+        // Подсчет элементов и потоков
+        result.setElementCount(parsedData.getElements().size());
+        result.setFlowCount(parsedData.getFlows().size());
+        
+        // Проверка наличия Start и End событий
+        boolean hasStartEvent = parsedData.getElements().stream()
+            .anyMatch(element -> "StartEvent".equals(element.getType()));
+        boolean hasEndEvent = parsedData.getElements().stream()
+            .anyMatch(element -> "EndEvent".equals(element.getType()));
+            
+        result.setHasStartEvent(hasStartEvent);
+        result.setHasEndEvent(hasEndEvent);
+        
+        // Поиск сиротских элементов (без входящих и исходящих потоков)
+        int orphanCount = 0;
+        for (BpmnElement element : parsedData.getElements()) {
+            if (element.getIncomingFlowCount() == 0 && element.getOutgoingFlowCount() == 0) {
+                result.addUnconnectedElement(element.getId());
+                orphanCount++;
+            }
+        }
+        result.setOrphanElementsCount(orphanCount);
+        
+        // Добавление структурных проблем
+        if (!hasStartEvent) {
+            result.addStructuralIssue("Отсутствует Start Event");
+        }
+        if (!hasEndEvent) {
+            result.addStructuralIssue("Отсутствует End Event");
+        }
+        if (orphanCount > 0) {
+            result.addStructuralIssue("Найдены сиротские элементы: " + orphanCount);
+        }
+        
+        // Вычисление сложности
+        int complexity = calculateComplexity(parsedData);
+        result.setComplexityScore(complexity);
+        
+        return result;
+    }
+    
+    private int calculateComplexity(BpmnParsedData parsedData) {
+        int complexity = 0;
+        
+        // Сложность на основе количества элементов
+        complexity += parsedData.getElements().size() * 1;
+        
+        // Сложность на основе количества потоков
+        complexity += parsedData.getFlows().size() * 2;
+        
+        // Сложность на основе шлюзов
+        long gatewayCount = parsedData.getElements().stream()
+            .filter(element -> element.isGateway())
+            .count();
+        complexity += gatewayCount * 3;
+        
+        // Сложность на основе подпроцессов
+        long subProcessCount = parsedData.getElements().stream()
+            .filter(element -> element.isSubProcess())
+            .count();
+        complexity += subProcessCount * 4;
+        
+        return Math.min(complexity, 100); // Ограничиваем максимумом
+    }
+}

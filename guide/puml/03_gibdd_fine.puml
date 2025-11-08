@@ -1,0 +1,26 @@
+@startuml
+actor Client as C
+participant "API Bank" as Bank
+participant "External GIBDD API" as G
+
+C -> Bank: POST /auth/bank-token (client_id, client_secret)
+activate Bank
+Bank -> C: access_token
+deactivate Bank
+
+C -> G: Search fines by STS
+activate G
+G -> C: list of fines
+deactivate G
+
+C -> Bank: GET /accounts
+activate Bank
+Bank -> C: list of accounts
+deactivate Bank
+
+C -> Bank: POST /payments (GIBDD fine)
+activate Bank
+Bank -> C: payment_id
+deactivate Bank
+
+@enduml

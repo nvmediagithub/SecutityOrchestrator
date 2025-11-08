@@ -53,6 +53,24 @@ dependencies {
     // Logging
     implementation("ch.qos.logback:logback-classic:1.4.14")
 
+    // Basic OpenAPI support (using stable versions)
+    implementation("org.openapitools:openapi-generator:7.4.0")
+    implementation("io.swagger.parser.v3:swagger-parser-v3:2.1.22")
+    implementation("io.swagger.parser.v2:swagger-parser-v2:2.1.22")
+    
+    // YAML and JSON processing
+    implementation("org.yaml:snakeyaml:2.2")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.15.3")
+    
+    // HTTP client utilities
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    
+    // JSON Schema validation
+    implementation("com.github.java-json-tools:json-schema-validator:2.2.14")
+    implementation("com.github.java-json-tools:json-schema-core:1.2.14")
+
     // Use JUnit Jupiter for testing.
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

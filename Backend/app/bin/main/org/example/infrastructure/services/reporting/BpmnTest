@@ -1,0 +1,336 @@
+package org.example.infrastructure.services.reporting;
+
+import org.example.domain.dto.reports.*;
+import org.example.domain.entities.BpmnDiagram;
+import org.example.domain.valueobjects.BpmnProcessId;
+import org.springframework.stereotype.Service;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Service for creating test examples and mock data for BPMN analysis
+ */
+@Service
+public class BpmnTestExamples {
+    
+    private static final String BPMN_FILES_PATH = "guide/bpmn/";
+    
+    /**
+     * Get list of available BPMN test files
+     */
+    public List<String> getAvailableBpmnFiles() {
+        try {
+            Path bpmnPath = Paths.get(BPMN_FILES_PATH);
+            if (Files.exists(bpmnPath)) {
+                return Files.list(bpmnPath)
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".bpmn"))
+                    .map(path -> path.getFileName().toString())
+                    .sorted()
+                    .collect(Collectors.toList());
+            }
+        } catch (Exception e) {
+            // Return default files if directory doesn't exist
+            return Arrays.asList(
+                "01_bonus_payment.bpmn",
+                "02_credit_application.bpmn", 
+                "03_gibdd_fine.bpmn",
+                "04_mobile_payment.bpmn"
+            );
+        }
+        
+        return Arrays.asList(
+            "01_bonus_payment.bpmn",
+            "02_credit_application.bpmn", 
+            "03_gibdd_fine.bpmn",
+            "04_mobile_payment.bpmn"
+        );
+    }
+    
+    /**
+     * Create sample report request for testing
+     */
+    public ReportRequest createSampleReportRequest(String diagramId, ReportRequest.ReportType reportType) {
+        ReportRequest request = new ReportRequest();
+        request.setDiagramId(BpmnProcessId.fromString(diagramId));
+        request.setReportType(reportType);
+        request.setFormat(ReportRequest.ReportFormat.PDF);
+        request.setIncludeMetrics(true);
+        request.setIncludeVisualizations(true);
+        request.setLevel(ReportRequest.ReportLevel.DETAILED);
+        
+        // Add sections based on report type
+        List<String> sections = getDefaultSections(reportType);
+        request.setSections(sections);
+        
+        return request;
+    }
+    
+    /**
+     * Generate mock dashboard metrics for testing
+     */
+    public DashboardMetrics generateMockDashboardMetrics(String diagramId) {
+        DashboardMetrics metrics = new DashboardMetrics(diagramId);
+        
+        // Process Metrics
+        DashboardMetrics.ProcessMetrics processMetrics = new DashboardMetrics.ProcessMetrics();
+        processMetrics.setTotalProcesses(getRandomInt(1, 5));
+        processMetrics.setActiveProcesses(getRandomInt(0, 3));
+        processMetrics.setCompletedProcesses(getRandomInt(0, 10));
+        processMetrics.setFailedProcesses(getRandomInt(0, 2));
+        processMetrics.setAverageCompletionTime(getRandomDouble(200.0, 800.0));
+        processMetrics.setProcessDistribution(createRandomProcessDistribution());
+        processMetrics.setProcessTypes(Arrays.asList("User Task", "Service Task", "Script Task"));
+        metrics.setProcessMetrics(processMetrics);
+        
+        // Security Metrics
+        DashboardMetrics.SecurityMetrics securityMetrics = new DashboardMetrics.SecurityMetrics();
+        securityMetrics.setTotalSecurityChecks(getRandomInt(10, 25));
+        securityMetrics.setPassedChecks(getRandomInt(8, 20));
+        securityMetrics.setFailedChecks(getRandomInt(1, 5));
+        securityMetrics.setCriticalIssues(getRandomInt(0, 2));
+        securityMetrics.setHighPriorityIssues(getRandomInt(1, 4));
+        securityMetrics.setMediumPriorityIssues(getRandomInt(2, 6));
+        securityMetrics.setLowPriorityIssues(getRandomInt(1, 3));
+        securityMetrics.setSecurityScore(getRandomDouble(70.0, 95.0));
+        securityMetrics.setVulnerabilityTypes(createRandomVulnerabilityTypes());
+        metrics.setSecurityMetrics(securityMetrics);
+        
+        // Compliance Metrics
+        DashboardMetrics.ComplianceMetrics complianceMetrics = new DashboardMetrics.ComplianceMetrics();
+        complianceMetrics.setOverallComplianceScore(getRandomDouble(75.0, 95.0));
+        complianceMetrics.setComplianceByStandard(createRandomComplianceByStandard());
+        complianceMetrics.setTotalComplianceChecks(getRandomInt(15, 30));
+        complianceMetrics.setPassedComplianceChecks(getRandomInt(12, 25));
+        complianceMetrics.setFailedComplianceChecks(getRandomInt(1, 5));
+        complianceMetrics.setComplianceStandards(Arrays.asList("BPMN 2.0", "ISO 9001", "SOX", "GDPR"));
+        complianceMetrics.setComplianceGaps(createRandomComplianceGaps());
+        metrics.setComplianceMetrics(complianceMetrics);
+        
+        // Performance Metrics
+        DashboardMetrics.PerformanceMetricsData performanceMetrics = new DashboardMetrics.PerformanceMetricsData();
+        performanceMetrics.setAverageResponseTime(getRandomDouble(300.0, 600.0));
+        performanceMetrics.setPeakResponseTime(getRandomDouble(800.0, 1500.0));
+        performanceMetrics.setTotalRequests(getRandomInt(1000, 50000));
+        performanceMetrics.setThroughput(getRandomDouble(75.0, 95.0));
+        performanceMetrics.setErrorRate(getRandomDouble(0.1, 2.0));
+        performanceMetrics.setResourceUtilization(createRandomResourceUtilization());
+        performanceMetrics.setPerformanceTrends(Arrays.asList("Stable", "Improving", "Declining"));
+        metrics.setPerformanceMetrics(performanceMetrics);
+        
+        // Summary
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("overallHealth", getRandomOverallHealth());
+        summary.put("lastAnalysisDate", java.time.LocalDateTime.now().toString());
+        summary.put("totalIssues", securityMetrics.getCriticalIssues() + 
+                   securityMetrics.getHighPriorityIssues() + 
+                   securityMetrics.getMediumPriorityIssues());
+        summary.put("criticalIssues", securityMetrics.getCriticalIssues());
+        summary.put("recommendationCount", getRandomInt(3, 8));
+        metrics.setSummary(summary);
+        
+        return metrics;
+    }
+    
+    /**
+     * Generate sample API specification for integration testing
+     */
+    public Map<String, Object> generateSampleApiSpec() {
+        Map<String, Object> apiSpec = new HashMap<>();
+        
+        apiSpec.put("openapi", "3.0.0");
+        apiSpec.put("info", Map.of(
+            "title", "BPMN Analysis API",
+            "version", "1.0.0",
+            "description", "API for BPMN process analysis and reporting"
+        ));
+        
+        Map<String, Object> paths = new HashMap<>();
+        
+        // Sample endpoints
+        paths.put("/api/reports/bpmn/{diagramId}", Map.of(
+            "post", Map.of(
+                "summary", "Generate BPMN analysis report",
+                "parameters", Arrays.asList(
+                    Map.of("name", "diagramId", "in", "path", "required", true, "schema", Map.of("type", "string"))
+                ),
+                "responses", Map.of("200", Map.of("description", "Report generated successfully"))
+            )
+        ));
+        
+        paths.put("/api/visualization/bpmn/{diagramId}/dashboard", Map.of(
+            "get", Map.of(
+                "summary", "Get dashboard metrics",
+                "parameters", Arrays.asList(
+                    Map.of("name", "diagramId", "in", "path", "required", true, "schema", Map.of("type", "string"))
+                ),
+                "responses", Map.of("200", Map.of("description", "Dashboard data retrieved"))
+            )
+        ));
+        
+        apiSpec.put("paths", paths);
+        
+        return apiSpec;
+    }
+    
+    /**
+     * Create test scenario for BPMN analysis
+     */
+    public Map<String, Object> createTestScenario(String scenarioName, String bpmnFile) {
+        Map<String, Object> scenario = new HashMap<>();
+        
+        scenario.put("name", scenarioName);
+        scenario.put("bpmnFile", bpmnFile);
+        scenario.put("description", "Test scenario for " + scenarioName);
+        scenario.put("expectedReports", Arrays.asList(
+            "PROCESS_API_MAPPING",
+            "BUSINESS_PROCESS_ANALYSIS", 
+            "API_PROCESS_COMPLIANCE",
+            "PROCESS_SECURITY_ASSESSMENT"
+        ));
+        
+        Map<String, Object> testSteps = new HashMap<>();
+        testSteps.put("1. Upload BPMN", "Upload the BPMN file to the system");
+        testSteps.put("2. Generate Reports", "Generate various types of analysis reports");
+        testSteps.put("3. Verify Visualizations", "Check that visualizations render correctly");
+        testSteps.put("4. Export Reports", "Test export functionality in different formats");
+        testSteps.put("5. Check Metrics", "Verify dashboard metrics are calculated correctly");
+        
+        scenario.put("testSteps", testSteps);
+        scenario.put("expectedOutcome", "Successful analysis with detailed reports and visualizations");
+        
+        return scenario;
+    }
+    
+    /**
+     * Generate sample mock data for demonstration
+     */
+    public Map<String, Object> generateMockAnalysisResult(String diagramId) {
+        Map<String, Object> result = new HashMap<>();
+        
+        result.put("diagramId", diagramId);
+        result.put("analysisDate", java.time.LocalDateTime.now().toString());
+        result.put("status", "COMPLETED");
+        
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("complexity", "Medium");
+        metrics.put("processSteps", getRandomInt(5, 15));
+        metrics.put("gateways", getRandomInt(1, 5));
+        metrics.put("tasks", getRandomInt(3, 12));
+        metrics.put("events", getRandomInt(2, 6));
+        result.put("structureMetrics", metrics);
+        
+        Map<String, Object> issues = new HashMap<>();
+        issues.put("critical", getRandomInt(0, 2));
+        issues.put("high", getRandomInt(1, 4));
+        issues.put("medium", getRandomInt(2, 6));
+        issues.put("low", getRandomInt(1, 5));
+        result.put("issues", issues);
+        
+        Map<String, Object> compliance = new HashMap<>();
+        compliance.put("overall", getRandomDouble(75.0, 95.0));
+        compliance.put("bpmn20", getRandomDouble(85.0, 98.0));
+        compliance.put("security", getRandomDouble(70.0, 90.0));
+        compliance.put("performance", getRandomDouble(80.0, 95.0));
+        result.put("compliance", compliance);
+        
+        List<String> recommendations = Arrays.asList(
+            "Consider simplifying complex gateway logic",
+            "Add error handling for critical tasks",
+            "Implement performance monitoring",
+            "Review security controls for data handling"
+        );
+        result.put("recommendations", recommendations);
+        
+        return result;
+    }
+    
+    // Helper methods
+    
+    private List<String> getDefaultSections(ReportRequest.ReportType reportType) {
+        switch (reportType) {
+            case PROCESS_API_MAPPING:
+                return Arrays.asList("processElements", "apiEndpoints", "mappings", "gaps");
+            case BUSINESS_PROCESS_ANALYSIS:
+                return Arrays.asList("flowAnalysis", "efficiency", "metrics", "optimization");
+            case API_PROCESS_COMPLIANCE:
+                return Arrays.asList("compliance", "inconsistencies", "gaps", "recommendations");
+            case PROCESS_SECURITY_ASSESSMENT:
+                return Arrays.asList("security", "vulnerabilities", "risks", "remediation");
+            case EXECUTIVE_SUMMARY:
+                return Arrays.asList("overview", "keyFindings", "risks", "recommendations");
+            default:
+                return Arrays.asList("summary", "details", "recommendations");
+        }
+    }
+    
+    private int getRandomInt(int min, int max) {
+        return min + (int) (Math.random() * (max - min + 1));
+    }
+    
+    private double getRandomDouble(double min, double max) {
+        return min + Math.random() * (max - min);
+    }
+    
+    private Map<String, Integer> createRandomProcessDistribution() {
+        Map<String, Integer> distribution = new HashMap<>();
+        distribution.put("Service Task", getRandomInt(1, 5));
+        distribution.put("User Task", getRandomInt(1, 4));
+        distribution.put("Script Task", getRandomInt(0, 3));
+        distribution.put("Gateway", getRandomInt(0, 3));
+        distribution.put("Start Event", 1);
+        distribution.put("End Event", getRandomInt(1, 2));
+        return distribution;
+    }
+    
+    private Map<String, String> createRandomVulnerabilityTypes() {
+        Map<String, String> vulnerabilities = new HashMap<>();
+        vulnerabilities.put("Authentication", getRandomSeverity());
+        vulnerabilities.put("Authorization", getRandomSeverity());
+        vulnerabilities.put("Data Validation", getRandomSeverity());
+        vulnerabilities.put("Input Sanitization", getRandomSeverity());
+        vulnerabilities.put("Error Handling", getRandomSeverity());
+        return vulnerabilities;
+    }
+    
+    private Map<String, Double> createRandomComplianceByStandard() {
+        Map<String, Double> compliance = new HashMap<>();
+        compliance.put("BPMN 2.0", getRandomDouble(85.0, 98.0));
+        compliance.put("ISO 9001", getRandomDouble(80.0, 95.0));
+        compliance.put("SOX", getRandomDouble(75.0, 92.0));
+        compliance.put("GDPR", getRandomDouble(78.0, 94.0));
+        return compliance;
+    }
+    
+    private Map<String, Object> createRandomComplianceGaps() {
+        Map<String, Object> gaps = new HashMap<>();
+        gaps.put("Missing Documentation", getRandomInt(0, 3));
+        gaps.put("Incomplete Testing", getRandomInt(0, 2));
+        gaps.put("Outdated Standards", getRandomInt(0, 2));
+        gaps.put("Insufficient Validation", getRandomInt(0, 2));
+        return gaps;
+    }
+    
+    private Map<String, Object> createRandomResourceUtilization() {
+        Map<String, Object> utilization = new HashMap<>();
+        utilization.put("CPU", getRandomDouble(45.0, 85.0));
+        utilization.put("Memory", getRandomDouble(50.0, 80.0));
+        utilization.put("Disk", getRandomDouble(30.0, 70.0));
+        utilization.put("Network", getRandomDouble(25.0, 65.0));
+        return utilization;
+    }
+    
+    private String getRandomSeverity() {
+        String[] severities = {"LOW", "MEDIUM", "HIGH", "CRITICAL"};
+        return severities[getRandomInt(0, severities.length - 1)];
+    }
+    
+    private String getRandomOverallHealth() {
+        String[] healthLevels = {"EXCELLENT", "GOOD", "WARNING", "CRITICAL"};
+        return healthLevels[getRandomInt(0, healthLevels.length - 1)];
+    }
+}

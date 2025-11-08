@@ -1,0 +1,84 @@
+package org.example.domain.dto.bpmn;
+
+import org.example.domain.entities.BpmnApiMapping;
+
+/**
+ * Response DTO for BpmnApiMapping entity
+ */
+public class BpmnApiMappingResponse {
+    private String processId;
+    private String bpmnElementId;
+    private String bpmnElementName;
+    private String bpmnElementType;
+    private String apiEndpoint;
+    private String httpMethod;
+    private String mappingDescription;
+
+    public BpmnApiMappingResponse() {}
+
+    public BpmnApiMappingResponse(String processId, String bpmnElementId, String bpmnElementName,
+                                String bpmnElementType, String apiEndpoint, String httpMethod,
+                                String mappingDescription) {
+        this.processId = processId;
+        this.bpmnElementId = bpmnElementId;
+        this.bpmnElementName = bpmnElementName;
+        this.bpmnElementType = bpmnElementType;
+        this.apiEndpoint = apiEndpoint;
+        this.httpMethod = httpMethod;
+        this.mappingDescription = mappingDescription;
+    }
+
+    /**
+     * Creates a response from a BpmnApiMapping domain object
+     */
+    public static BpmnApiMappingResponse fromDomain(BpmnApiMapping mapping) {
+        return new BpmnApiMappingResponse(
+            mapping.getProcessId().getValue(),
+            mapping.getBpmnElementId(),
+            mapping.getBpmnElementName(),
+            mapping.getBpmnElementType(),
+            mapping.getApiEndpoint(),
+            mapping.getHttpMethod(),
+            mapping.getMappingDescription()
+        );
+    }
+
+    // Getters and setters
+    public String getProcessId() { return processId; }
+    public void setProcessId(String processId) { this.processId = processId; }
+
+    public String getBpmnElementId() { return bpmnElementId; }
+    public void setBpmnElementId(String bpmnElementId) { this.bpmnElementId = bpmnElementId; }
+
+    public String getBpmnElementName() { return bpmnElementName; }
+    public void setBpmnElementName(String bpmnElementName) { this.bpmnElementName = bpmnElementName; }
+
+    public String getBpmnElementType() { return bpmnElementType; }
+    public void setBpmnElementType(String bpmnElementType) { this.bpmnElementType = bpmnElementType; }
+
+    public String getApiEndpoint() { return apiEndpoint; }
+    public void setApiEndpoint(String apiEndpoint) { this.apiEndpoint = apiEndpoint; }
+
+    public String getHttpMethod() { return httpMethod; }
+    public void setHttpMethod(String httpMethod) { this.httpMethod = httpMethod; }
+
+    public String getMappingDescription() { return mappingDescription; }
+    public void setMappingDescription(String mappingDescription) { this.mappingDescription = mappingDescription; }
+
+    // Utility methods
+    public boolean hasApiMapping() {
+        return apiEndpoint != null && !apiEndpoint.trim().isEmpty();
+    }
+
+    public boolean hasMappingDescription() {
+        return mappingDescription != null && !mappingDescription.trim().isEmpty();
+    }
+
+    public boolean isTaskElement() {
+        return "task".equalsIgnoreCase(bpmnElementType) || "userTask".equalsIgnoreCase(bpmnElementType);
+    }
+
+    public boolean isServiceElement() {
+        return "serviceTask".equalsIgnoreCase(bpmnElementType);
+    }
+}

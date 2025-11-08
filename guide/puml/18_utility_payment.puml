@@ -1,0 +1,26 @@
+@startuml
+actor Client as C
+participant "API Bank" as Bank
+participant "External GKH API" as G
+
+C -> Bank: POST /auth/bank-token (client_id, client_secret)
+activate Bank
+Bank -> C: access_token
+deactivate Bank
+
+C -> G: Identify GKH by account details
+activate G
+G -> C: exact account details
+deactivate G
+
+C -> Bank: GET /accounts
+activate Bank
+Bank -> C: list of accounts
+deactivate Bank
+
+C -> Bank: POST /payments (GKH account)
+activate Bank
+Bank -> C: payment_id
+deactivate Bank
+
+@enduml

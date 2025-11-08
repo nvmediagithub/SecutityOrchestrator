@@ -1,0 +1,221 @@
+package org.example.domain.dto.openapi;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * DTO for security check results
+ */
+public class ApiSecurityCheckResponse {
+    
+    private Long id;
+    private String analysisId;
+    private String endpointId;
+    private String checkType; // AUTHENTICATION_REQUIRED, AUTHORIZATION_CHECK, etc.
+    private String checkName;
+    private String status; // PASSED, FAILED, WARNING, ERROR
+    private String description;
+    private String checkResult;
+    private String actualValue;
+    private String expectedValue;
+    private String severity; // LOW, MEDIUM, HIGH, CRITICAL
+    private String recommendations;
+    private String fixInstructions;
+    private String evidence;
+    private String elementPath;
+    private String securityScheme;
+    private Boolean isCompliant;
+    private String complianceStandard; // OWASP, NIST, etc.
+    private Boolean isActive;
+    private LocalDateTime checkedAt;
+    private Long checkDurationMs;
+    private Double confidenceScore;
+    private List<String> tags;
+    
+    // Constructors
+    public ApiSecurityCheckResponse() {}
+    
+    // Static factory methods for mock data
+    public static ApiSecurityCheckResponse createMockAuthenticationCheck(String analysisId) {
+        ApiSecurityCheckResponse check = new ApiSecurityCheckResponse();
+        check.setAnalysisId(analysisId);
+        check.setCheckType("AUTHENTICATION_REQUIRED");
+        check.setCheckName("Authentication Required");
+        check.setStatus("FAILED");
+        check.setDescription("Endpoint does not require authentication");
+        check.setCheckResult("No security requirements found");
+        check.setActualValue("No authentication");
+        check.setExpectedValue("Bearer token or API key required");
+        check.setRecommendations("Add authentication security requirement to protect the endpoint");
+        check.setFixInstructions("Add 'security' property to the operation with appropriate scheme");
+        check.setElementPath("/paths/users/{id}/delete");
+        check.setComplianceStandard("OWASP API Security");
+        check.setIsCompliant(false);
+        check.setSeverity("HIGH");
+        check.setCheckedAt(LocalDateTime.now());
+        check.setIsActive(true);
+        return check;
+    }
+    
+    public static ApiSecurityCheckResponse createMockHttpsCheck(String analysisId) {
+        ApiSecurityCheckResponse check = new ApiSecurityCheckResponse();
+        check.setAnalysisId(analysisId);
+        check.setCheckType("HTTPS_ENFORCEMENT");
+        check.setCheckName("HTTPS Enforcement");
+        check.setStatus("PASSED");
+        check.setDescription("HTTPS is properly configured");
+        check.setCheckResult("All endpoints require HTTPS");
+        check.setActualValue("HTTPS required");
+        check.setExpectedValue("HTTPS required");
+        check.setRecommendations("Continue enforcing HTTPS for all endpoints");
+        check.setElementPath("/servers");
+        check.setComplianceStandard("OWASP API Security");
+        check.setIsCompliant(true);
+        check.setSeverity("LOW");
+        check.setCheckedAt(LocalDateTime.now());
+        check.setIsActive(true);
+        return check;
+    }
+    
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public String getAnalysisId() { return analysisId; }
+    public void setAnalysisId(String analysisId) { this.analysisId = analysisId; }
+    
+    public String getEndpointId() { return endpointId; }
+    public void setEndpointId(String endpointId) { this.endpointId = endpointId; }
+    
+    public String getCheckType() { return checkType; }
+    public void setCheckType(String checkType) { this.checkType = checkType; }
+    
+    public String getCheckName() { return checkName; }
+    public void setCheckName(String checkName) { this.checkName = checkName; }
+    
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    
+    public String getCheckResult() { return checkResult; }
+    public void setCheckResult(String checkResult) { this.checkResult = checkResult; }
+    
+    public String getActualValue() { return actualValue; }
+    public void setActualValue(String actualValue) { this.actualValue = actualValue; }
+    
+    public String getExpectedValue() { return expectedValue; }
+    public void setExpectedValue(String expectedValue) { this.expectedValue = expectedValue; }
+    
+    public String getSeverity() { return severity; }
+    public void setSeverity(String severity) { this.severity = severity; }
+    
+    public String getRecommendations() { return recommendations; }
+    public void setRecommendations(String recommendations) { this.recommendations = recommendations; }
+    
+    public String getFixInstructions() { return fixInstructions; }
+    public void setFixInstructions(String fixInstructions) { this.fixInstructions = fixInstructions; }
+    
+    public String getEvidence() { return evidence; }
+    public void setEvidence(String evidence) { this.evidence = evidence; }
+    
+    public String getElementPath() { return elementPath; }
+    public void setElementPath(String elementPath) { this.elementPath = elementPath; }
+    
+    public String getSecurityScheme() { return securityScheme; }
+    public void setSecurityScheme(String securityScheme) { this.securityScheme = securityScheme; }
+    
+    public Boolean getIsCompliant() { return isCompliant; }
+    public void setIsCompliant(Boolean isCompliant) { this.isCompliant = isCompliant; }
+    
+    public String getComplianceStandard() { return complianceStandard; }
+    public void setComplianceStandard(String complianceStandard) { this.complianceStandard = complianceStandard; }
+    
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    
+    public LocalDateTime getCheckedAt() { return checkedAt; }
+    public void setCheckedAt(LocalDateTime checkedAt) { this.checkedAt = checkedAt; }
+    
+    public Long getCheckDurationMs() { return checkDurationMs; }
+    public void setCheckDurationMs(Long checkDurationMs) { this.checkDurationMs = checkDurationMs; }
+    
+    public Double getConfidenceScore() { return confidenceScore; }
+    public void setConfidenceScore(Double confidenceScore) { this.confidenceScore = confidenceScore; }
+    
+    public List<String> getTags() { return tags; }
+    public void setTags(List<String> tags) { this.tags = tags; }
+    
+    // Helper methods
+    public boolean isSecurityCompliant() {
+        return Boolean.TRUE.equals(isCompliant) && "PASSED".equals(status);
+    }
+    
+    public boolean hasSecurityIssues() {
+        return "FAILED".equals(status) || "WARNING".equals(status);
+    }
+    
+    public boolean isPassed() {
+        return "PASSED".equals(status);
+    }
+    
+    public boolean isFailed() {
+        return "FAILED".equals(status);
+    }
+    
+    public boolean isWarning() {
+        return "WARNING".equals(status);
+    }
+    
+    public boolean isHighSeverity() {
+        return "HIGH".equals(severity) || "CRITICAL".equals(severity);
+    }
+    
+    public String getSeverityLevel() {
+        return severity != null ? severity : determineSeverityFromStatus();
+    }
+    
+    private String determineSeverityFromStatus() {
+        switch (status) {
+            case "FAILED":
+                return "HIGH";
+            case "WARNING":
+                return "MEDIUM";
+            case "PASSED":
+                return "LOW";
+            default:
+                return "LOW";
+        }
+    }
+    
+    public void addTag(String tag) {
+        if (tags == null) {
+            tags = new java.util.ArrayList<>();
+        }
+        if (!tags.contains(tag)) {
+            tags.add(tag);
+        }
+    }
+    
+    public void setCheckDuration(Long durationMs) {
+        this.checkDurationMs = durationMs;
+    }
+    
+    public void setConfidenceScore(Double score) {
+        this.confidenceScore = score;
+    }
+    
+    @Override
+    public String toString() {
+        return "ApiSecurityCheckResponse{" +
+                "id=" + id +
+                ", checkType='" + checkType + '\'' +
+                ", checkName='" + checkName + '\'' +
+                ", status='" + status + '\'' +
+                ", isCompliant=" + isCompliant +
+                ", severity='" + severity + '\'' +
+                ", checkedAt=" + checkedAt +
+                '}';
+    }
+}

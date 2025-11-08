@@ -19,11 +19,11 @@ class LLMProviderSettings {
 
   factory LLMProviderSettings.fromJson(Map<String, dynamic> json) {
     return LLMProviderSettings(
-      provider: LLMProvider.fromString(json['provider'] as String),
+      provider: LLMProvider.fromString(json['provider'] as String? ?? ''),
       apiKey: json['apiKey'] as String?,
       baseUrl: json['baseUrl'] as String?,
-      timeout: json['timeout'] ?? 30,
-      maxRetries: json['maxRetries'] ?? 3,
+      timeout: (json['timeout'] as num?)?.toInt() ?? 30,
+      maxRetries: (json['maxRetries'] as num?)?.toInt() ?? 3,
     );
   }
 
@@ -70,10 +70,10 @@ class LLMModelConfig {
 
   factory LLMModelConfig.fromJson(Map<String, dynamic> json) {
     return LLMModelConfig(
-      modelName: json['modelName'] as String,
-      provider: LLMProvider.fromString(json['provider'] as String),
-      contextWindow: json['contextWindow'] ?? 4096,
-      maxTokens: json['maxTokens'] ?? 2048,
+      modelName: json['modelName'] as String? ?? '',
+      provider: LLMProvider.fromString(json['provider'] as String? ?? ''),
+      contextWindow: (json['contextWindow'] as num?)?.toInt() ?? 4096,
+      maxTokens: (json['maxTokens'] as num?)?.toInt() ?? 2048,
       temperature: (json['temperature'] as num?)?.toDouble() ?? 0.7,
       topP: (json['topP'] as num?)?.toDouble() ?? 0.9,
       frequencyPenalty: (json['frequencyPenalty'] as num?)?.toDouble() ?? 0.0,
@@ -116,12 +116,12 @@ class LLMStatusResponse {
 
   factory LLMStatusResponse.fromJson(Map<String, dynamic> json) {
     return LLMStatusResponse(
-      provider: LLMProvider.fromString(json['provider'] as String),
-      available: json['available'] as bool,
-      healthy: json['healthy'] as bool,
+      provider: LLMProvider.fromString(json['provider'] as String? ?? ''),
+      available: json['available'] as bool? ?? false,
+      healthy: json['healthy'] as bool? ?? false,
       responseTimeMs: (json['responseTimeMs'] as num?)?.toDouble(),
       errorMessage: json['errorMessage'] as String?,
-      lastCheckedAt: DateTime.parse(json['lastCheckedAt'] as String),
+      lastCheckedAt: DateTime.parse(json['lastCheckedAt'] as String? ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -155,7 +155,9 @@ class LLMConfigResponse {
     final providers = <String, LLMProviderSettings>{};
     if (providersJson != null) {
       providersJson.forEach((key, value) {
-        providers[key] = LLMProviderSettings.fromJson(Map<String, dynamic>.from(value as Map));
+        if (value != null) {
+          providers[key] = LLMProviderSettings.fromJson(Map<String, dynamic>.from(value as Map));
+        }
       });
     }
 
@@ -163,13 +165,15 @@ class LLMConfigResponse {
     final models = <String, LLMModelConfig>{};
     if (modelsJson != null) {
       modelsJson.forEach((key, value) {
-        models[key] = LLMModelConfig.fromJson(Map<String, dynamic>.from(value as Map));
+        if (value != null) {
+          models[key] = LLMModelConfig.fromJson(Map<String, dynamic>.from(value as Map));
+        }
       });
     }
 
     return LLMConfigResponse(
-      activeProvider: LLMProvider.fromString(json['activeProvider'] as String),
-      activeModel: json['activeModel'] as String,
+      activeProvider: LLMProvider.fromString(json['activeProvider'] as String? ?? ''),
+      activeModel: json['activeModel'] as String? ?? '',
       providers: providers,
       models: models,
     );
@@ -236,13 +240,13 @@ class LLMTestResponse {
 
   factory LLMTestResponse.fromJson(Map<String, dynamic> json) {
     return LLMTestResponse(
-      modelName: json['modelName'] as String,
-      provider: LLMProvider.fromString(json['provider'] as String),
-      prompt: json['prompt'] as String,
-      response: json['response'] as String,
-      tokensUsed: json['tokensUsed'] as int,
-      responseTimeMs: (json['responseTimeMs'] as num).toDouble(),
-      success: json['success'] as bool,
+      modelName: json['modelName'] as String? ?? '',
+      provider: LLMProvider.fromString(json['provider'] as String? ?? ''),
+      prompt: json['prompt'] as String? ?? '',
+      response: json['response'] as String? ?? '',
+      tokensUsed: (json['tokensUsed'] as num?)?.toInt() ?? 0,
+      responseTimeMs: (json['responseTimeMs'] as num?)?.toDouble() ?? 0.0,
+      success: json['success'] as bool? ?? false,
     );
   }
 

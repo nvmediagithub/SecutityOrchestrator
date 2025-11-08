@@ -1,0 +1,117 @@
+package org.example.domain.dto.test;
+
+import org.example.domain.entities.OpenApiSpec;
+import org.example.domain.valueobjects.OpenApiVersion;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+
+public class OpenApiSpecResponse {
+    
+    private Long id;
+    private String specificationId;
+    private String title;
+    private String version;
+    private OpenApiVersion openApiVersion;
+    private String specificationContent;
+    private Map<String, String> paths;
+    private String components;
+    private String serverUrls;
+    private String description;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private Boolean isActive;
+    private String fileName;
+    private Long fileSize;
+    private String contentType;
+    
+    public OpenApiSpecResponse() {
+    }
+    
+    public OpenApiSpecResponse(OpenApiSpec openApiSpec) {
+        if (openApiSpec != null) {
+            this.id = openApiSpec.getId();
+            this.specificationId = openApiSpec.getSpecificationId().getValue();
+            this.title = openApiSpec.getTitle();
+            this.version = openApiSpec.getVersion() != null ? openApiSpec.getVersion().toString() : null;
+            this.openApiVersion = openApiSpec.getOpenApiVersion();
+            this.specificationContent = openApiSpec.getSpecificationContent();
+            this.paths = openApiSpec.getPaths();
+            this.components = openApiSpec.getComponents();
+            this.serverUrls = openApiSpec.getServerUrls();
+            this.description = openApiSpec.getDescription();
+            this.createdAt = openApiSpec.getCreatedAt();
+            this.updatedAt = openApiSpec.getUpdatedAt();
+            this.isActive = openApiSpec.getIsActive();
+            this.fileName = openApiSpec.getFileName();
+            this.fileSize = openApiSpec.getFileSize();
+            this.contentType = openApiSpec.getContentType();
+        }
+    }
+    
+    public static OpenApiSpecResponse from(OpenApiSpec openApiSpec) {
+        return new OpenApiSpecResponse(openApiSpec);
+    }
+    
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public String getSpecificationId() { return specificationId; }
+    public void setSpecificationId(String specificationId) { this.specificationId = specificationId; }
+    
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    
+    public String getVersion() { return version; }
+    public void setVersion(String version) { this.version = version; }
+    
+    public OpenApiVersion getOpenApiVersion() { return openApiVersion; }
+    public void setOpenApiVersion(OpenApiVersion openApiVersion) { this.openApiVersion = openApiVersion; }
+    
+    public String getSpecificationContent() { return specificationContent; }
+    public void setSpecificationContent(String specificationContent) { this.specificationContent = specificationContent; }
+    
+    public Map<String, String> getPaths() { return paths; }
+    public void setPaths(Map<String, String> paths) { this.paths = paths; }
+    
+    public String getComponents() { return components; }
+    public void setComponents(String components) { this.components = components; }
+    
+    public String getServerUrls() { return serverUrls; }
+    public void setServerUrls(String serverUrls) { this.serverUrls = serverUrls; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    
+    public String getFileName() { return fileName; }
+    public void setFileName(String fileName) { this.fileName = fileName; }
+    
+    public Long getFileSize() { return fileSize; }
+    public void setFileSize(Long fileSize) { this.fileSize = fileSize; }
+    
+    public String getContentType() { return contentType; }
+    public void setContentType(String contentType) { this.contentType = contentType; }
+    
+    @Override
+    public String toString() {
+        return "OpenApiSpecResponse{" +
+                "id=" + id +
+                ", specificationId='" + specificationId + '\'' +
+                ", title='" + title + '\'' +
+                ", version='" + version + '\'' +
+                ", openApiVersion=" + openApiVersion +
+                ", isActive=" + isActive +
+                ", createdAt=" + createdAt +
+                '}';
+    }
+}

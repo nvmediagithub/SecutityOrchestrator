@@ -1,0 +1,167 @@
+package org.example.domain.entities.openapi;
+
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+
+/**
+ * Схема безопасности API
+ */
+public class ApiSecurityScheme {
+    
+    private String type; // apiKey, http, oauth2, openIdConnect
+    private String name; // for apiKey
+    private String in; // for apiKey: query, header, cookie
+    private String scheme; // for http: basic, bearer, etc.
+    private String bearerFormat; // for bearer tokens
+    private String description;
+    private String flows; // for oauth2
+    private Map<String, Object> authorizationUrl;
+    private Map<String, Object> tokenUrl;
+    private Map<String, Object> refreshUrl;
+    private Map<String, List<String>> scopes; // for oauth2
+    private String openIdConnectUrl;
+    private Map<String, Object> extensions;
+    private String originalRef;
+    
+    public ApiSecurityScheme() {
+        this.scopes = new java.util.HashMap<>();
+        this.authorizationUrl = new java.util.HashMap<>();
+        this.tokenUrl = new java.util.HashMap<>();
+        this.refreshUrl = new java.util.HashMap<>();
+        this.extensions = new java.util.HashMap<>();
+    }
+    
+    public ApiSecurityScheme(String name, String type) {
+        this();
+        this.name = name;
+        this.type = type;
+    }
+    
+    public void addScope(String flow, List<String> scopeList) {
+        this.scopes.put(flow, scopeList);
+    }
+    
+    // Getters and Setters
+    public String getType() {
+        return type;
+    }
+    
+    public void setType(String type) {
+        this.type = type;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public String getIn() {
+        return in;
+    }
+    
+    public void setIn(String in) {
+        this.in = in;
+    }
+    
+    public String getScheme() {
+        return scheme;
+    }
+    
+    public void setScheme(String scheme) {
+        this.scheme = scheme;
+    }
+    
+    public String getBearerFormat() {
+        return bearerFormat;
+    }
+    
+    public void setBearerFormat(String bearerFormat) {
+        this.bearerFormat = bearerFormat;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public String getFlows() {
+        return flows;
+    }
+    
+    public void setFlows(String flows) {
+        this.flows = flows;
+    }
+    
+    public Map<String, Object> getAuthorizationUrl() {
+        return authorizationUrl;
+    }
+    
+    public void setAuthorizationUrl(Map<String, Object> authorizationUrl) {
+        this.authorizationUrl = authorizationUrl;
+    }
+    
+    public Map<String, Object> getTokenUrl() {
+        return tokenUrl;
+    }
+    
+    public void setTokenUrl(Map<String, Object> tokenUrl) {
+        this.tokenUrl = tokenUrl;
+    }
+    
+    public Map<String, Object> getRefreshUrl() {
+        return refreshUrl;
+    }
+    
+    public void setRefreshUrl(Map<String, Object> refreshUrl) {
+        this.refreshUrl = refreshUrl;
+    }
+    
+    public Map<String, List<String>> getScopes() {
+        return scopes;
+    }
+    
+    public void setScopes(Map<String, List<String>> scopes) {
+        this.scopes = scopes;
+    }
+    
+    public String getOpenIdConnectUrl() {
+        return openIdConnectUrl;
+    }
+    
+    public void setOpenIdConnectUrl(String openIdConnectUrl) {
+        this.openIdConnectUrl = openIdConnectUrl;
+    }
+    
+    public Map<String, Object> getExtensions() {
+        return extensions;
+    }
+    
+    public void setExtensions(Map<String, Object> extensions) {
+        this.extensions = extensions;
+    }
+    
+    public String getOriginalRef() {
+        return originalRef;
+    }
+    
+    public void setOriginalRef(String originalRef) {
+        this.originalRef = originalRef;
+    }
+    
+    @Override
+    public String toString() {
+        return "ApiSecurityScheme{" +
+                "name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", scheme='" + scheme + '\'' +
+                ", flows='" + flows + '\'' +
+                '}';
+    }
+}

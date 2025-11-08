@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -25,10 +26,10 @@ import java.util.stream.Collectors;
 /**
  * REST Controller for LLM operations
  * Provides endpoints for managing LLM providers, models, and chat completions
+ * CORS is configured globally in SecurityOrchestratorApplication
  */
 @RestController
 @RequestMapping("/api/llm")
-@CrossOrigin(origins = "*")
 public class LLMController {
     
     private static final Logger logger = LoggerFactory.getLogger(LLMController.class);
@@ -49,16 +50,27 @@ public class LLMController {
      * Get available LLM providers
      */
     @GetMapping("/providers")
-    public ResponseEntity<ApiResponse<Map<String, LLMProviderSettings>>> getProviders() {
+    public ResponseEntity<ApiResponse<Map<String, LLMProviderSettings>>> getProviders(HttpServletRequest request) {
+        logger.info("CORS Debug - Request from origin: {} for /api/llm/providers", request.getHeader("Origin"));
+        logger.info("CORS Debug - Request headers: Origin={}, User-Agent={}",
+            request.getHeader("Origin"), request.getHeader("User-Agent"));
+        
         try {
+            logger.info("Getting LLM providers configuration");
             Map<String, LLMProviderSettings> providers = new HashMap<>();
             
             // OpenRouter provider
-            providers.put("openrouter", createOpenRouterSettings());
+            LLMProviderSettings openRouterSettings = createOpenRouterSettings();
+            providers.put("openrouter", openRouterSettings);
+            logger.info("OpenRouter provider configured: hasKey={}, baseUrl={}",
+                openRouterSettings.hasApiKey(), openRouterSettings.getBaseUrl());
             
             // Local provider
-            providers.put("local", createLocalSettings());
+            LLMProviderSettings localSettings = createLocalSettings();
+            providers.put("local", localSettings);
+            logger.info("Local provider configured: baseUrl={}", localSettings.getBaseUrl());
             
+            logger.info("Successfully retrieved {} LLM providers", providers.size());
             return ResponseEntity.ok(ApiResponse.success(providers, "providers-retrieved"));
         } catch (Exception e) {
             logger.error("Failed to get providers", e);
@@ -257,18 +269,28 @@ public class LLMController {
      * Get LLM service status
      */
     @GetMapping("/status")
-    public ResponseEntity<ApiResponse<Map<String, LLMStatusResponse>>> getStatus() {
+    public ResponseEntity<ApiResponse<Map<String, LLMStatusResponse>>> getStatus(HttpServletRequest request) {
+        logger.info("CORS Debug - Status request from origin: {} for /api/llm/status", request.getHeader("Origin"));
+        
         try {
+            logger.info("Getting LLM service status");
             Map<String, LLMStatusResponse> statuses = new HashMap<>();
             
             // OpenRouter status
+            logger.info("Checking OpenRouter status");
             LLMStatusResponse openRouterStatus = getOpenRouterStatus();
             statuses.put("openrouter", openRouterStatus);
+            logger.info("OpenRouter status: healthy={}, available={}",
+                openRouterStatus.isHealthy(), openRouterStatus.isAvailable());
             
             // Local status
+            logger.info("Checking Local LLM status");
             LLMStatusResponse localStatus = getLocalStatus();
             statuses.put("local", localStatus);
+            logger.info("Local LLM status: healthy={}, available={}",
+                localStatus.isHealthy(), localStatus.isAvailable());
             
+            logger.info("Successfully retrieved LLM service status");
             return ResponseEntity.ok(ApiResponse.success(statuses, "status-retrieved"));
         } catch (Exception e) {
             logger.error("Failed to get status", e);
@@ -285,7 +307,12 @@ public class LLMController {
     @PostMapping("/test")
     public ResponseEntity<ApiResponse<LLMTestResponse>> testLLM(@Valid @RequestBody LLMTestRequest request) {
         try {
-            String provider = request.getModelName().contains(":") ? 
+            if (request.getModelName() == null || request.getModelName().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(new ApiResponse.ApiError("INVALID_REQUEST", "modelName is required"), "error"));
+            }
+            
+            String provider = request.getModelName().contains(":") ?
                 request.getModelName().split(":")[0] : "openrouter";
             
             LLMTestResponse response;
@@ -301,6 +328,38 @@ public class LLMController {
             logger.error("LLM test failed", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(new ApiResponse.ApiError("TEST_ERROR", "LLM test failed: " + e.getMessage()), "error"));
+        }
+    }
+    
+    // ==================== OPENROUTER MODELS ====================
+    
+    /**
+     * List OpenRouter models
+     */
+    @GetMapping("/openrouter/models")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> listOpenRouterModels() {
+        try {
+            logger.info("Getting OpenRouter models list");
+            Map<String, Object> response = new HashMap<>();
+            
+            // Mock OpenRouter models for demo
+            List<Map<String, Object>> models = Arrays.asList(
+                createModelInfo("gpt-4", "GPT-4", "OpenAI", 8192, true),
+                createModelInfo("gpt-3.5-turbo", "GPT-3.5 Turbo", "OpenAI", 4096, true),
+                createModelInfo("claude-3-opus", "Claude 3 Opus", "Anthropic", 200000, true),
+                createModelInfo("claude-3-sonnet", "Claude 3 Sonnet", "Anthropic", 200000, true),
+                createModelInfo("llama-3.1-70b", "Llama 3.1 70B", "Meta", 131072, true)
+            );
+            
+            response.put("models", models);
+            response.put("total", models.size());
+            response.put("provider", "openrouter");
+            
+            return ResponseEntity.ok(ApiResponse.success(response, "openrouter-models-retrieved"));
+        } catch (Exception e) {
+            logger.error("Failed to list OpenRouter models", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(new ApiResponse.ApiError("OPENROUTER_MODELS_ERROR", "Failed to list OpenRouter models: " + e.getMessage()), "error"));
         }
     }
     
@@ -478,7 +537,9 @@ public class LLMController {
      * Health check endpoint for testing
      */
     @GetMapping("/health")
-    public ResponseEntity<ApiResponse<String>> healthCheck() {
+    public ResponseEntity<ApiResponse<String>> healthCheck(HttpServletRequest request) {
+        logger.info("CORS Debug - Health check from origin: {} for /api/llm/health", request.getHeader("Origin"));
+        logger.info("LLM Controller health check endpoint called");
         return ResponseEntity.ok(ApiResponse.success("LLM Controller is healthy", "health-check"));
     }
     
@@ -487,11 +548,17 @@ public class LLMController {
      */
     @GetMapping("/test/echo")
     public ResponseEntity<ApiResponse<Map<String, String>>> testEcho(
-            @RequestParam(defaultValue = "Hello from LLM Controller") String message) {
+            @RequestParam(defaultValue = "Hello from LLM Controller") String message,
+            HttpServletRequest request) {
+        logger.info("CORS Debug - Test echo from origin: {} for /api/llm/test/echo", request.getHeader("Origin"));
+        logger.info("Echo test endpoint called with message: {}", message);
+        
         Map<String, String> response = new HashMap<>();
         response.put("message", message);
         response.put("timestamp", LocalDateTime.now().toString());
         response.put("status", "ok");
+        response.put("server", "SecurityOrchestrator LLM Controller");
+        response.put("version", "1.0.0");
         return ResponseEntity.ok(ApiResponse.success(response, "test-echo"));
     }
     
@@ -584,7 +651,7 @@ public class LLMController {
     
     private LLMTestResponse testLocalModel(LLMTestRequest request) {
         try {
-            CompletableFuture<LocalLLMService.ChatCompletionResponse> future = 
+            CompletableFuture<LocalLLMService.ChatCompletionResponse> future =
                 localLLMService.localChatCompletion(request.getModelName(), request.getPrompt(), 512, 0.7);
             
             LocalLLMService.ChatCompletionResponse completion = future.get();
@@ -609,5 +676,18 @@ public class LLMController {
                 false
             );
         }
+    }
+    
+    /**
+     * Helper method to create model information map
+     */
+    private Map<String, Object> createModelInfo(String id, String name, String provider, int contextWindow, boolean available) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("id", id);
+        model.put("name", name);
+        model.put("provider", provider);
+        model.put("contextWindow", contextWindow);
+        model.put("available", available);
+        return model;
     }
 }

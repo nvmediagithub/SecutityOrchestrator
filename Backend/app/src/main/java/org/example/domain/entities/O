@@ -1,0 +1,567 @@
+package org.example.domain.entities;
+
+import org.example.domain.valueobjects.SeverityLevel;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.*;
+
+/**
+ * Сущность для хранения отчетов по OWASP соответствию
+ */
+@Entity
+@Table(name = "owasp_compliance_reports")
+public class OwaspComplianceReport {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(unique = true, nullable = false)
+    private String reportId;
+    
+    @Column(nullable = false)
+    private String name;
+    
+    @Column(length = 2000)
+    private String description;
+    
+    @Column(nullable = false)
+    private String applicationName;
+    
+    @Column(length = 1000)
+    private String applicationVersion;
+    
+    @Column(length = 1000)
+    private String assessmentType; // FULL, PARTIAL, CONTINUOUS, MANUAL, AUTOMATED
+    
+    @Column(length = 2000)
+    private String assessmentScope; // API, WEB_APP, MOBILE_APP, INFRASTRUCTURE
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ComplianceStatus overallStatus = ComplianceStatus.PENDING;
+    
+    @Column(length = 2000)
+    private String assessmentDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime lastAssessment;
+    
+    @Column(length = 2000)
+    private String assessor; // Пользователь или система, проводившая оценку
+    
+    @Column(length = 1000)
+    private String owaspVersion; // OWASP Top 10 2021, OWASP API Security Top 10, etc.
+    
+    // OWASP Top 10 Categories Coverage
+    @Column(length = 1000)
+    private String a01_brokenAccessControl = "NOT_TESTED"; // Tested, Not Tested, Failed, Passed
+    
+    @Column(length = 1000)
+    private String a02_cryptographicFailures = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String a03_injection = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String a04_insecureDesign = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String a05_securityMisconfiguration = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String a06_vulnerableComponents = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String a07_identificationFailures = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String a08_softwareIntegrity = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String a09_loggingFailures = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String a10_serverSideRequestForgery = "NOT_TESTED";
+    
+    // API Security Top 10 (2023 Edition)
+    @Column(length = 1000)
+    private String api01_brokenObjectLevelAuthorization = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String api02_brokenUserAuthentication = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String api03_excessiveDataExposure = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String api04_lackOfResourcesRateLimit = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String api05_brokenFunctionLevelAuthorization = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String api06_unrestrictedResourceConsumption = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String api07_brokenAuthentication = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String api08_improperAssetsManagement = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String api09_unsuccessfulSecurityConfiguration = "NOT_TESTED";
+    
+    @Column(length = 1000)
+    private String api10_improperInventoryManagement = "NOT_TESTED";
+    
+    // Overall Metrics
+    private Integer totalTests = 0;
+    private Integer passedTests = 0;
+    private Integer failedTests = 0;
+    private Integer notTested = 0;
+    private Integer warningTests = 0;
+    
+    private Double overallComplianceScore = 0.0; // 0-100 percentage
+    private Double riskScore = 0.0; // 0-10 scale (10 = highest risk)
+    
+    @Enumerated(EnumType.STRING)
+    private SeverityLevel riskLevel = SeverityLevel.INFO;
+    
+    @Column(length = 2000)
+    private String riskRating; // CRITICAL, HIGH, MEDIUM, LOW, MINIMAL
+    
+    // Detailed findings
+    @Column(length = 4000)
+    private String criticalFindings;
+    
+    @Column(length = 4000)
+    private String highRiskFindings;
+    
+    @Column(length = 4000)
+    private String mediumRiskFindings;
+    
+    @Column(length = 4000)
+    private String lowRiskFindings;
+    
+    @Column(length = 4000)
+    private String recommendations;
+    
+    @Column(length = 4000)
+    private String executiveSummary;
+    
+    @ElementCollection
+    private List<String> testScenariosExecuted = new ArrayList<>();
+    
+    @ElementCollection
+    private List<String> identifiedVulnerabilities = new ArrayList<>();
+    
+    @ElementCollection
+    private List<String> securityControlsTested = new ArrayList<>();
+    
+    @ElementCollection
+    private List<String> complianceGaps = new ArrayList<>();
+    
+    @ElementCollection
+    private List<String> remediationActions = new ArrayList<>();
+    
+    @ElementCollection
+    private Map<String, String> categoryScores = new HashMap<>();
+    
+    @ElementCollection
+    private Map<String, String> additionalMetrics = new HashMap<>();
+    
+    @Column(length = 2000)
+    private String reportFormat; // HTML, PDF, JSON, XML, CSV
+    
+    @Column(length = 2000)
+    private String generatedBy; // System or user who generated the report
+    
+    private Boolean isAutomatedReport = false;
+    private Boolean isScheduledReport = false;
+    private Boolean isPartialAssessment = false;
+    
+    @Column(length = 2000)
+    private String environment; // Development, Testing, Staging, Production
+    
+    @Column(length = 4000)
+    private String assessmentNotes;
+    
+    @Column(length = 4000)
+    private String methodology;
+    
+    @Column(length = 4000)
+    private String toolsUsed;
+    
+    @Column(length = 4000)
+    private String standardsCompliance; // ISO 27001, NIST, etc.
+    
+    private LocalDateTime nextAssessmentDate;
+    
+    @Column(length = 2000)
+    private String reportStatus = "DRAFT"; // DRAFT, FINAL, ARCHIVED, SUPERSEDED
+    
+    @Column(length = 2000)
+    private String supersededBy;
+    
+    // Constructors
+    public OwaspComplianceReport() {
+        this.reportId = "OCR_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 10000);
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.testScenariosExecuted = new ArrayList<>();
+        this.identifiedVulnerabilities = new ArrayList<>();
+        this.securityControlsTested = new ArrayList<>();
+        this.complianceGaps = new ArrayList<>();
+        this.remediationActions = new ArrayList<>();
+        this.categoryScores = new HashMap<>();
+        this.additionalMetrics = new HashMap<>();
+    }
+    
+    public OwaspComplianceReport(String name, String applicationName, String assessmentType) {
+        this();
+        this.name = name;
+        this.applicationName = applicationName;
+        this.assessmentType = assessmentType;
+    }
+    
+    // Helper methods
+    public boolean isCompliant() {
+        return overallStatus == ComplianceStatus.COMPLIANT;
+    }
+    
+    public boolean hasCriticalIssues() {
+        return riskLevel == SeverityLevel.CRITICAL;
+    }
+    
+    public boolean hasHighRisk() {
+        return riskLevel == SeverityLevel.HIGH;
+    }
+    
+    public void updateComplianceStatus() {
+        int total = passedTests + failedTests + warningTests;
+        if (total == 0) {
+            this.overallStatus = ComplianceStatus.PENDING;
+            this.overallComplianceScore = 0.0;
+        } else {
+            this.overallComplianceScore = (double) passedTests / total * 100.0;
+            
+            if (overallComplianceScore >= 95) {
+                this.overallStatus = ComplianceStatus.COMPLIANT;
+            } else if (overallComplianceScore >= 80) {
+                this.overallStatus = ComplianceStatus.PARTIALLY_COMPLIANT;
+            } else {
+                this.overallStatus = ComplianceStatus.NON_COMPLIANT;
+            }
+        }
+        
+        // Update risk level based on failed tests and scores
+        if (failedTests > 0 || riskScore > 7) {
+            this.riskLevel = SeverityLevel.CRITICAL;
+            this.riskRating = "CRITICAL";
+        } else if (failedTests > 0 || riskScore > 4) {
+            this.riskLevel = SeverityLevel.HIGH;
+            this.riskRating = "HIGH";
+        } else if (warningTests > 0 || riskScore > 2) {
+            this.riskLevel = SeverityLevel.MEDIUM;
+            this.riskRating = "MEDIUM";
+        } else {
+            this.riskLevel = SeverityLevel.LOW;
+            this.riskRating = "LOW";
+        }
+    }
+    
+    public void addTestScenario(String scenarioId) {
+        if (scenarioId != null && !testScenariosExecuted.contains(scenarioId)) {
+            testScenariosExecuted.add(scenarioId);
+        }
+    }
+    
+    public void addVulnerability(String vulnerability) {
+        if (vulnerability != null && !identifiedVulnerabilities.contains(vulnerability)) {
+            identifiedVulnerabilities.add(vulnerability);
+        }
+    }
+    
+    public void addComplianceGap(String gap) {
+        if (gap != null && !complianceGaps.contains(gap)) {
+            complianceGaps.add(gap);
+        }
+    }
+    
+    public void addRemediationAction(String action) {
+        if (action != null && !remediationActions.contains(action)) {
+            remediationActions.add(action);
+        }
+    }
+    
+    public void setCategoryScore(String category, String score) {
+        if (category != null && score != null) {
+            categoryScores.put(category, score);
+        }
+    }
+    
+    public void addMetric(String key, String value) {
+        if (key != null && value != null) {
+            additionalMetrics.put(key, value);
+        }
+    }
+    
+    public String getCategoryStatus(String category) {
+        return categoryScores.getOrDefault(category, "NOT_TESTED");
+    }
+    
+    public double getCompliancePercentage() {
+        return overallComplianceScore;
+    }
+    
+    public boolean isAssessmentComplete() {
+        return totalTests > 0 && (passedTests + failedTests + warningTests) == totalTests;
+    }
+    
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public String getReportId() { return reportId; }
+    public void setReportId(String reportId) { this.reportId = reportId; }
+    
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    
+    public String getApplicationName() { return applicationName; }
+    public void setApplicationName(String applicationName) { this.applicationName = applicationName; }
+    
+    public String getApplicationVersion() { return applicationVersion; }
+    public void setApplicationVersion(String applicationVersion) { this.applicationVersion = applicationVersion; }
+    
+    public String getAssessmentType() { return assessmentType; }
+    public void setAssessmentType(String assessmentType) { this.assessmentType = assessmentType; }
+    
+    public String getAssessmentScope() { return assessmentScope; }
+    public void setAssessmentScope(String assessmentScope) { this.assessmentScope = assessmentScope; }
+    
+    public ComplianceStatus getOverallStatus() { return overallStatus; }
+    public void setOverallStatus(ComplianceStatus overallStatus) { this.overallStatus = overallStatus; }
+    
+    public String getAssessmentDate() { return assessmentDate; }
+    public void setAssessmentDate(String assessmentDate) { this.assessmentDate = assessmentDate; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public LocalDateTime getLastAssessment() { return lastAssessment; }
+    public void setLastAssessment(LocalDateTime lastAssessment) { this.lastAssessment = lastAssessment; }
+    
+    public String getAssessor() { return assessor; }
+    public void setAssessor(String assessor) { this.assessor = assessor; }
+    
+    public String getOwaspVersion() { return owaspVersion; }
+    public void setOwaspVersion(String owaspVersion) { this.owaspVersion = owaspVersion; }
+    
+    // OWASP Category Getters and Setters
+    public String getA01_brokenAccessControl() { return a01_brokenAccessControl; }
+    public void setA01_brokenAccessControl(String a01_brokenAccessControl) { this.a01_brokenAccessControl = a01_brokenAccessControl; }
+    
+    public String getA02_cryptographicFailures() { return a02_cryptographicFailures; }
+    public void setA02_cryptographicFailures(String a02_cryptographicFailures) { this.a02_cryptographicFailures = a02_cryptographicFailures; }
+    
+    public String getA03_injection() { return a03_injection; }
+    public void setA03_injection(String a03_injection) { this.a03_injection = a03_injection; }
+    
+    public String getA04_insecureDesign() { return a04_insecureDesign; }
+    public void setA04_insecureDesign(String a04_insecureDesign) { this.a04_insecureDesign = a04_insecureDesign; }
+    
+    public String getA05_securityMisconfiguration() { return a05_securityMisconfiguration; }
+    public void setA05_securityMisconfiguration(String a05_securityMisconfiguration) { this.a05_securityMisconfiguration = a05_securityMisconfiguration; }
+    
+    public String getA06_vulnerableComponents() { return a06_vulnerableComponents; }
+    public void setA06_vulnerableComponents(String a06_vulnerableComponents) { this.a06_vulnerableComponents = a06_vulnerableComponents; }
+    
+    public String getA07_identificationFailures() { return a07_identificationFailures; }
+    public void setA07_identificationFailures(String a07_identificationFailures) { this.a07_identificationFailures = a07_identificationFailures; }
+    
+    public String getA08_softwareIntegrity() { return a08_softwareIntegrity; }
+    public void setA08_softwareIntegrity(String a08_softwareIntegrity) { this.a08_softwareIntegrity = a08_softwareIntegrity; }
+    
+    public String getA09_loggingFailures() { return a09_loggingFailures; }
+    public void setA09_loggingFailures(String a09_loggingFailures) { this.a09_loggingFailures = a09_loggingFailures; }
+    
+    public String getA10_serverSideRequestForgery() { return a10_serverSideRequestForgery; }
+    public void setA10_serverSideRequestForgery(String a10_serverSideRequestForgery) { this.a10_serverSideRequestForgery = a10_serverSideRequestForgery; }
+    
+    public String getApi01_brokenObjectLevelAuthorization() { return api01_brokenObjectLevelAuthorization; }
+    public void setApi01_brokenObjectLevelAuthorization(String api01_brokenObjectLevelAuthorization) { this.api01_brokenObjectLevelAuthorization = api01_brokenObjectLevelAuthorization; }
+    
+    public String getApi02_brokenUserAuthentication() { return api02_brokenUserAuthentication; }
+    public void setApi02_brokenUserAuthentication(String api02_brokenUserAuthentication) { this.api02_brokenUserAuthentication = api02_brokenUserAuthentication; }
+    
+    public String getApi03_excessiveDataExposure() { return api03_excessiveDataExposure; }
+    public void setApi03_excessiveDataExposure(String api03_excessiveDataExposure) { this.api03_excessiveDataExposure = api03_excessiveDataExposure; }
+    
+    public String getApi04_lackOfResourcesRateLimit() { return api04_lackOfResourcesRateLimit; }
+    public void setApi04_lackOfResourcesRateLimit(String api04_lackOfResourcesRateLimit) { this.api04_lackOfResourcesRateLimit = api04_lackOfResourcesRateLimit; }
+    
+    public String getApi05_brokenFunctionLevelAuthorization() { return api05_brokenFunctionLevelAuthorization; }
+    public void setApi05_brokenFunctionLevelAuthorization(String api05_brokenFunctionLevelAuthorization) { this.api05_brokenFunctionLevelAuthorization = api05_brokenFunctionLevelAuthorization; }
+    
+    public String getApi06_unrestrictedResourceConsumption() { return api06_unrestrictedResourceConsumption; }
+    public void setApi06_unrestrictedResourceConsumption(String api06_unrestrictedResourceConsumption) { this.api06_unrestrictedResourceConsumption = api06_unrestrictedResourceConsumption; }
+    
+    public String getApi07_brokenAuthentication() { return api07_brokenAuthentication; }
+    public void setApi07_brokenAuthentication(String api07_brokenAuthentication) { this.api07_brokenAuthentication = api07_brokenAuthentication; }
+    
+    public String getApi08_improperAssetsManagement() { return api08_improperAssetsManagement; }
+    public void setApi08_improperAssetsManagement(String api08_improperAssetsManagement) { this.api08_improperAssetsManagement = api08_improperAssetsManagement; }
+    
+    public String getApi09_unsuccessfulSecurityConfiguration() { return api09_unsuccessfulSecurityConfiguration; }
+    public void setApi09_unsuccessfulSecurityConfiguration(String api09_unsuccessfulSecurityConfiguration) { this.api09_unsuccessfulSecurityConfiguration = api09_unsuccessfulSecurityConfiguration; }
+    
+    public String getApi10_improperInventoryManagement() { return api10_improperInventoryManagement; }
+    public void setApi10_improperInventoryManagement(String api10_improperInventoryManagement) { this.api10_improperInventoryManagement = api10_improperInventoryManagement; }
+    
+    public Integer getTotalTests() { return totalTests; }
+    public void setTotalTests(Integer totalTests) { this.totalTests = totalTests; }
+    
+    public Integer getPassedTests() { return passedTests; }
+    public void setPassedTests(Integer passedTests) { this.passedTests = passedTests; }
+    
+    public Integer getFailedTests() { return failedTests; }
+    public void setFailedTests(Integer failedTests) { this.failedTests = failedTests; }
+    
+    public Integer getNotTested() { return notTested; }
+    public void setNotTested(Integer notTested) { this.notTested = notTested; }
+    
+    public Integer getWarningTests() { return warningTests; }
+    public void setWarningTests(Integer warningTests) { this.warningTests = warningTests; }
+    
+    public Double getOverallComplianceScore() { return overallComplianceScore; }
+    public void setOverallComplianceScore(Double overallComplianceScore) { this.overallComplianceScore = overallComplianceScore; }
+    
+    public Double getRiskScore() { return riskScore; }
+    public void setRiskScore(Double riskScore) { this.riskScore = riskScore; }
+    
+    public SeverityLevel getRiskLevel() { return riskLevel; }
+    public void setRiskLevel(SeverityLevel riskLevel) { this.riskLevel = riskLevel; }
+    
+    public String getRiskRating() { return riskRating; }
+    public void setRiskRating(String riskRating) { this.riskRating = riskRating; }
+    
+    public String getCriticalFindings() { return criticalFindings; }
+    public void setCriticalFindings(String criticalFindings) { this.criticalFindings = criticalFindings; }
+    
+    public String getHighRiskFindings() { return highRiskFindings; }
+    public void setHighRiskFindings(String highRiskFindings) { this.highRiskFindings = highRiskFindings; }
+    
+    public String getMediumRiskFindings() { return mediumRiskFindings; }
+    public void setMediumRiskFindings(String mediumRiskFindings) { this.mediumRiskFindings = mediumRiskFindings; }
+    
+    public String getLowRiskFindings() { return lowRiskFindings; }
+    public void setLowRiskFindings(String lowRiskFindings) { this.lowRiskFindings = lowRiskFindings; }
+    
+    public String getRecommendations() { return recommendations; }
+    public void setRecommendations(String recommendations) { this.recommendations = recommendations; }
+    
+    public String getExecutiveSummary() { return executiveSummary; }
+    public void setExecutiveSummary(String executiveSummary) { this.executiveSummary = executiveSummary; }
+    
+    public List<String> getTestScenariosExecuted() { return testScenariosExecuted; }
+    public void setTestScenariosExecuted(List<String> testScenariosExecuted) { this.testScenariosExecuted = testScenariosExecuted; }
+    
+    public List<String> getIdentifiedVulnerabilities() { return identifiedVulnerabilities; }
+    public void setIdentifiedVulnerabilities(List<String> identifiedVulnerabilities) { this.identifiedVulnerabilities = identifiedVulnerabilities; }
+    
+    public List<String> getSecurityControlsTested() { return securityControlsTested; }
+    public void setSecurityControlsTested(List<String> securityControlsTested) { this.securityControlsTested = securityControlsTested; }
+    
+    public List<String> getComplianceGaps() { return complianceGaps; }
+    public void setComplianceGaps(List<String> complianceGaps) { this.complianceGaps = complianceGaps; }
+    
+    public List<String> getRemediationActions() { return remediationActions; }
+    public void setRemediationActions(List<String> remediationActions) { this.remediationActions = remediationActions; }
+    
+    public Map<String, String> getCategoryScores() { return categoryScores; }
+    public void setCategoryScores(Map<String, String> categoryScores) { this.categoryScores = categoryScores; }
+    
+    public Map<String, String> getAdditionalMetrics() { return additionalMetrics; }
+    public void setAdditionalMetrics(Map<String, String> additionalMetrics) { this.additionalMetrics = additionalMetrics; }
+    
+    public String getReportFormat() { return reportFormat; }
+    public void setReportFormat(String reportFormat) { this.reportFormat = reportFormat; }
+    
+    public String getGeneratedBy() { return generatedBy; }
+    public void setGeneratedBy(String generatedBy) { this.generatedBy = generatedBy; }
+    
+    public Boolean getIsAutomatedReport() { return isAutomatedReport; }
+    public void setIsAutomatedReport(Boolean isAutomatedReport) { this.isAutomatedReport = isAutomatedReport; }
+    
+    public Boolean getIsScheduledReport() { return isScheduledReport; }
+    public void setIsScheduledReport(Boolean isScheduledReport) { this.isScheduledReport = isScheduledReport; }
+    
+    public Boolean getIsPartialAssessment() { return isPartialAssessment; }
+    public void setIsPartialAssessment(Boolean isPartialAssessment) { this.isPartialAssessment = isPartialAssessment; }
+    
+    public String getEnvironment() { return environment; }
+    public void setEnvironment(String environment) { this.environment = environment; }
+    
+    public String getAssessmentNotes() { return assessmentNotes; }
+    public void setAssessmentNotes(String assessmentNotes) { this.assessmentNotes = assessmentNotes; }
+    
+    public String getMethodology() { return methodology; }
+    public void setMethodology(String methodology) { this.methodology = methodology; }
+    
+    public String getToolsUsed() { return toolsUsed; }
+    public void setToolsUsed(String toolsUsed) { this.toolsUsed = toolsUsed; }
+    
+    public String getStandardsCompliance() { return standardsCompliance; }
+    public void setStandardsCompliance(String standardsCompliance) { this.standardsCompliance = standardsCompliance; }
+    
+    public LocalDateTime getNextAssessmentDate() { return nextAssessmentDate; }
+    public void setNextAssessmentDate(LocalDateTime nextAssessmentDate) { this.nextAssessmentDate = nextAssessmentDate; }
+    
+    public String getReportStatus() { return reportStatus; }
+    public void setReportStatus(String reportStatus) { this.reportStatus = reportStatus; }
+    
+    public String getSupersededBy() { return supersededBy; }
+    public void setSupersededBy(String supersededBy) { this.supersededBy = supersededBy; }
+    
+    // Enums
+    public enum ComplianceStatus {
+        PENDING,
+        COMPLIANT,
+        PARTIALLY_COMPLIANT,
+        NON_COMPLIANT,
+        NOT_ASSESSED
+    }
+    
+    @Override
+    public String toString() {
+        return "OwaspComplianceReport{" +
+                "reportId='" + reportId + '\'' +
+                ", name='" + name + '\'' +
+                ", applicationName='" + applicationName + '\'' +
+                ", overallStatus=" + overallStatus +
+                ", overallComplianceScore=" + overallComplianceScore +
+                ", riskLevel=" + riskLevel +
+                '}';
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OwaspComplianceReport that = (OwaspComplianceReport) o;
+        return Objects.equals(reportId, that.reportId);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(reportId);
+    }
+}

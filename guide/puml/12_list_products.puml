@@ -1,0 +1,10 @@
+@startuml
+actor Client as C
+participant "API Bank" as Bank
+
+C -> Bank: GET /products
+activate Bank
+Bank -> C: list of products
+deactivate Bank
+
+@enduml

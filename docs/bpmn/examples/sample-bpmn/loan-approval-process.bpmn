@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" 
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI" 
+                  id="Definitions_LoanApproval" 
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  
+  <bpmn:process id="Process_LoanApproval" name="Loan Approval Process" isExecutable="true">
+    
+    <!-- Start Event -->
+    <bpmn:startEvent id="StartEvent_LoanApplication" name="Customer Applies for Loan">
+      <bpmn:outgoing>Flow_ApplicationToValidation</bpmn:outgoing>
+    </bpmn:startEvent>
+    
+    <!-- User Task: Application Validation -->
+    <bpmn:userTask id="UserTask_ValidateApplication" name="Validate Loan Application">
+      <bpmn:incoming>Flow_ApplicationToValidation</bpmn:incoming>
+      <bpmn:outgoing>Flow_ValidationToDecision</bpmn:outgoing>
+      <bpmn:dataInputAssociation>
+        <bpmn:sourceRef>DataObject_Application</bpmn:sourceRef>
+        <bpmn:targetRef>DataInput_Application</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+    </bpmn:userTask>
+    
+    <!-- Exclusive Gateway: Application Valid -->
+    <bpmn:exclusiveGateway id="ExclusiveGateway_ApplicationValid" name="Application Valid?">
+      <bpmn:incoming>Flow_ValidationToDecision</bpmn:incoming>
+      <bpmn:outgoing>Flow_ValidToCreditCheck</bpmn:outgoing>
+      <bpmn:outgoing>Flow_InvalidToRejection</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    
+    <!-- Service Task: Credit Check -->
+    <bpmn:serviceTask id="ServiceTask_CreditCheck" name="Perform Credit Check">
+      <bpmn:incoming>Flow_ValidToCreditCheck</bpmn:incoming>
+      <bpmn:outgoing>Flow_CreditCheckToApproval</bpmn:outgoing>
+      <bpmn:dataInputAssociation>
+        <bpmn:sourceRef>DataObject_CustomerInfo</bpmn:sourceRef>
+        <bpmn:targetRef>DataInput_CustomerData</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation>
+        <bpmn:sourceRef>DataOutput_CreditScore</bpmn:sourceRef>
+        <bpmn:targetRef>DataObject_CreditResult</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    
+    <!-- Parallel Gateway: Credit Approval Decision -->
+    <bpmn:parallelGateway id="ParallelGateway_CreditDecision" name="Credit Check Complete">
+      <bpmn:incoming>Flow_CreditCheckToApproval</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToManagerApproval</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ToAutoApproval</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    
+    <!-- User Task: Manager Approval -->
+    <bpmn:userTask id="UserTask_ManagerApproval" name="Manager Approval for High-Value Loans">
+      <bpmn:incoming>Flow_ToManagerApproval</bpmn:incoming>
+      <bpmn:outgoing>Flow_ManagerApprovalToFinal</bpmn:outgoing>
+      <bpmn:dataInputAssociation>
+        <bpmn:sourceRef>DataObject_LoanDetails</bpmn:sourceRef>
+        <bpmn:targetRef>DataInput_LoanInfo</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+    </bpmn:userTask>
+    
+    <!-- User Task: Automated Approval -->
+    <bpmn:userTask id="UserTask_AutomatedApproval" name="Final Loan Approval">
+      <bpmn:incoming>Flow_ToAutoApproval</bpmn:incoming>
+      <bpmn:outgoing>Flow_ApprovalToFinal</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <!-- Parallel Gateway: Final Decision -->
+    <bpmn:parallelGateway id="ParallelGateway_FinalDecision" name="Approval Complete">
+      <bpmn:incoming>Flow_ManagerApprovalToFinal</bpmn:incoming>
+      <bpmn:incoming>Flow_ApprovalToFinal</bpmn:incoming>
+      <bpmn:outgoing>Flow_FinalToCompletion</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    
+    <!-- Service Task: Notify Customer -->
+    <bpmn:serviceTask id="ServiceTask_NotifyCustomer" name="Send Approval Notification">
+      <bpmn:incoming>Flow_FinalToCompletion</bpmn:incoming>
+      <bpmn:outgoing>Flow_CompletionToEnd</bpmn:outgoing>
+      <bpmn:dataInputAssociation>
+        <bpmn:sourceRef>DataObject_ApprovalResult</bpmn:sourceRef>
+        <bpmn:targetRef>DataInput_Notification</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+    </bpmn:serviceTask>
+    
+    <!-- Error Event: Application Rejected -->
+    <bpmn:intermediateThrowEvent id="IntermediateThrowEvent_ApplicationRejected" name="Application Rejected">
+      <bpmn:incoming>Flow_InvalidToRejection</bpmn:incoming>
+      <bpmn:messageEventDefinition messageRef="Message_ApplicationRejected"/>
+    </bpmn:intermediateThrowEvent>
+    
+    <!-- End Event: Process Completed -->
+    <bpmn:endEvent id="EndEvent_LoanProcessed" name="Loan Processing Complete">
+      <bpmn:incoming>Flow_CompletionToEnd</bpmn:incoming>
+    </bpmn:endEvent>
+    
+    <!-- Sequence Flows -->
+    <bpmn:sequenceFlow id="Flow_ApplicationToValidation" sourceRef="StartEvent_LoanApplication" targetRef="UserTask_ValidateApplication"/>
+    <bpmn:sequenceFlow id="Flow_ValidationToDecision" sourceRef="UserTask_ValidateApplication" targetRef="ExclusiveGateway_ApplicationValid"/>
+    <bpmn:sequenceFlow id="Flow_ValidToCreditCheck" name="Valid" sourceRef="ExclusiveGateway_ApplicationValid" targetRef="ServiceTask_CreditCheck">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${application.valid == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_InvalidToRejection" name="Invalid" sourceRef="ExclusiveGateway_ApplicationValid" targetRef="IntermediateThrowEvent_ApplicationRejected">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${application.valid == false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_CreditCheckToApproval" sourceRef="ServiceTask_CreditCheck" targetRef="ParallelGateway_CreditDecision"/>
+    <bpmn:sequenceFlow id="Flow_ToManagerApproval" name="High Value" sourceRef="ParallelGateway_CreditDecision" targetRef="UserTask_ManagerApproval">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${loan.amount > 50000}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_ToAutoApproval" name="Standard" sourceRef="ParallelGateway_CreditDecision" targetRef="UserTask_AutomatedApproval">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${loan.amount <= 50000}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_ManagerApprovalToFinal" sourceRef="UserTask_ManagerApproval" targetRef="ParallelGateway_FinalDecision"/>
+    <bpmn:sequenceFlow id="Flow_ApprovalToFinal" sourceRef="UserTask_AutomatedApproval" targetRef="ParallelGateway_FinalDecision"/>
+    <bpmn:sequenceFlow id="Flow_FinalToCompletion" sourceRef="ParallelGateway_FinalDecision" targetRef="ServiceTask_NotifyCustomer"/>
+    <bpmn:sequenceFlow id="Flow_CompletionToEnd" sourceRef="ServiceTask_NotifyCustomer" targetRef="EndEvent_LoanProcessed"/>
+    
+    <!-- Data Objects (for security analysis) -->
+    <bpmn:dataObject id="DataObject_Application" name="Loan Application Data" isCollection="false">
+      <bpmn:dataObjectReference dataObjectRef="DataObject_Application"/>
+    </bpmn:dataObject>
+    
+    <bpmn:dataObject id="DataObject_CustomerInfo" name="Customer Personal Information" isCollection="false">
+      <bpmn:dataObjectReference dataObjectRef="DataObject_CustomerInfo"/>
+    </bpmn:dataObject>
+    
+    <bpmn:dataObject id="DataObject_CreditResult" name="Credit Check Results" isCollection="false">
+      <bpmn:dataObjectReference dataObjectRef="DataObject_CreditResult"/>
+    </bpmn:dataObject>
+    
+    <bpmn:dataObject id="DataObject_LoanDetails" name="Loan Details and Terms" isCollection="false">
+      <bpmn:dataObjectReference dataObjectRef="DataObject_LoanDetails"/>
+    </bpmn:dataObject>
+    
+    <bpmn:dataObject id="DataObject_ApprovalResult" name="Final Approval Decision" isCollection="false">
+      <bpmn:dataObjectReference dataObjectRef="DataObject_ApprovalResult"/>
+    </bpmn:dataObject>
+    
+    <!-- Timer Events -->
+    <bpmn:boundaryEvent id="BoundaryEvent_ApplicationTimeout" name="Application Processing Timeout" attachedToRef="UserTask_ValidateApplication">
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT24H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    
+    <!-- Message Events -->
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_AdditionalInfo" name="Request Additional Information">
+      <bpmn:messageEventDefinition messageRef="Message_AdditionalInfoRequired"/>
+    </bpmn:intermediateCatchEvent>
+    
+    <!-- Security Annotations (Extension Elements) -->
+    <bpmn:extensionElements>
+      <bpmn:securityAnnotation id="SecurityAnnotation_ValidateApplication" name="Authentication Required">
+        <bpmn:securityRequirement>
+          <bpmn:authMethod>JWT</bpmn:authMethod>
+          <bpmn:requiredRole>loan_officer</bpmn:requiredRole>
+        </bpmn:securityRequirement>
+      </bpmn:securityAnnotation>
+      
+      <bpmn:securityAnnotation id="SecurityAnnotation_CreditCheck" name="External API Security">
+        <bpmn:securityRequirement>
+          <bpmn:authMethod>API_KEY</bpmn:authMethod>
+          <bpmn:encryption>TLS_1_2</bpmn:encryption>
+        </bpmn:securityRequirement>
+      </bpmn:securityAnnotation>
+      
+      <bpmn:dataClassification id="DataClassification_PII" name="Personal Identifiable Information">
+        <bpmn:dataType>pii</bpmn:dataType>
+        <bpmn:classificationLevel>confidential</bpmn:classificationLevel>
+        <bpmn:retentionPeriod>7_years</bpmn:retentionPeriod>
+      </bpmn:dataClassification>
+    </bpmn:extensionElements>
+    
+  </bpmn:process>
+  
+  <!-- Messages -->
+  <bpmn:message id="Message_ApplicationRejected" name="Application Rejected"/>
+  <bpmn:message id="Message_AdditionalInfoRequired" name="Additional Information Required"/>
+  
+  <!-- Error Definitions -->
+  <bpmn:error id="Error_InvalidApplication" name="Invalid Loan Application" errorCode="INVALID_APPLICATION"/>
+  <bpmn:error id="Error_CreditCheckFailed" name="Credit Check Service Unavailable" errorCode="CREDIT_CHECK_ERROR"/>
+  
+</bpmn:definitions>
+
+<!-- BPMN 2.0 Extension Schema for Security Annotations -->
+<definitions xmlns="http://bpmn.io/schema/bpmn-2.0" 
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:security="http://securityorchestrator.io/schema/bpmn-security"
+             xsi:schemaLocation="
+               http://bpmn.io/schema/bpmn-2.0 BPMN_Schema.xsd
+               http://securityorchestrator.io/schema/bpmn-security http://securityorchestrator.io/schema/bpmn-security.xsd">
+  
+  <collaboration id="Collaboration_LoanApproval">
+    <participant id="Participant_Customer" name="Customer" processRef="Process_LoanApproval"/>
+    <participant id="Participant_Bank" name="Bank" processRef="Process_LoanApproval"/>
+    
+    <messageFlow id="MessageFlow_CustomerToBank" sourceRef="Participant_Customer" targetRef="Participant_Bank">
+      <security:messageSecurity>
+        <security:encryption>required</security:encryption>
+        <security:authentication>client_certificate</security:authentication>
+      </security:messageSecurity>
+    </messageFlow>
+  </collaboration>
+</definitions>

@@ -1,0 +1,490 @@
+package org.example.infrastructure.services.llm;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.example.infrastructure.services.llm.IssueClassifier.RawIssue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Специализированный анализатор для обработки ответов LLM
+ * Извлекает структурированные данные из неструктурированных ответов LLM
+ */
+@Service
+public class OpenApiLLMAnalyzer {
+    
+    private static final Logger logger = LoggerFactory.getLogger(OpenApiLLMAnalyzer.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    
+    // Паттерны для извлечения JSON из ответов LLM
+    private static final Pattern JSON_PATTERN = Pattern.compile("\\{[\\s\\S]*\\}");
+    private static final Pattern SECURITY_ISSUE_PATTERN = Pattern.compile(
+        "(?i)\"securityIssues\"\\s*:\\s*\\[([\\s\\S]*?)\\]"
+    );
+    
+    private static final Pattern VALIDATION_ISSUE_PATTERN = Pattern.compile(
+        "(?i)\"validationIssues\"\\s*:\\s*\\[([\\s\\S]*?)\\]"
+    );
+    
+    private static final Pattern CONSISTENCY_ISSUE_PATTERN = Pattern.compile(
+        "(?i)\"inconsistencies\"\\s*:\\s*\\[([\\s\\S]*?)\\]"
+    );
+    
+    private static final Pattern COMPREHENSIVE_PATTERN = Pattern.compile(
+        "(?i)\\{[\\s\\S]*?\"overallScore\"\\s*:\\s*\"?\\d+\"?[\\s\\S]*?\\}"
+    );
+    
+    /**
+     * Парсит ответ LLM для анализа безопасности
+     */
+    public List<RawIssue> parseSecurityAnalysis(String llmResponse) {
+        logger.debug("Parsing security analysis response");
+        List<RawIssue> issues = new ArrayList<>();
+        
+        try {
+            // Пытаемся извлечь JSON из ответа
+            String jsonContent = extractJsonFromResponse(llmResponse);
+            if (jsonContent != null) {
+                JsonNode root = objectMapper.readTree(jsonContent);
+                JsonNode securityIssues = root.get("securityIssues");
+                
+                if (securityIssues != null && securityIssues.isArray()) {
+                    for (JsonNode issue : securityIssues) {
+                        RawIssue rawIssue = parseSecurityIssue(issue);
+                        if (rawIssue != null) {
+                            issues.add(rawIssue);
+                        }
+                    }
+                }
+            } else {
+                // Парсим текстовый ответ
+                issues = parseSecurityIssuesFromText(llmResponse);
+            }
+            
+        } catch (Exception e) {
+            logger.warn("Failed to parse JSON security analysis, trying text parsing", e);
+            issues = parseSecurityIssuesFromText(llmResponse);
+        }
+        
+        logger.debug("Parsed {} security issues from LLM response", issues.size());
+        return issues;
+    }
+    
+    /**
+     * Парсит ответ LLM для анализа валидации
+     */
+    public List<RawIssue> parseValidationAnalysis(String llmResponse) {
+        logger.debug("Parsing validation analysis response");
+        List<RawIssue> issues = new ArrayList<>();
+        
+        try {
+            String jsonContent = extractJsonFromResponse(llmResponse);
+            if (jsonContent != null) {
+                JsonNode root = objectMapper.readTree(jsonContent);
+                JsonNode validationIssues = root.get("validationIssues");
+                
+                if (validationIssues != null && validationIssues.isArray()) {
+                    for (JsonNode issue : validationIssues) {
+                        RawIssue rawIssue = parseValidationIssue(issue);
+                        if (rawIssue != null) {
+                            issues.add(rawIssue);
+                        }
+                    }
+                }
+            } else {
+                issues = parseValidationIssuesFromText(llmResponse);
+            }
+            
+        } catch (Exception e) {
+            logger.warn("Failed to parse JSON validation analysis, trying text parsing", e);
+            issues = parseValidationIssuesFromText(llmResponse);
+        }
+        
+        logger.debug("Parsed {} validation issues from LLM response", issues.size());
+        return issues;
+    }
+    
+    /**
+     * Парсит ответ LLM для анализа согласованности
+     */
+    public List<RawIssue> parseConsistencyAnalysis(String llmResponse) {
+        logger.debug("Parsing consistency analysis response");
+        List<RawIssue> issues = new ArrayList<>();
+        
+        try {
+            String jsonContent = extractJsonFromResponse(llmResponse);
+            if (jsonContent != null) {
+                JsonNode root = objectMapper.readTree(jsonContent);
+                JsonNode inconsistencies = root.get("inconsistencies");
+                
+                if (inconsistencies != null && inconsistencies.isArray()) {
+                    for (JsonNode issue : inconsistencies) {
+                        RawIssue rawIssue = parseConsistencyIssue(issue);
+                        if (rawIssue != null) {
+                            issues.add(rawIssue);
+                        }
+                    }
+                }
+            } else {
+                issues = parseConsistencyIssuesFromText(llmResponse);
+            }
+            
+        } catch (Exception e) {
+            logger.warn("Failed to parse JSON consistency analysis, trying text parsing", e);
+            issues = parseConsistencyIssuesFromText(llmResponse);
+        }
+        
+        logger.debug("Parsed {} consistency issues from LLM response", issues.size());
+        return issues;
+    }
+    
+    /**
+     * Парсит ответ LLM для комплексного анализа
+     */
+    public Map<String, Object> parseComprehensiveAnalysis(String llmResponse) {
+        logger.debug("Parsing comprehensive analysis response");
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            String jsonContent = extractJsonFromResponse(llmResponse);
+            if (jsonContent != null) {
+                JsonNode root = objectMapper.readTree(jsonContent);
+                
+                // Извлекаем основные метрики
+                if (root.has("overallScore")) {
+                    result.put("overallScore", root.get("overallScore").asText());
+                }
+                if (root.has("grade")) {
+                    result.put("grade", root.get("grade").asText());
+                }
+                if (root.has("summary")) {
+                    result.put("summary", root.get("summary").asText());
+                }
+                
+                // Извлекаем анализ по категориям
+                if (root.has("analysis")) {
+                    JsonNode analysis = root.get("analysis");
+                    Map<String, Object> analysisMap = new HashMap<>();
+                    
+                    if (analysis.has("security")) {
+                        JsonNode security = analysis.get("security");
+                        analysisMap.put("security", extractAnalysisData(security));
+                    }
+                    if (analysis.has("validation")) {
+                        JsonNode validation = analysis.get("validation");
+                        analysisMap.put("validation", extractAnalysisData(validation));
+                    }
+                    if (analysis.has("consistency")) {
+                        JsonNode consistency = analysis.get("consistency");
+                        analysisMap.put("consistency", extractAnalysisData(consistency));
+                    }
+                    
+                    result.put("analysis", analysisMap);
+                }
+                
+                // Извлекаем рекомендации
+                if (root.has("recommendations")) {
+                    JsonNode recommendations = root.get("recommendations");
+                    if (recommendations.isArray()) {
+                        List<String> recs = new ArrayList<>();
+                        for (JsonNode rec : recommendations) {
+                            recs.add(rec.asText());
+                        }
+                        result.put("recommendations", recs);
+                    }
+                }
+                
+            } else {
+                result = parseComprehensiveDataFromText(llmResponse);
+            }
+            
+        } catch (Exception e) {
+            logger.warn("Failed to parse JSON comprehensive analysis, trying text parsing", e);
+            result = parseComprehensiveDataFromText(llmResponse);
+        }
+        
+        logger.debug("Parsed comprehensive analysis data: {} fields", result.size());
+        return result;
+    }
+    
+    /**
+     * Извлекает JSON из ответа LLM
+     */
+    private String extractJsonFromResponse(String response) {
+        if (response == null || response.trim().isEmpty()) {
+            return null;
+        }
+        
+        // Ищем JSON блоки
+        Matcher jsonMatcher = JSON_PATTERN.matcher(response);
+        if (jsonMatcher.find()) {
+            return jsonMatcher.group();
+        }
+        
+        // Если JSON не найден, пытаемся найти специфичные блоки
+        return null;
+    }
+    
+    /**
+     * Парсинг отдельной проблемы безопасности из JSON
+     */
+    private RawIssue parseSecurityIssue(JsonNode issueNode) {
+        try {
+            String id = generateIssueId("security", issueNode);
+            String type = getStringValue(issueNode, "type", "Security Issue");
+            String severity = getStringValue(issueNode, "severity", "MEDIUM");
+            String endpoint = getStringValue(issueNode, "endpoint", "");
+            String description = getStringValue(issueNode, "description", "");
+            String recommendation = getStringValue(issueNode, "recommendation", "");
+            
+            RawIssue issue = new RawIssue(id, type, description, severity);
+            issue.setLocation(endpoint);
+            issue.setMetadata(createMetadataMap("recommendation", recommendation));
+            
+            return issue;
+        } catch (Exception e) {
+            logger.warn("Failed to parse security issue from JSON", e);
+            return null;
+        }
+    }
+    
+    /**
+     * Парсинг отдельной проблемы валидации из JSON
+     */
+    private RawIssue parseValidationIssue(JsonNode issueNode) {
+        try {
+            String id = generateIssueId("validation", issueNode);
+            String type = getStringValue(issueNode, "type", "Validation Issue");
+            String severity = getStringValue(issueNode, "severity", "MEDIUM");
+            String location = getStringValue(issueNode, "location", "");
+            String field = getStringValue(issueNode, "field", "");
+            String description = getStringValue(issueNode, "description", "");
+            String fix = getStringValue(issueNode, "fix", "");
+            
+            RawIssue issue = new RawIssue(id, type, description, severity);
+            issue.setLocation(location + (field.isEmpty() ? "" : "." + field));
+            issue.setMetadata(createMetadataMap("fix", fix));
+            
+            return issue;
+        } catch (Exception e) {
+            logger.warn("Failed to parse validation issue from JSON", e);
+            return null;
+        }
+    }
+    
+    /**
+     * Парсинг отдельной проблемы согласованности из JSON
+     */
+    private RawIssue parseConsistencyIssue(JsonNode issueNode) {
+        try {
+            String id = generateIssueId("consistency", issueNode);
+            String type = getStringValue(issueNode, "type", "Consistency Issue");
+            String severity = getStringValue(issueNode, "severity", "LOW");
+            String location = getStringValue(issueNode, "location", "");
+            String description = getStringValue(issueNode, "description", "");
+            String conflicts = getStringValue(issueNode, "conflicts", "");
+            
+            RawIssue issue = new RawIssue(id, type, description, severity);
+            issue.setLocation(location);
+            issue.setMetadata(createMetadataMap("conflicts", conflicts));
+            
+            return issue;
+        } catch (Exception e) {
+            logger.warn("Failed to parse consistency issue from JSON", e);
+            return null;
+        }
+    }
+    
+    /**
+     * Извлекает данные анализа из JSON узла
+     */
+    private Map<String, Object> extractAnalysisData(JsonNode analysisNode) {
+        Map<String, Object> data = new HashMap<>();
+        
+        if (analysisNode.has("score")) {
+            data.put("score", analysisNode.get("score").asText());
+        }
+        if (analysisNode.has("issues")) {
+            JsonNode issues = analysisNode.get("issues");
+            if (issues.isArray()) {
+                List<String> issueList = new ArrayList<>();
+                for (JsonNode issue : issues) {
+                    issueList.add(issue.asText());
+                }
+                data.put("issues", issueList);
+            }
+        }
+        
+        return data;
+    }
+    
+    // Текстовые парсеры как fallback
+    
+    private List<RawIssue> parseSecurityIssuesFromText(String response) {
+        List<RawIssue> issues = new ArrayList<>();
+        
+        // Простой парсинг текста
+        String[] lines = response.split("\n");
+        for (String line : lines) {
+            if (line.toLowerCase().contains("проблема") || 
+                line.toLowerCase().contains("уязвимость") ||
+                line.toLowerCase().contains("безопасность")) {
+                
+                RawIssue issue = new RawIssue(
+                    "security_" + issues.size(),
+                    "Security Issue",
+                    line.trim(),
+                    determineSeverityFromText(line)
+                );
+                issues.add(issue);
+            }
+        }
+        
+        return issues;
+    }
+    
+    private List<RawIssue> parseValidationIssuesFromText(String response) {
+        List<RawIssue> issues = new ArrayList<>();
+        
+        String[] lines = response.split("\n");
+        for (String line : lines) {
+            if (line.toLowerCase().contains("валидация") || 
+                line.toLowerCase().contains("схема") ||
+                line.toLowerCase().contains("поле")) {
+                
+                RawIssue issue = new RawIssue(
+                    "validation_" + issues.size(),
+                    "Validation Issue",
+                    line.trim(),
+                    determineSeverityFromText(line)
+                );
+                issues.add(issue);
+            }
+        }
+        
+        return issues;
+    }
+    
+    private List<RawIssue> parseConsistencyIssuesFromText(String response) {
+        List<RawIssue> issues = new ArrayList<>();
+        
+        String[] lines = response.split("\n");
+        for (String line : lines) {
+            if (line.toLowerCase().contains("согласованность") || 
+                line.toLowerCase().contains("противоречие") ||
+                line.toLowerCase().contains("несоответствие")) {
+                
+                RawIssue issue = new RawIssue(
+                    "consistency_" + issues.size(),
+                    "Consistency Issue",
+                    line.trim(),
+                    determineSeverityFromText(line)
+                );
+                issues.add(issue);
+            }
+        }
+        
+        return issues;
+    }
+    
+    private Map<String, Object> parseComprehensiveDataFromText(String response) {
+        Map<String, Object> result = new HashMap<>();
+        
+        // Извлекаем оценку
+        Pattern scorePattern = Pattern.compile("(?i)оценка\\s*[:=]\\s*(\\d+)");
+        Matcher scoreMatcher = scorePattern.matcher(response);
+        if (scoreMatcher.find()) {
+            result.put("overallScore", scoreMatcher.group(1));
+        }
+        
+        // Извлекаем оценку буквами
+        Pattern gradePattern = Pattern.compile("(?i)оценка\\s*[:=]\\s*([A-F])");
+        Matcher gradeMatcher = gradePattern.matcher(response);
+        if (gradeMatcher.find()) {
+            result.put("grade", gradeMatcher.group(1));
+        }
+        
+        // Извлекаем резюме (первый абзац)
+        String[] paragraphs = response.split("\n\n");
+        if (paragraphs.length > 0) {
+            result.put("summary", paragraphs[0].trim());
+        }
+        
+        return result;
+    }
+    
+    // Вспомогательные методы
+    
+    private String getStringValue(JsonNode node, String field, String defaultValue) {
+        JsonNode valueNode = node.get(field);
+        return valueNode != null ? valueNode.asText() : defaultValue;
+    }
+    
+    private String generateIssueId(String prefix, JsonNode node) {
+        String type = getStringValue(node, "type", "issue");
+        return prefix + "_" + type.toLowerCase().replaceAll("[^a-z0-9]", "_") + "_" + System.currentTimeMillis();
+    }
+    
+    private Map<String, Object> createMetadataMap(String... keyValuePairs) {
+        Map<String, Object> metadata = new HashMap<>();
+        for (int i = 0; i < keyValuePairs.length; i += 2) {
+            if (i + 1 < keyValuePairs.length) {
+                metadata.put(keyValuePairs[i], keyValuePairs[i + 1]);
+            }
+        }
+        return metadata;
+    }
+    
+    private String determineSeverityFromText(String text) {
+        String lowerText = text.toLowerCase();
+        
+        if (lowerText.contains("критическ") || lowerText.contains("ошибка") || lowerText.contains("error")) {
+            return "CRITICAL";
+        } else if (lowerText.contains("высокий") || lowerText.contains("warning") || lowerText.contains("предупреждение")) {
+            return "HIGH";
+        } else if (lowerText.contains("средний") || lowerText.contains("medium")) {
+            return "MEDIUM";
+        } else if (lowerText.contains("низкий") || lowerText.contains("low") || lowerText.contains("информация")) {
+            return "LOW";
+        }
+        
+        return "MEDIUM"; // по умолчанию
+    }
+    
+    /**
+     * Проверяет валидность JSON строки
+     */
+    public boolean isValidJson(String jsonString) {
+        if (jsonString == null || jsonString.trim().isEmpty()) {
+            return false;
+        }
+        
+        try {
+            objectMapper.readTree(jsonString);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Очищает текст от лишних символов
+     */
+    public String cleanText(String text) {
+        if (text == null) {
+            return "";
+        }
+        
+        return text
+            .replaceAll("```json", "")
+            .replaceAll("```", "")
+            .replaceAll("\n+", "\n")
+            .replaceAll("\\s+", " ")
+            .trim();
+    }
+}

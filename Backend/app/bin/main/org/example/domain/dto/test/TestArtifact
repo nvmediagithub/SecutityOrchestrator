@@ -1,0 +1,151 @@
+package org.example.domain.dto.test;
+
+import org.example.domain.entities.TestArtifact;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class TestArtifactResponse {
+    
+    private Long id;
+    private String artifactId;
+    private String testProjectId;
+    private TestArtifact.ArtifactType artifactType;
+    private String artifactName;
+    private String artifactDescription;
+    private String version;
+    private TestArtifact.ArtifactStatus status;
+    private String metadata;
+    private String uploadedBy;
+    private List<String> tags;
+    private Boolean isPrimary;
+    private Boolean isActive;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime lastUsedAt;
+    private Integer usageCount;
+    private Integer testSessionCount;
+    
+    // Additional fields for OpenAPI specs
+    private OpenApiSpecResponse openApiSpec;
+    
+    // Additional fields for BPMN diagrams
+    private BpmnDiagramResponse bpmnDiagram;
+    
+    public TestArtifactResponse() {
+    }
+    
+    public TestArtifactResponse(TestArtifact testArtifact) {
+        if (testArtifact != null) {
+            this.id = testArtifact.getId();
+            this.artifactId = testArtifact.getArtifactId();
+            this.testProjectId = testArtifact.getTestProject() != null ? 
+                testArtifact.getTestProject().getProjectId() : null;
+            this.artifactType = testArtifact.getArtifactType();
+            this.artifactName = testArtifact.getArtifactName();
+            this.artifactDescription = testArtifact.getArtifactDescription();
+            this.version = testArtifact.getVersion();
+            this.status = testArtifact.getStatus();
+            this.metadata = testArtifact.getMetadata();
+            this.uploadedBy = testArtifact.getUploadedBy();
+            this.tags = testArtifact.getTags();
+            this.isPrimary = testArtifact.getIsPrimary();
+            this.isActive = testArtifact.getIsActive();
+            this.createdAt = testArtifact.getCreatedAt();
+            this.updatedAt = testArtifact.getUpdatedAt();
+            this.lastUsedAt = testArtifact.getLastUsedAt();
+            this.usageCount = testArtifact.getUsageCount();
+            this.testSessionCount = testArtifact.getTestSessionCount();
+            
+            // Populate nested entities if present
+            if (testArtifact.getOpenApiSpec() != null) {
+                this.openApiSpec = new OpenApiSpecResponse(testArtifact.getOpenApiSpec());
+            }
+            
+            if (testArtifact.getBpmnDiagram() != null) {
+                this.bpmnDiagram = new BpmnDiagramResponse(testArtifact.getBpmnDiagram());
+            }
+        }
+    }
+    
+    public static TestArtifactResponse from(TestArtifact testArtifact) {
+        return new TestArtifactResponse(testArtifact);
+    }
+    
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public String getArtifactId() { return artifactId; }
+    public void setArtifactId(String artifactId) { this.artifactId = artifactId; }
+    
+    public String getTestProjectId() { return testProjectId; }
+    public void setTestProjectId(String testProjectId) { this.testProjectId = testProjectId; }
+    
+    public TestArtifact.ArtifactType getArtifactType() { return artifactType; }
+    public void setArtifactType(TestArtifact.ArtifactType artifactType) { this.artifactType = artifactType; }
+    
+    public String getArtifactName() { return artifactName; }
+    public void setArtifactName(String artifactName) { this.artifactName = artifactName; }
+    
+    public String getArtifactDescription() { return artifactDescription; }
+    public void setArtifactDescription(String artifactDescription) { this.artifactDescription = artifactDescription; }
+    
+    public String getVersion() { return version; }
+    public void setVersion(String version) { this.version = version; }
+    
+    public TestArtifact.ArtifactStatus getStatus() { return status; }
+    public void setStatus(TestArtifact.ArtifactStatus status) { this.status = status; }
+    
+    public String getMetadata() { return metadata; }
+    public void setMetadata(String metadata) { this.metadata = metadata; }
+    
+    public String getUploadedBy() { return uploadedBy; }
+    public void setUploadedBy(String uploadedBy) { this.uploadedBy = uploadedBy; }
+    
+    public List<String> getTags() { return tags; }
+    public void setTags(List<String> tags) { this.tags = tags; }
+    
+    public Boolean getIsPrimary() { return isPrimary; }
+    public void setIsPrimary(Boolean isPrimary) { this.isPrimary = isPrimary; }
+    
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public LocalDateTime getLastUsedAt() { return lastUsedAt; }
+    public void setLastUsedAt(LocalDateTime lastUsedAt) { this.lastUsedAt = lastUsedAt; }
+    
+    public Integer getUsageCount() { return usageCount; }
+    public void setUsageCount(Integer usageCount) { this.usageCount = usageCount; }
+    
+    public Integer getTestSessionCount() { return testSessionCount; }
+    public void setTestSessionCount(Integer testSessionCount) { this.testSessionCount = testSessionCount; }
+    
+    public OpenApiSpecResponse getOpenApiSpec() { return openApiSpec; }
+    public void setOpenApiSpec(OpenApiSpecResponse openApiSpec) { this.openApiSpec = openApiSpec; }
+    
+    public BpmnDiagramResponse getBpmnDiagram() { return bpmnDiagram; }
+    public void setBpmnDiagram(BpmnDiagramResponse bpmnDiagram) { this.bpmnDiagram = bpmnDiagram; }
+    
+    @Override
+    public String toString() {
+        return "TestArtifactResponse{" +
+                "id=" + id +
+                ", artifactId='" + artifactId + '\'' +
+                ", artifactType=" + artifactType +
+                ", artifactName='" + artifactName + '\'' +
+                ", version='" + version + '\'' +
+                ", status=" + status +
+                ", isPrimary=" + isPrimary +
+                ", isActive=" + isActive +
+                ", usageCount=" + usageCount +
+                ", createdAt=" + createdAt +
+                '}';
+    }
+}

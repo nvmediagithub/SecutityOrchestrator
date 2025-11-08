@@ -1,0 +1,26 @@
+package org.example.domain.valueobjects;
+
+/**
+ * Enumeration of possible statuses for BPMN process analysis
+ */
+public enum ProcessStatus {
+    /**
+     * Process analysis is pending
+     */
+    PENDING,
+    
+    /**
+     * Process analysis is currently in progress
+     */
+    ANALYZING,
+    
+    /**
+     * Process analysis completed successfully
+     */
+    COMPLETED,
+    
+    /**
+     * Process analysis failed
+     */
+    FAILED
+}

@@ -1,0 +1,466 @@
+package org.example.web.controllers;
+
+import org.example.infrastructure.services.integrated.ComprehensiveAnalysisService;
+import org.example.infrastructure.services.integrated.dto.ComprehensiveAnalysisRequest;
+import org.example.infrastructure.services.integrated.dto.ComprehensiveAnalysisResult;
+import org.example.infrastructure.services.integrated.dto.ComprehensiveAnalysisStatus;
+import org.example.infrastructure.services.integrated.dto.ComprehensiveDashboardData;
+import org.example.infrastructure.services.integrated.dto.ApiBpmnContradiction;
+import org.example.infrastructure.services.integrated.dto.PrioritizedIssue;
+import org.example.infrastructure.services.integrated.dto.IntegratedRecommendation;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+/**
+ * REST controller для комплексного API-BPMN анализа
+ * Предоставляет endpoints для запуска и получения результатов интегрированного анализа
+ */
+@RestController
+@RequestMapping("/api/analysis/comprehensive")
+@CrossOrigin(origins = "*")
+public class IntegratedAnalysisController {
+    
+    @Autowired
+    private ComprehensiveAnalysisService analysisService;
+    
+    /**
+     * POST /api/analysis/comprehensive/{projectId} - Запуск комплексного анализа проекта
+     * Запускает асинхронный анализ OpenAPI и BPMN в одном контексте
+     */
+    @PostMapping("/{projectId}")
+    public CompletableFuture<ResponseEntity<ComprehensiveAnalysisStatusResponse>> startComprehensiveAnalysis(
+            @PathVariable String projectId,
+            @Valid @RequestBody ComprehensiveAnalysisRequest request) {
+        
+        try {
+            // Валидация проекта ID
+            if (!projectId.equals(request.getProjectId())) {
+                return CompletableFuture.completedFuture(
+                    ResponseEntity.badRequest().build()
+                );
+            }
+            
+            // Запускаем анализ асинхронно
+            CompletableFuture<ComprehensiveAnalysisResult> analysisFuture = 
+                analysisService.analyzeProject(projectId, request);
+            
+            // Возвращаем немедленный ответ со статусом
+            ComprehensiveAnalysisStatusResponse response = 
+                createStatusResponse(projectId, "ANALYSIS_STARTED", request);
+            
+            return CompletableFuture.completedFuture(
+                ResponseEntity.accepted().body(response)
+            );
+            
+        } catch (Exception e) {
+            return CompletableFuture.completedFuture(
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            );
+        }
+    }
+    
+    /**
+     * GET /api/analysis/comprehensive/{projectId} - Получение результатов комплексного анализа
+     * Возвращает статус анализа и результаты
+     */
+    @GetMapping("/{projectId}")
+    public ResponseEntity<ComprehensiveAnalysisResult> getComprehensiveAnalysisResults(
+            @PathVariable String projectId,
+            @RequestParam(required = false, defaultValue = "false") boolean includeDetails) {
+        
+        try {
+            ComprehensiveAnalysisResult result = analysisService.getAnalysisResults(projectId);
+            
+            if (result == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            if (!includeDetails) {
+                // Возвращаем сокращенную версию
+                result = createSummaryResult(result);
+            }
+            
+            return ResponseEntity.ok(result);
+            
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
+    /**
+     * GET /api/analysis/comprehensive/{projectId}/status - Получение статуса анализа
+     * Возвращает текущий статус выполнения анализа
+     */
+    @GetMapping("/{projectId}/status")
+    public ResponseEntity<ComprehensiveAnalysisStatus> getAnalysisStatus(@PathVariable String projectId) {
+        try {
+            // Генерируем analysisId для поиска статуса
+            String analysisId = "comprehensive_" + projectId + "_" + System.currentTimeMillis();
+            ComprehensiveAnalysisStatus status = analysisService.getAnalysisStatus(analysisId);
+            
+            if (status == null) {
+                // Создаем базовый статус для активного анализа
+                status = new ComprehensiveAnalysisStatus();
+                status.setAnalysisId(analysisId);
+                status.setStatus("UNKNOWN");
+                status.setTimestamp(java.time.LocalDateTime.now());
+            }
+            
+            return ResponseEntity.ok(status);
+            
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
+    /**
+     * GET /api/analysis/comprehensive/{projectId}/contradictions - Получение противоречий API-BPMN
+     * Возвращает список выявленных противоречий между API и бизнес-процессами
+     */
+    @GetMapping("/{projectId}/contradictions")
+    public ResponseEntity<List<ApiBpmnContradiction>> getApiBpmnContradictions(
+            @PathVariable String projectId,
+            @RequestParam(required = false, defaultValue = "all") String severity,
+            @RequestParam(required = false, defaultValue = "all") String type,
+            @RequestParam(required = false, defaultValue = "50") int limit) {
+        
+        try {
+            ComprehensiveAnalysisResult result = analysisService.getAnalysisResults(projectId);
+            
+            if (result == null || !result.hasIntegratedAnalysis()) {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
+            
+            List<ApiBpmnContradiction> contradictions = 
+                result.getIntegratedAnalysis().getContradictions();
+            
+            if (contradictions == null) {
+                contradictions = Collections.emptyList();
+            }
+            
+            // Фильтрация по серьезности
+            if (!"all".equals(severity)) {
+                contradictions = contradictions.stream()
+                    .filter(c -> c.getSeverity().name().equalsIgnoreCase(severity))
+                    .collect(Collectors.toList());
+            }
+            
+            // Фильтрация по типу
+            if (!"all".equals(type)) {
+                contradictions = contradictions.stream()
+                    .filter(c -> c.getType().name().equalsIgnoreCase(type))
+                    .collect(Collectors.toList());
+            }
+            
+            // Ограничение количества
+            if (contradictions.size() > limit) {
+                contradictions = contradictions.stream()
+                    .limit(limit)
+                    .collect(Collectors.toList());
+            }
+            
+            return ResponseEntity.ok(contradictions);
+            
+        } catch (Exception e) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+    }
+    
+    /**
+     * GET /api/analysis/comprehensive/{projectId}/priorities - Получение приоритизированных проблем
+     * Возвращает список проблем, приоритизированных по бизнес-импакту
+     */
+    @GetMapping("/{projectId}/priorities")
+    public ResponseEntity<List<PrioritizedIssue>> getPrioritizedIssues(
+            @PathVariable String projectId,
+            @RequestParam(required = false, defaultValue = "all") String category,
+            @RequestParam(required = false, defaultValue = "all") String status,
+            @RequestParam(required = false, defaultValue = "20") int limit) {
+        
+        try {
+            ComprehensiveAnalysisResult result = analysisService.getAnalysisResults(projectId);
+            
+            if (result == null || !result.hasIntegratedAnalysis()) {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
+            
+            List<PrioritizedIssue> issues = 
+                result.getIntegratedAnalysis().getPrioritizedIssues();
+            
+            if (issues == null) {
+                issues = Collections.emptyList();
+            }
+            
+            // Фильтрация по категории
+            if (!"all".equals(category)) {
+                issues = issues.stream()
+                    .filter(i -> i.getCategory().equalsIgnoreCase(category))
+                    .collect(Collectors.toList());
+            }
+            
+            // Фильтрация по статусу
+            if (!"all".equals(status)) {
+                issues = issues.stream()
+                    .filter(i -> i.getStatus().equalsIgnoreCase(status))
+                    .collect(Collectors.toList());
+            }
+            
+            // Сортировка по приоритету (высокий сначала)
+            issues.sort((i1, i2) -> {
+                int priorityCompare = Integer.compare(
+                    i2.getPriority().getLevel(), 
+                    i1.getPriority().getLevel()
+                );
+                if (priorityCompare != 0) {
+                    return priorityCompare;
+                }
+                return Double.compare(
+                    i2.getBusinessImpactScore(), 
+                    i1.getBusinessImpactScore()
+                );
+            });
+            
+            // Ограничение количества
+            if (issues.size() > limit) {
+                issues = issues.stream()
+                    .limit(limit)
+                    .collect(Collectors.toList());
+            }
+            
+            return ResponseEntity.ok(issues);
+            
+        } catch (Exception e) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+    }
+    
+    /**
+     * POST /api/analysis/comprehensive/{projectId}/recommendations - Генерация рекомендаций
+     * Генерирует рекомендации по улучшению на основе анализа
+     */
+    @PostMapping("/{projectId}/recommendations")
+    public ResponseEntity<Map<String, Object>> generateRecommendations(
+            @PathVariable String projectId,
+            @RequestBody(required = false) Map<String, Object> requestParams) {
+        
+        try {
+            ComprehensiveAnalysisResult result = analysisService.getAnalysisResults(projectId);
+            
+            if (result == null || !result.hasIntegratedAnalysis()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            List<IntegratedRecommendation> recommendations = 
+                result.getIntegratedAnalysis().getRecommendations();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("projectId", projectId);
+            response.put("recommendationsCount", recommendations != null ? recommendations.size() : 0);
+            response.put("recommendations", recommendations);
+            response.put("generatedAt", java.time.LocalDateTime.now());
+            response.put("analysisId", result.getAnalysisId());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    /**
+     * GET /api/analysis/comprehensive/{projectId}/dashboard - Получение данных для дашборда
+     * Возвращает агрегированные данные для визуализации
+     */
+    @GetMapping("/{projectId}/dashboard")
+    public ResponseEntity<ComprehensiveDashboardData> getDashboardData(@PathVariable String projectId) {
+        try {
+            ComprehensiveAnalysisResult result = analysisService.getAnalysisResults(projectId);
+            
+            if (result == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            ComprehensiveDashboardData dashboardData = 
+                analysisService.createDashboardData(projectId, result);
+            
+            return ResponseEntity.ok(dashboardData);
+            
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
+    /**
+     * POST /api/analysis/comprehensive/{projectId}/regenerate - Перезапуск анализа
+     * Перезапускает анализ с новыми параметрами
+     */
+    @PostMapping("/{projectId}/regenerate")
+    public CompletableFuture<ResponseEntity<ComprehensiveAnalysisStatusResponse>> regenerateAnalysis(
+            @PathVariable String projectId,
+            @Valid @RequestBody ComprehensiveAnalysisRequest request) {
+        
+        try {
+            // Валидация проекта ID
+            if (!projectId.equals(request.getProjectId())) {
+                return CompletableFuture.completedFuture(
+                    ResponseEntity.badRequest().build()
+                );
+            }
+            
+            // Очищаем кэш для проекта
+            analysisService.clearCache();
+            
+            // Запускаем новый анализ
+            CompletableFuture<ComprehensiveAnalysisResult> analysisFuture = 
+                analysisService.analyzeProject(projectId, request);
+            
+            // Возвращаем ответ
+            ComprehensiveAnalysisStatusResponse response = 
+                createStatusResponse(projectId, "ANALYSIS_REGENERATED", request);
+            
+            return CompletableFuture.completedFuture(
+                ResponseEntity.accepted().body(response)
+            );
+            
+        } catch (Exception e) {
+            return CompletableFuture.completedFuture(
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            );
+        }
+    }
+    
+    /**
+     * GET /api/analysis/comprehensive/{projectId}/summary - Краткая сводка анализа
+     * Возвращает общую сводку результатов анализа
+     */
+    @GetMapping("/{projectId}/summary")
+    public ResponseEntity<Map<String, Object>> getAnalysisSummary(@PathVariable String projectId) {
+        try {
+            ComprehensiveAnalysisResult result = analysisService.getAnalysisResults(projectId);
+            
+            if (result == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            Map<String, Object> summary = new HashMap<>();
+            summary.put("projectId", projectId);
+            summary.put("analysisId", result.getAnalysisId());
+            summary.put("status", result.getStatus());
+            summary.put("totalIssues", result.getTotalIssues());
+            summary.put("criticalIssues", result.getCriticalIssues());
+            summary.put("highIssues", result.getHighIssues());
+            summary.put("mediumIssues", result.getMediumIssues());
+            summary.put("lowIssues", result.getLowIssues());
+            summary.put("overallScore", result.getOverallScore());
+            summary.put("securityScore", result.getSecurityScore());
+            summary.put("processScore", result.getProcessScore());
+            summary.put("integrationScore", result.getIntegrationScore());
+            summary.put("processingTimeMs", result.getProcessingTimeMs());
+            summary.put("createdAt", result.getCreatedAt());
+            
+            // Информация о противоречиях
+            if (result.hasIntegratedAnalysis() && 
+                result.getIntegratedAnalysis().getContradictions() != null) {
+                summary.put("contradictionsCount", 
+                    result.getIntegratedAnalysis().getContradictions().size());
+            }
+            
+            // Информация о рекомендациях
+            if (result.hasIntegratedAnalysis() && 
+                result.getIntegratedAnalysis().getRecommendations() != null) {
+                summary.put("recommendationsCount", 
+                    result.getIntegratedAnalysis().getRecommendations().size());
+            }
+            
+            return ResponseEntity.ok(summary);
+            
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
+    // Вспомогательные методы
+    
+    private ComprehensiveAnalysisStatusResponse createStatusResponse(
+            String projectId, 
+            String status, 
+            ComprehensiveAnalysisRequest request) {
+        
+        ComprehensiveAnalysisStatusResponse response = new ComprehensiveAnalysisStatusResponse();
+        response.setProjectId(projectId);
+        response.setStatus(status);
+        response.setAnalysisType(request.getAnalysisType());
+        response.setStartedAt(java.time.LocalDateTime.now());
+        response.setMessage("Comprehensive analysis started for project: " + projectId);
+        
+        // Добавляем информацию о входных данных
+        if (request.hasOpenApiSpec()) {
+            response.addDetail("openApiSpec", "Provided");
+        }
+        if (request.hasBpmnDiagrams()) {
+            response.addDetail("bpmnDiagrams", request.getBpmnDiagrams().size() + " diagrams");
+        }
+        
+        return response;
+    }
+    
+    private ComprehensiveAnalysisResult createSummaryResult(ComprehensiveAnalysisResult fullResult) {
+        ComprehensiveAnalysisResult summary = new ComprehensiveAnalysisResult();
+        summary.setAnalysisId(fullResult.getAnalysisId());
+        summary.setProjectId(fullResult.getProjectId());
+        summary.setStatus(fullResult.getStatus());
+        summary.setTotalIssues(fullResult.getTotalIssues());
+        summary.setCriticalIssues(fullResult.getCriticalIssues());
+        summary.setHighIssues(fullResult.getHighIssues());
+        summary.setMediumIssues(fullResult.getMediumIssues());
+        summary.setLowIssues(fullResult.getLowIssues());
+        summary.setOverallScore(fullResult.getOverallScore());
+        summary.setSecurityScore(fullResult.getSecurityScore());
+        summary.setProcessScore(fullResult.getProcessScore());
+        summary.setIntegrationScore(fullResult.getIntegrationScore());
+        summary.setCreatedAt(fullResult.getCreatedAt());
+        summary.setProcessingTimeMs(fullResult.getProcessingTimeMs());
+        
+        return summary;
+    }
+    
+    // Вспомогательный класс для ответа со статусом
+    public static class ComprehensiveAnalysisStatusResponse {
+        private String projectId;
+        private String status;
+        private String analysisType;
+        private java.time.LocalDateTime startedAt;
+        private String message;
+        private Map<String, Object> details = new HashMap<>();
+        
+        // Геттеры и сеттеры
+        public String getProjectId() { return projectId; }
+        public void setProjectId(String projectId) { this.projectId = projectId; }
+        
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
+        
+        public String getAnalysisType() { return analysisType; }
+        public void setAnalysisType(String analysisType) { this.analysisType = analysisType; }
+        
+        public java.time.LocalDateTime getStartedAt() { return startedAt; }
+        public void setStartedAt(java.time.LocalDateTime startedAt) { this.startedAt = startedAt; }
+        
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+        
+        public Map<String, Object> getDetails() { return details; }
+        public void setDetails(Map<String, Object> details) { this.details = details; }
+        
+        public void addDetail(String key, Object value) {
+            this.details.put(key, value);
+        }
+    }
+}

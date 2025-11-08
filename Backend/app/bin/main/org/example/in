@@ -1,0 +1,333 @@
+package org.example.infrastructure.services.testgen;
+
+import org.example.domain.entities.TestScenario;
+import org.example.domain.entities.TestDataSet;
+import org.example.infrastructure.repositories.TestScenarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.*;
+
+/**
+ * Генератор security тестов для OWASP Top 10 и API Security Top 10
+ */
+@Service
+public class SecurityTestGenerator {
+    
+    @Autowired
+    private TestScenarioRepository scenarioRepository;
+    
+    @Autowired
+    private TestDataGenerator testDataGenerator;
+    
+    // Генерация security сценариев для OWASP Top 10 2021
+    public List<TestScenario> generateOwaspTop10Scenarios(String analysisId) {
+        List<TestScenario> scenarios = new ArrayList<>();
+        
+        // A01: Broken Access Control
+        scenarios.add(createAccessControlScenario(analysisId));
+        
+        // A02: Cryptographic Failures
+        scenarios.add(createCryptographicFailureScenario(analysisId));
+        
+        // A03: Injection
+        scenarios.add(createInjectionScenario(analysisId));
+        
+        // A04: Insecure Design
+        scenarios.add(createInsecureDesignScenario(analysisId));
+        
+        // A05: Security Misconfiguration
+        scenarios.add(createSecurityMisconfigurationScenario(analysisId));
+        
+        // A06: Vulnerable and Outdated Components
+        scenarios.add(createVulnerableComponentsScenario(analysisId));
+        
+        // A07: Identification and Authentication Failures
+        scenarios.add(createAuthenticationFailureScenario(analysisId));
+        
+        // A08: Software and Data Integrity Failures
+        scenarios.add(createIntegrityFailureScenario(analysisId));
+        
+        // A09: Security Logging and Monitoring Failures
+        scenarios.add(createLoggingFailureScenario(analysisId));
+        
+        // A10: Server-Side Request Forgery (SSRF)
+        scenarios.add(createSsrfScenario(analysisId));
+        
+        return scenarios;
+    }
+    
+    // A01: Broken Access Control
+    private TestScenario createAccessControlScenario(String analysisId) {
+        TestScenario scenario = new TestScenario(
+            "A01: Broken Access Control Test",
+            "SECURITY",
+            "A01"
+        );
+        
+        scenario.setAnalysisId(analysisId);
+        scenario.setDescription("Test for broken access control vulnerabilities including privilege escalation and unauthorized access");
+        scenario.setTargetEndpoints("/api/admin/,/api/user/{id},/api/orders/{id}");
+        scenario.setAttackVectors("IDOR,Bypass Authorization,Privilege Escalation");
+        scenario.setSecurityControls("Role-based access,Resource-level permissions,Input validation");
+        scenario.setEnvironment("TEST");
+        scenario.setStatus("ACTIVE");
+        scenario.setIsSecurityTest(true);
+        scenario.setPriority(1);
+        
+        // Добавление тестовых шагов
+        scenario.getTestSteps().add("Test direct object references");
+        scenario.getTestSteps().add("Test privilege escalation");
+        scenario.getTestSteps().add("Test force browsing to protected resources");
+        scenario.getTestSteps().add("Test HTTP methods bypass");
+        scenario.getTestSteps().add("Test CORS misconfigurations");
+        
+        return scenario;
+    }
+    
+    // A02: Cryptographic Failures
+    private TestScenario createCryptographicFailureScenario(String analysisId) {
+        TestScenario scenario = new TestScenario(
+            "A02: Cryptographic Failures Test",
+            "SECURITY",
+            "A02"
+        );
+        
+        scenario.setAnalysisId(analysisId);
+        scenario.setDescription("Test for weak cryptographic implementations and data transmission vulnerabilities");
+        scenario.setTargetEndpoints("/api/auth/login,/api/data/encrypt,/api/payment/process");
+        scenario.setAttackVectors("Weak encryption,Insecure transmission,Hardcoded keys");
+        scenario.setSecurityControls("Strong encryption,TLS/SSL,Key management");
+        scenario.setEnvironment("TEST");
+        scenario.setStatus("ACTIVE");
+        scenario.setIsSecurityTest(true);
+        scenario.setPriority(1);
+        
+        scenario.getTestSteps().add("Test weak encryption algorithms");
+        scenario.getTestSteps().add("Test insecure data transmission");
+        scenario.getTestSteps().add("Test hardcoded cryptographic keys");
+        scenario.getTestSteps().add("Test improper certificate validation");
+        scenario.getTestSteps().add("Test missing transport layer security");
+        
+        return scenario;
+    }
+    
+    // A03: Injection
+    private TestScenario createInjectionScenario(String analysisId) {
+        TestScenario scenario = new TestScenario(
+            "A03: Injection Attack Test",
+            "SECURITY",
+            "A03"
+        );
+        
+        scenario.setAnalysisId(analysisId);
+        scenario.setDescription("Test for various injection vulnerabilities including SQL, NoSQL, OS command, and LDAP injection");
+        scenario.setTargetEndpoints("/api/users/search,/api/files/process,/api/orders/create");
+        scenario.setAttackVectors("SQL Injection,NoSQL Injection,OS Command Injection,LDAP Injection");
+        scenario.setSecurityControls("Input validation,Parameterized queries,Output encoding");
+        scenario.setEnvironment("TEST");
+        scenario.setStatus("ACTIVE");
+        scenario.setIsSecurityTest(true);
+        scenario.setPriority(1);
+        
+        scenario.getTestSteps().add("Test SQL injection vulnerabilities");
+        scenario.getTestSteps().add("Test NoSQL injection");
+        scenario.getTestSteps().add("Test OS command injection");
+        scenario.getTestSteps().add("Test LDAP injection");
+        scenario.getTestSteps().add("Test template injection");
+        
+        return scenario;
+    }
+    
+    // A04: Insecure Design
+    private TestScenario createInsecureDesignScenario(String analysisId) {
+        TestScenario scenario = new TestScenario(
+            "A04: Insecure Design Test",
+            "SECURITY",
+            "A04"
+        );
+        
+        scenario.setAnalysisId(analysisId);
+        scenario.setDescription("Test for insecure design patterns and missing security controls");
+        scenario.setTargetEndpoints("/api/password/reset,/api/2fa/verify,/api/mfa/enable");
+        scenario.setAttackVectors("Missing MFA,Weak password reset,Insecure workflows");
+        scenario.setSecurityControls("Multi-factor authentication,Secure workflows,Defense in depth");
+        scenario.setEnvironment("TEST");
+        scenario.setStatus("ACTIVE");
+        scenario.setIsSecurityTest(true);
+        scenario.setPriority(2);
+        
+        scenario.getTestSteps().add("Test missing multi-factor authentication");
+        scenario.getTestSteps().add("Test weak password reset flows");
+        scenario.getTestSteps().add("Test insecure business logic");
+        scenario.getTestSteps().add("Test insufficient defense in depth");
+        
+        return scenario;
+    }
+    
+    // A05: Security Misconfiguration
+    private TestScenario createSecurityMisconfigurationScenario(String analysisId) {
+        TestScenario scenario = new TestScenario(
+            "A05: Security Misconfiguration Test",
+            "SECURITY",
+            "A05"
+        );
+        
+        scenario.setAnalysisId(analysisId);
+        scenario.setDescription("Test for security misconfigurations including default credentials and exposed endpoints");
+        scenario.setTargetEndpoints("/api/admin/,/api/config,/api/debug");
+        scenario.setAttackVectors("Default credentials,Debug endpoints,Directory listing");
+        scenario.setSecurityControls("Secure configuration,Default changes,Minimal attack surface");
+        scenario.setEnvironment("TEST");
+        scenario.setStatus("ACTIVE");
+        scenario.setIsSecurityTest(true);
+        scenario.setPriority(2);
+        
+        scenario.getTestSteps().add("Test default credentials");
+        scenario.getTestSteps().add("Test debug and admin endpoints");
+        scenario.getTestSteps().add("Test directory listing");
+        scenario.getTestSteps().add("Test missing security headers");
+        scenario.getTestSteps().add("Test unnecessary features enabled");
+        
+        return scenario;
+    }
+    
+    // A06: Vulnerable and Outdated Components
+    private TestScenario createVulnerableComponentsScenario(String analysisId) {
+        TestScenario scenario = new TestScenario(
+            "A06: Vulnerable Components Test",
+            "SECURITY",
+            "A06"
+        );
+        
+        scenario.setAnalysisId(analysisId);
+        scenario.setDescription("Test for vulnerable and outdated software components");
+        scenario.setTargetEndpoints("/api/dependencies,/api/system/info,/api/library/check");
+        scenario.setAttackVectors("Known vulnerabilities,Outdated libraries,Unpatched systems");
+        scenario.setSecurityControls("Dependency management,Regular updates,Vulnerability scanning");
+        scenario.setEnvironment("TEST");
+        scenario.setStatus("ACTIVE");
+        scenario.setIsSecurityTest(true);
+        scenario.setPriority(3);
+        
+        scenario.getTestSteps().add("Test for known CVEs");
+        scenario.getTestSteps().add("Test outdated library versions");
+        scenario.getTestSteps().add("Test unpatched systems");
+        scenario.getTestSteps().add("Test unsupported software");
+        
+        return scenario;
+    }
+    
+    // A07: Identification and Authentication Failures
+    private TestScenario createAuthenticationFailureScenario(String analysisId) {
+        TestScenario scenario = new TestScenario(
+            "A07: Authentication Failures Test",
+            "SECURITY",
+            "A07"
+        );
+        
+        scenario.setAnalysisId(analysisId);
+        scenario.setDescription("Test for authentication and session management vulnerabilities");
+        scenario.setTargetEndpoints("/api/auth/login,/api/auth/logout,/api/auth/refresh");
+        scenario.setAttackVectors("Weak passwords,Session fixation,Brute force,Credential stuffing");
+        scenario.setSecurityControls("Strong authentication,Session management,Rate limiting");
+        scenario.setEnvironment("TEST");
+        scenario.setStatus("ACTIVE");
+        scenario.setIsSecurityTest(true);
+        scenario.setPriority(1);
+        
+        scenario.getTestSteps().add("Test weak password policies");
+        scenario.getTestSteps().add("Test session fixation");
+        scenario.getTestSteps().add("Test brute force attacks");
+        scenario.getTestSteps().add("Test credential stuffing");
+        scenario.getTestSteps().add("Test session timeout");
+        
+        return scenario;
+    }
+    
+    // A08: Software and Data Integrity Failures
+    private TestScenario createIntegrityFailureScenario(String analysisId) {
+        TestScenario scenario = new TestScenario(
+            "A08: Data Integrity Failures Test",
+            "SECURITY",
+            "A08"
+        );
+        
+        scenario.setAnalysisId(analysisId);
+        scenario.setDescription("Test for software and data integrity vulnerabilities");
+        scenario.setTargetEndpoints("/api/system/update,/api/plugin/install,/api/data/import");
+        scenario.setAttackVectors("Unsigned updates,Insecure plugins,Data tampering");
+        scenario.setSecurityControls("Code signing,Integrity checks,Secure update mechanisms");
+        scenario.setEnvironment("TEST");
+        scenario.setStatus("ACTIVE");
+        scenario.setIsSecurityTest(true);
+        scenario.setPriority(2);
+        
+        scenario.getTestSteps().add("Test unsigned software updates");
+        scenario.getTestSteps().add("Test insecure plugin installation");
+        scenario.getTestSteps().add("Test data integrity violations");
+        scenario.getTestSteps().add("Test CI/CD pipeline security");
+        
+        return scenario;
+    }
+    
+    // A09: Security Logging and Monitoring Failures
+    private TestScenario createLoggingFailureScenario(String analysisId) {
+        TestScenario scenario = new TestScenario(
+            "A09: Logging and Monitoring Failures Test",
+            "SECURITY",
+            "A09"
+        );
+        
+        scenario.setAnalysisId(analysisId);
+        scenario.setDescription("Test for insufficient logging and monitoring capabilities");
+        scenario.setTargetEndpoints("/api/admin/operations,/api/security/events,/api/audit/logs");
+        scenario.setAttackVectors("Missing logs,Unmonitored attacks,Silent failures");
+        scenario.setSecurityControls("Comprehensive logging,Real-time monitoring,Incident response");
+        scenario.setEnvironment("TEST");
+        scenario.setStatus("ACTIVE");
+        scenario.setIsSecurityTest(true);
+        scenario.setPriority(3);
+        
+        scenario.getTestSteps().add("Test missing security logs");
+        scenario.getTestSteps().add("Test unmonitored attack attempts");
+        scenario.getTestSteps().add("Test silent failure detection");
+        scenario.getTestSteps().add("Test log tampering");
+        
+        return scenario;
+    }
+    
+    // A10: Server-Side Request Forgery (SSRF)
+    private TestScenario createSsrfScenario(String analysisId) {
+        TestScenario scenario = new TestScenario(
+            "A10: SSRF Test",
+            "SECURITY",
+            "A10"
+        );
+        
+        scenario.setAnalysisId(analysisId);
+        scenario.setDescription("Test for Server-Side Request Forgery vulnerabilities");
+        scenario.setTargetEndpoints("/api/fetch,/api/proxy,/api/url/process");
+        scenario.setAttackVectors("Internal network access,Cloud metadata,Port scanning");
+        scenario.setSecurityControls("URL validation,Network segmentation,Metadata protection");
+        scenario.setEnvironment("TEST");
+        scenario.setStatus("ACTIVE");
+        scenario.setIsSecurityTest(true);
+        scenario.setPriority(1);
+        
+        scenario.getTestSteps().add("Test internal network access");
+        scenario.getTestSteps().add("Test cloud metadata access");
+        scenario.getTestSteps().add("Test port scanning capabilities");
+        scenario.getTestSteps().add("Test file scheme abuse");
+        
+        return scenario;
+    }
+    
+    // Генерация комбинированных сценариев
+    public List<TestScenario> generateComprehensiveSecurityScenarios(String analysisId) {
+        List<TestScenario> allScenarios = new ArrayList<>();
+        allScenarios.addAll(generateOwaspTop10Scenarios(analysisId));
+        
+        // Сохранение в репозиторий
+        return scenarioRepository.saveAll(allScenarios);
+    }
+}

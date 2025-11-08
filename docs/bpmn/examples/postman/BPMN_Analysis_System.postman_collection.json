@@ -1,0 +1,704 @@
+{
+	"info": {
+		"_postman_id": "bpmn-analysis-system-collection",
+		"name": "BPMN Analysis System API",
+		"description": "Comprehensive API collection for SecurityOrchestrator's BPMN Analysis System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api/v1/bpmn",
+			"type": "string"
+		},
+		{
+			"key": "apiKey",
+			"value": "your-api-key-here",
+			"type": "string"
+		},
+		{
+			"key": "processId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "analysisId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "System Health",
+			"item": [
+				{
+					"name": "Get System Health",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check the health status of the BPMN Analysis System"
+					}
+				}
+			]
+		},
+		{
+			"name": "Process Management",
+			"item": [
+				{
+					"name": "Upload BPMN Process",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "sample-bpmn.bpmn"
+								},
+								{
+									"key": "name",
+									"value": "E-commerce Order Process",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Customer order processing workflow for e-commerce platform",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "ecommerce,order,processing",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/processes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"processes"
+							]
+						},
+						"description": "Upload and parse a BPMN 2.0 process file"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.to.have.status(201)) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('processId', response.processId);",
+									"    console.log('Process uploaded successfully:', response.processId);",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Process Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/processes/{{processId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"processes",
+								"{{processId}}"
+							]
+						},
+						"description": "Retrieve detailed information about a specific process"
+					}
+				},
+				{
+					"name": "List All Processes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/processes?page=1&size=20&status=PARSED",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"processes"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "status",
+									"value": "PARSED"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt"
+								},
+								{
+									"key": "order",
+									"value": "desc"
+								}
+							]
+						},
+						"description": "List all processes with optional filtering and pagination"
+					}
+				},
+				{
+					"name": "Update Process",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": {
+								"name": "Updated E-commerce Order Process",
+								"description": "Enhanced customer order processing workflow with improved security controls",
+								"tags": ["ecommerce", "order", "security-enhanced"],
+								"settings": {
+									"autoAnalyze": true,
+									"complianceStandards": ["GDPR", "PCI-DSS"],
+									"securityLevel": "HIGH"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/processes/{{processId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"processes",
+								"{{processId}}"
+							]
+						},
+						"description": "Update process metadata and settings"
+					}
+				}
+			]
+		},
+		{
+			"name": "Security Analysis",
+			"item": [
+				{
+					"name": "Start Comprehensive Analysis",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": {
+								"processId": "{{processId}}",
+								"analysisType": "COMPREHENSIVE",
+								"complianceStandards": [
+									"GDPR",
+									"PCI-DSS",
+									"ISO27001"
+								],
+								"configuration": {
+									"includePerformance": true,
+									"includeCompliance": true,
+									"includeThreatModeling": true,
+									"aiAssisted": true,
+									"customRules": []
+								},
+								"priorities": {
+									"focusAreas": [
+										"AUTHENTICATION",
+										"DATA_PROTECTION",
+										"COMPLIANCE"
+									],
+									"excludeElements": []
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/analysis",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analysis"
+							]
+						},
+						"description": "Initiate comprehensive security analysis of a BPMN process"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.to.have.status(202)) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('analysisId', response.analysisId);",
+									"    console.log('Analysis started:', response.analysisId);",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Analysis Results",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/analysis/{{analysisId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analysis",
+								"{{analysisId}}"
+							]
+						},
+						"description": "Retrieve analysis results and current status"
+					}
+				},
+				{
+					"name": "Get Analysis History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/processes/{{processId}}/analysis/history",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"processes",
+								"{{processId}}",
+								"analysis",
+								"history"
+							]
+						},
+						"description": "Retrieve analysis history for a specific process"
+					}
+				},
+				{
+					"name": "Start Quick Analysis",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": {
+								"processId": "{{processId}}",
+								"analysisType": "QUICK"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/analysis",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"analysis"
+							]
+						},
+						"description": "Start a quick security analysis for rapid feedback"
+					}
+				}
+			]
+		},
+		{
+			"name": "AI Integration",
+			"item": [
+				{
+					"name": "Test AI Provider",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": {
+								"provider": "OPENROUTER",
+								"model": "anthropic/claude-3-haiku",
+								"testPrompt": "Analyze this business process for security vulnerabilities and provide recommendations.",
+								"timeout": 30
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ai/test",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ai",
+								"test"
+							]
+						},
+						"description": "Test AI provider connectivity and configuration"
+					}
+				},
+				{
+					"name": "Get AI Configuration",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ai/configuration",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ai",
+								"configuration"
+							]
+						},
+						"description": "Retrieve current AI provider configuration"
+					}
+				},
+				{
+					"name": "Generate AI Recommendations",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": {
+								"processId": "{{processId}}",
+								"context": {
+									"businessDomain": "FINANCIAL_SERVICES",
+									"dataClassification": "SENSITIVE",
+									"complianceRequirements": [
+										"GDPR",
+										"PCI-DSS"
+									]
+								},
+								"focus": [
+									"AUTHENTICATION",
+									"DATA_PROTECTION",
+									"COMPLIANCE"
+								],
+								"detailLevel": "DETAILED"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ai/recommendations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ai",
+								"recommendations"
+							]
+						},
+						"description": "Generate AI-powered security recommendations"
+					}
+				}
+			]
+		},
+		{
+			"name": "Test Generation",
+			"item": [
+				{
+					"name": "Generate Security Test Cases",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": {
+								"processId": "{{processId}}",
+								"analysisId": "{{analysisId}}",
+								"testTypes": [
+									"AUTHENTICATION",
+									"AUTHORIZATION",
+									"DATA_VALIDATION",
+									"ERROR_HANDLING"
+								],
+								"coverage": "COMPREHENSIVE",
+								"testFramework": "JUNIT",
+								"outputFormat": "JAVA",
+								"configuration": {
+									"includeEdgeCases": true,
+									"generateMockData": true,
+									"includeNegativeTests": true
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/test-generation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"test-generation"
+							]
+						},
+						"description": "Generate automated security test cases based on process analysis"
+					}
+				},
+				{
+					"name": "Get Test Generation Results",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/test-generation/{{generationId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"test-generation",
+								"{{generationId}}"
+							]
+						},
+						"description": "Retrieve generated test cases and download information"
+					}
+				}
+			]
+		},
+		{
+			"name": "WebSocket Endpoints",
+			"item": [
+				{
+					"name": "WebSocket Connection for Analysis Updates",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "ws://localhost:8080/ws/bpmn",
+							"host": [
+								"localhost:8080"
+							],
+							"protocol": "ws",
+							"path": [
+								"ws",
+								"bpmn"
+							]
+						},
+						"description": "WebSocket endpoint for real-time analysis updates. Use WebSocket testing tool to connect."
+					}
+				}
+			]
+		},
+		{
+			"name": "API Documentation",
+			"item": [
+				{
+					"name": "Get OpenAPI Specification",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/openapi.json",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"openapi.json"
+							]
+						},
+						"description": "Retrieve the complete OpenAPI 3.0 specification"
+					}
+				},
+				{
+					"name": "Swagger UI",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/swagger-ui.html",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"swagger-ui.html"
+							]
+						},
+						"description": "Interactive API documentation interface"
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Set up environment variables",
+					"pm.environment.set('baseUrl', pm.environment.get('baseUrl') || 'http://localhost:8080/api/v1/bpmn');",
+					"pm.environment.set('apiKey', pm.environment.get('apiKey') || 'your-api-key-here');"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Test response",
+					"pm.test('Status code is 2xx', function () {",
+					"    pm.expect(pm.response.code).to.be.within(200, 299);",
+					"});",
+					"",
+					"pm.test('Response time is acceptable', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+					"});",
+					"",
+					"// Log response for debugging",
+					"console.log('Response:', pm.response.text());"
+				]
+			}
+		}
+	]
+}
