@@ -1,333 +1,465 @@
-package org.example.infrastructure.services.testgen;
+package org.example.infrastructure.services.datamanagement;
 
-import org.example.domain.entities.TestScenario;
-import org.example.domain.entities.TestDataSet;
-import org.example.infrastructure.repositories.TestScenarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Генератор security тестов для OWASP Top 10 и API Security Top 10
+ * Service for managing data retention policies and lifecycle
  */
 @Service
-public class SecurityTestGenerator {
+@Transactional
+public class DataRetentionService {
     
     @Autowired
-    private TestScenarioRepository scenarioRepository;
+    private RetentionPolicyRepository retentionPolicyRepository;
     
     @Autowired
-    private TestDataGenerator testDataGenerator;
+    private TestDataRepository testDataRepository;
     
-    // Генерация security сценариев для OWASP Top 10 2021
-    public List<TestScenario> generateOwaspTop10Scenarios(String analysisId) {
-        List<TestScenario> scenarios = new ArrayList<>();
+    // Policy Management Methods
+    
+    /**
+     * Create a new retention policy
+     */
+    public RetentionPolicy createPolicy(String name, String dataType, Integer retentionDays, String userId) {
+        RetentionPolicy policy = new RetentionPolicy(name, dataType, retentionDays);
+        policy.setCreatedBy(userId);
+        policy.setEffectiveFrom(LocalDateTime.now());
         
-        // A01: Broken Access Control
-        scenarios.add(createAccessControlScenario(analysisId));
-        
-        // A02: Cryptographic Failures
-        scenarios.add(createCryptographicFailureScenario(analysisId));
-        
-        // A03: Injection
-        scenarios.add(createInjectionScenario(analysisId));
-        
-        // A04: Insecure Design
-        scenarios.add(createInsecureDesignScenario(analysisId));
-        
-        // A05: Security Misconfiguration
-        scenarios.add(createSecurityMisconfigurationScenario(analysisId));
-        
-        // A06: Vulnerable and Outdated Components
-        scenarios.add(createVulnerableComponentsScenario(analysisId));
-        
-        // A07: Identification and Authentication Failures
-        scenarios.add(createAuthenticationFailureScenario(analysisId));
-        
-        // A08: Software and Data Integrity Failures
-        scenarios.add(createIntegrityFailureScenario(analysisId));
-        
-        // A09: Security Logging and Monitoring Failures
-        scenarios.add(createLoggingFailureScenario(analysisId));
-        
-        // A10: Server-Side Request Forgery (SSRF)
-        scenarios.add(createSsrfScenario(analysisId));
-        
-        return scenarios;
+        return retentionPolicyRepository.save(policy);
     }
     
-    // A01: Broken Access Control
-    private TestScenario createAccessControlScenario(String analysisId) {
-        TestScenario scenario = new TestScenario(
-            "A01: Broken Access Control Test",
-            "SECURITY",
-            "A01"
-        );
-        
-        scenario.setAnalysisId(analysisId);
-        scenario.setDescription("Test for broken access control vulnerabilities including privilege escalation and unauthorized access");
-        scenario.setTargetEndpoints("/api/admin/,/api/user/{id},/api/orders/{id}");
-        scenario.setAttackVectors("IDOR,Bypass Authorization,Privilege Escalation");
-        scenario.setSecurityControls("Role-based access,Resource-level permissions,Input validation");
-        scenario.setEnvironment("TEST");
-        scenario.setStatus("ACTIVE");
-        scenario.setIsSecurityTest(true);
-        scenario.setPriority(1);
-        
-        // Добавление тестовых шагов
-        scenario.getTestSteps().add("Test direct object references");
-        scenario.getTestSteps().add("Test privilege escalation");
-        scenario.getTestSteps().add("Test force browsing to protected resources");
-        scenario.getTestSteps().add("Test HTTP methods bypass");
-        scenario.getTestSteps().add("Test CORS misconfigurations");
-        
-        return scenario;
+    /**
+     * Get retention policy
+     */
+    public Optional<RetentionPolicy> getPolicy(String policyId) {
+        return retentionPolicyRepository.findByPolicyId(policyId);
     }
     
-    // A02: Cryptographic Failures
-    private TestScenario createCryptographicFailureScenario(String analysisId) {
-        TestScenario scenario = new TestScenario(
-            "A02: Cryptographic Failures Test",
-            "SECURITY",
-            "A02"
-        );
-        
-        scenario.setAnalysisId(analysisId);
-        scenario.setDescription("Test for weak cryptographic implementations and data transmission vulnerabilities");
-        scenario.setTargetEndpoints("/api/auth/login,/api/data/encrypt,/api/payment/process");
-        scenario.setAttackVectors("Weak encryption,Insecure transmission,Hardcoded keys");
-        scenario.setSecurityControls("Strong encryption,TLS/SSL,Key management");
-        scenario.setEnvironment("TEST");
-        scenario.setStatus("ACTIVE");
-        scenario.setIsSecurityTest(true);
-        scenario.setPriority(1);
-        
-        scenario.getTestSteps().add("Test weak encryption algorithms");
-        scenario.getTestSteps().add("Test insecure data transmission");
-        scenario.getTestSteps().add("Test hardcoded cryptographic keys");
-        scenario.getTestSteps().add("Test improper certificate validation");
-        scenario.getTestSteps().add("Test missing transport layer security");
-        
-        return scenario;
+    /**
+     * Get all active policies
+     */
+    public List<RetentionPolicy> getActivePolicies() {
+        return retentionPolicyRepository.findByIsActiveTrue();
     }
     
-    // A03: Injection
-    private TestScenario createInjectionScenario(String analysisId) {
-        TestScenario scenario = new TestScenario(
-            "A03: Injection Attack Test",
-            "SECURITY",
-            "A03"
-        );
+    /**
+     * Update retention policy
+     */
+    public RetentionPolicy updatePolicy(String policyId, Integer retentionDays, Integer archiveDays, String userId) {
+        RetentionPolicy policy = retentionPolicyRepository.findByPolicyId(policyId)
+                .orElseThrow(() -> new IllegalArgumentException("Policy not found: " + policyId));
         
-        scenario.setAnalysisId(analysisId);
-        scenario.setDescription("Test for various injection vulnerabilities including SQL, NoSQL, OS command, and LDAP injection");
-        scenario.setTargetEndpoints("/api/users/search,/api/files/process,/api/orders/create");
-        scenario.setAttackVectors("SQL Injection,NoSQL Injection,OS Command Injection,LDAP Injection");
-        scenario.setSecurityControls("Input validation,Parameterized queries,Output encoding");
-        scenario.setEnvironment("TEST");
-        scenario.setStatus("ACTIVE");
-        scenario.setIsSecurityTest(true);
-        scenario.setPriority(1);
+        policy.setRetentionDays(retentionDays);
+        if (archiveDays != null) {
+            policy.setArchiveDays(archiveDays);
+        }
+        policy.setLastModifiedBy(userId);
+        policy.setUpdatedAt(LocalDateTime.now());
         
-        scenario.getTestSteps().add("Test SQL injection vulnerabilities");
-        scenario.getTestSteps().add("Test NoSQL injection");
-        scenario.getTestSteps().add("Test OS command injection");
-        scenario.getTestSteps().add("Test LDAP injection");
-        scenario.getTestSteps().add("Test template injection");
-        
-        return scenario;
+        return retentionPolicyRepository.save(policy);
     }
     
-    // A04: Insecure Design
-    private TestScenario createInsecureDesignScenario(String analysisId) {
-        TestScenario scenario = new TestScenario(
-            "A04: Insecure Design Test",
-            "SECURITY",
-            "A04"
-        );
+    // Data Lifecycle Management Methods
+    
+    /**
+     * Check which data sets need archiving based on policies
+     */
+    public List<TestDataSet> findDataSetsForArchiving() {
+        List<TestDataSet> dataSetsForArchiving = new ArrayList<>();
+        List<RetentionPolicy> activePolicies = getActivePolicies();
         
-        scenario.setAnalysisId(analysisId);
-        scenario.setDescription("Test for insecure design patterns and missing security controls");
-        scenario.setTargetEndpoints("/api/password/reset,/api/2fa/verify,/api/mfa/enable");
-        scenario.setAttackVectors("Missing MFA,Weak password reset,Insecure workflows");
-        scenario.setSecurityControls("Multi-factor authentication,Secure workflows,Defense in depth");
-        scenario.setEnvironment("TEST");
-        scenario.setStatus("ACTIVE");
-        scenario.setIsSecurityTest(true);
-        scenario.setPriority(2);
+        for (TestDataSet dataSet : testDataRepository.findAll()) {
+            for (RetentionPolicy policy : activePolicies) {
+                if (shouldArchiveDataSet(dataSet, policy)) {
+                    dataSetsForArchiving.add(dataSet);
+                    break; // Only add once per data set
+                }
+            }
+        }
         
-        scenario.getTestSteps().add("Test missing multi-factor authentication");
-        scenario.getTestSteps().add("Test weak password reset flows");
-        scenario.getTestSteps().add("Test insecure business logic");
-        scenario.getTestSteps().add("Test insufficient defense in depth");
-        
-        return scenario;
+        return dataSetsForArchiving;
     }
     
-    // A05: Security Misconfiguration
-    private TestScenario createSecurityMisconfigurationScenario(String analysisId) {
-        TestScenario scenario = new TestScenario(
-            "A05: Security Misconfiguration Test",
-            "SECURITY",
-            "A05"
-        );
+    /**
+     * Check which data sets need deletion based on policies
+     */
+    public List<TestDataSet> findDataSetsForDeletion() {
+        List<TestDataSet> dataSetsForDeletion = new ArrayList<>();
+        List<RetentionPolicy> activePolicies = getActivePolicies();
         
-        scenario.setAnalysisId(analysisId);
-        scenario.setDescription("Test for security misconfigurations including default credentials and exposed endpoints");
-        scenario.setTargetEndpoints("/api/admin/,/api/config,/api/debug");
-        scenario.setAttackVectors("Default credentials,Debug endpoints,Directory listing");
-        scenario.setSecurityControls("Secure configuration,Default changes,Minimal attack surface");
-        scenario.setEnvironment("TEST");
-        scenario.setStatus("ACTIVE");
-        scenario.setIsSecurityTest(true);
-        scenario.setPriority(2);
+        for (TestDataSet dataSet : testDataRepository.findAll()) {
+            for (RetentionPolicy policy : activePolicies) {
+                if (shouldDeleteDataSet(dataSet, policy)) {
+                    dataSetsForDeletion.add(dataSet);
+                    break; // Only add once per data set
+                }
+            }
+        }
         
-        scenario.getTestSteps().add("Test default credentials");
-        scenario.getTestSteps().add("Test debug and admin endpoints");
-        scenario.getTestSteps().add("Test directory listing");
-        scenario.getTestSteps().add("Test missing security headers");
-        scenario.getTestSteps().add("Test unnecessary features enabled");
-        
-        return scenario;
+        return dataSetsForDeletion;
     }
     
-    // A06: Vulnerable and Outdated Components
-    private TestScenario createVulnerableComponentsScenario(String analysisId) {
-        TestScenario scenario = new TestScenario(
-            "A06: Vulnerable Components Test",
-            "SECURITY",
-            "A06"
-        );
+    /**
+     * Execute archiving for data sets
+     */
+    public ArchiveReport archiveDataSets(List<String> dataSetIds, String userId) {
+        List<String> successfullyArchived = new ArrayList<>();
+        List<String> failedToArchive = new ArrayList<>();
         
-        scenario.setAnalysisId(analysisId);
-        scenario.setDescription("Test for vulnerable and outdated software components");
-        scenario.setTargetEndpoints("/api/dependencies,/api/system/info,/api/library/check");
-        scenario.setAttackVectors("Known vulnerabilities,Outdated libraries,Unpatched systems");
-        scenario.setSecurityControls("Dependency management,Regular updates,Vulnerability scanning");
-        scenario.setEnvironment("TEST");
-        scenario.setStatus("ACTIVE");
-        scenario.setIsSecurityTest(true);
-        scenario.setPriority(3);
+        for (String dataSetId : dataSetIds) {
+            try {
+                Optional<TestDataSet> dataSetOpt = testDataRepository.findByDataSetId(dataSetId);
+                if (dataSetOpt.isPresent()) {
+                    TestDataSet dataSet = dataSetOpt.get();
+                    dataSet.archive();
+                    dataSet.setLastModifiedBy(userId);
+                    testDataRepository.save(dataSet);
+                    
+                    successfullyArchived.add(dataSetId);
+                    
+                    // Log the action
+                    // In real implementation, would log to audit table
+                } else {
+                    failedToArchive.add(dataSetId + " (not found)");
+                }
+            } catch (Exception e) {
+                failedToArchive.add(dataSetId + " (error: " + e.getMessage() + ")");
+            }
+        }
         
-        scenario.getTestSteps().add("Test for known CVEs");
-        scenario.getTestSteps().add("Test outdated library versions");
-        scenario.getTestSteps().add("Test unpatched systems");
-        scenario.getTestSteps().add("Test unsupported software");
-        
-        return scenario;
+        return new ArchiveReport(successfullyArchived, failedToArchive, userId);
     }
     
-    // A07: Identification and Authentication Failures
-    private TestScenario createAuthenticationFailureScenario(String analysisId) {
-        TestScenario scenario = new TestScenario(
-            "A07: Authentication Failures Test",
-            "SECURITY",
-            "A07"
-        );
+    /**
+     * Execute deletion for data sets
+     */
+    public DeletionReport deleteDataSets(List<String> dataSetIds, String userId) {
+        List<String> successfullyDeleted = new ArrayList<>();
+        List<String> failedToDelete = new ArrayList<>();
         
-        scenario.setAnalysisId(analysisId);
-        scenario.setDescription("Test for authentication and session management vulnerabilities");
-        scenario.setTargetEndpoints("/api/auth/login,/api/auth/logout,/api/auth/refresh");
-        scenario.setAttackVectors("Weak passwords,Session fixation,Brute force,Credential stuffing");
-        scenario.setSecurityControls("Strong authentication,Session management,Rate limiting");
-        scenario.setEnvironment("TEST");
-        scenario.setStatus("ACTIVE");
-        scenario.setIsSecurityTest(true);
-        scenario.setPriority(1);
+        for (String dataSetId : dataSetIds) {
+            try {
+                Optional<TestDataSet> dataSetOpt = testDataRepository.findByDataSetId(dataSetId);
+                if (dataSetOpt.isPresent()) {
+                    TestDataSet dataSet = dataSetOpt.get();
+                    
+                    // Check if deletion is allowed
+                    if (canDeleteDataSet(dataSet)) {
+                        testDataRepository.delete(dataSet);
+                        successfullyDeleted.add(dataSetId);
+                        
+                        // Log the action
+                        // In real implementation, would log to audit table
+                    } else {
+                        failedToDelete.add(dataSetId + " (deletion not allowed)");
+                    }
+                } else {
+                    failedToDelete.add(dataSetId + " (not found)");
+                }
+            } catch (Exception e) {
+                failedToDelete.add(dataSetId + " (error: " + e.getMessage() + ")");
+            }
+        }
         
-        scenario.getTestSteps().add("Test weak password policies");
-        scenario.getTestSteps().add("Test session fixation");
-        scenario.getTestSteps().add("Test brute force attacks");
-        scenario.getTestSteps().add("Test credential stuffing");
-        scenario.getTestSteps().add("Test session timeout");
-        
-        return scenario;
+        return new DeletionReport(successfullyDeleted, failedToDelete, userId);
     }
     
-    // A08: Software and Data Integrity Failures
-    private TestScenario createIntegrityFailureScenario(String analysisId) {
-        TestScenario scenario = new TestScenario(
-            "A08: Data Integrity Failures Test",
-            "SECURITY",
-            "A08"
-        );
-        
-        scenario.setAnalysisId(analysisId);
-        scenario.setDescription("Test for software and data integrity vulnerabilities");
-        scenario.setTargetEndpoints("/api/system/update,/api/plugin/install,/api/data/import");
-        scenario.setAttackVectors("Unsigned updates,Insecure plugins,Data tampering");
-        scenario.setSecurityControls("Code signing,Integrity checks,Secure update mechanisms");
-        scenario.setEnvironment("TEST");
-        scenario.setStatus("ACTIVE");
-        scenario.setIsSecurityTest(true);
-        scenario.setPriority(2);
-        
-        scenario.getTestSteps().add("Test unsigned software updates");
-        scenario.getTestSteps().add("Test insecure plugin installation");
-        scenario.getTestSteps().add("Test data integrity violations");
-        scenario.getTestSteps().add("Test CI/CD pipeline security");
-        
-        return scenario;
+    // Automated Retention Processing
+    
+    /**
+     * Scheduled method to process retention policies daily
+     */
+    @Scheduled(cron = "0 0 2 * * ?") // Run at 2 AM daily
+    public void processRetentionPolicies() {
+        try {
+            List<TestDataSet> dataSetsForArchiving = findDataSetsForArchiving();
+            List<TestDataSet> dataSetsForDeletion = findDataSetsForDeletion();
+            
+            if (!dataSetsForArchiving.isEmpty()) {
+                List<String> dataSetIds = dataSetsForArchiving.stream()
+                        .map(TestDataSet::getDataSetId)
+                        .collect(Collectors.toList());
+                archiveDataSets(dataSetIds, "SYSTEM");
+            }
+            
+            if (!dataSetsForDeletion.isEmpty()) {
+                List<String> dataSetIds = dataSetsForDeletion.stream()
+                        .map(TestDataSet::getDataSetId)
+                        .collect(Collectors.toList());
+                deleteDataSets(dataSetIds, "SYSTEM");
+            }
+            
+        } catch (Exception e) {
+            // Log error but don't throw - scheduled method should be resilient
+            System.err.println("Error processing retention policies: " + e.getMessage());
+        }
     }
     
-    // A09: Security Logging and Monitoring Failures
-    private TestScenario createLoggingFailureScenario(String analysisId) {
-        TestScenario scenario = new TestScenario(
-            "A09: Logging and Monitoring Failures Test",
-            "SECURITY",
-            "A09"
-        );
+    // Compliance and Reporting Methods
+    
+    /**
+     * Generate retention compliance report
+     */
+    public RetentionComplianceReport generateComplianceReport() {
+        List<TestDataSet> allDataSets = testDataRepository.findAll();
+        List<RetentionPolicy> activePolicies = getActivePolicies();
         
-        scenario.setAnalysisId(analysisId);
-        scenario.setDescription("Test for insufficient logging and monitoring capabilities");
-        scenario.setTargetEndpoints("/api/admin/operations,/api/security/events,/api/audit/logs");
-        scenario.setAttackVectors("Missing logs,Unmonitored attacks,Silent failures");
-        scenario.setSecurityControls("Comprehensive logging,Real-time monitoring,Incident response");
-        scenario.setEnvironment("TEST");
-        scenario.setStatus("ACTIVE");
-        scenario.setIsSecurityTest(true);
-        scenario.setPriority(3);
+        Map<String, Object> statistics = new HashMap<>();
+        List<String> violations = new ArrayList<>();
+        List<String> recommendations = new ArrayList<>();
         
-        scenario.getTestSteps().add("Test missing security logs");
-        scenario.getTestSteps().add("Test unmonitored attack attempts");
-        scenario.getTestSteps().add("Test silent failure detection");
-        scenario.getTestSteps().add("Test log tampering");
+        // Calculate statistics
+        long totalDataSets = allDataSets.size();
+        long archivedDataSets = allDataSets.stream()
+                .mapToLong(ds -> Boolean.TRUE.equals(ds.getIsArchived()) ? 1 : 0)
+                .sum();
+        long activeDataSets = totalDataSets - archivedDataSets;
         
-        return scenario;
+        statistics.put("totalDataSets", totalDataSets);
+        statistics.put("activeDataSets", activeDataSets);
+        statistics.put("archivedDataSets", archivedDataSets);
+        statistics.put("activePolicies", activePolicies.size());
+        
+        // Check for policy violations
+        for (TestDataSet dataSet : allDataSets) {
+            if (isRetentionPolicyViolated(dataSet, activePolicies)) {
+                violations.add("Data set " + dataSet.getDataSetId() + " violates retention policy");
+            }
+        }
+        
+        // Generate recommendations
+        if (activePolicies.isEmpty()) {
+            recommendations.add("No active retention policies found - create policies for data governance");
+        }
+        
+        long oldDataSets = allDataSets.stream()
+                .mapToLong(ds -> {
+                    if (ds.getCreatedAt() != null) {
+                        long daysOld = ChronoUnit.DAYS.between(ds.getCreatedAt(), LocalDateTime.now());
+                        return daysOld > 365 ? 1 : 0; // Older than 1 year
+                    }
+                    return 0;
+                })
+                .sum();
+        
+        if (oldDataSets > 0) {
+            recommendations.add("Found " + oldDataSets + " data sets older than 1 year - review for archiving");
+        }
+        
+        return new RetentionComplianceReport(statistics, violations, recommendations);
     }
     
-    // A10: Server-Side Request Forgery (SSRF)
-    private TestScenario createSsrfScenario(String analysisId) {
-        TestScenario scenario = new TestScenario(
-            "A10: SSRF Test",
-            "SECURITY",
-            "A10"
-        );
-        
-        scenario.setAnalysisId(analysisId);
-        scenario.setDescription("Test for Server-Side Request Forgery vulnerabilities");
-        scenario.setTargetEndpoints("/api/fetch,/api/proxy,/api/url/process");
-        scenario.setAttackVectors("Internal network access,Cloud metadata,Port scanning");
-        scenario.setSecurityControls("URL validation,Network segmentation,Metadata protection");
-        scenario.setEnvironment("TEST");
-        scenario.setStatus("ACTIVE");
-        scenario.setIsSecurityTest(true);
-        scenario.setPriority(1);
-        
-        scenario.getTestSteps().add("Test internal network access");
-        scenario.getTestSteps().add("Test cloud metadata access");
-        scenario.getTestSteps().add("Test port scanning capabilities");
-        scenario.getTestSteps().add("Test file scheme abuse");
-        
-        return scenario;
+    /**
+     * Get data sets by age
+     */
+    public List<TestDataSet> getDataSetsByAge(int minDaysOld) {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(minDaysOld);
+        return testDataRepository.findByCreatedAtBefore(cutoffDate);
     }
     
-    // Генерация комбинированных сценариев
-    public List<TestScenario> generateComprehensiveSecurityScenarios(String analysisId) {
-        List<TestScenario> allScenarios = new ArrayList<>();
-        allScenarios.addAll(generateOwaspTop10Scenarios(analysisId));
+    /**
+     * Calculate storage savings from archiving
+     */
+    public StorageSavingsReport calculateStorageSavings() {
+        List<TestDataSet> archivedDataSets = testDataRepository.findByIsArchivedTrue();
+        List<TestDataSet> activeDataSets = testDataRepository.findByIsArchivedFalse();
         
-        // Сохранение в репозиторий
-        return scenarioRepository.saveAll(allScenarios);
+        long archivedSize = archivedDataSets.stream()
+                .mapToLong(ds -> ds.getDataSize() != null ? ds.getDataSize() : 0)
+                .sum();
+        
+        long activeSize = activeDataSets.stream()
+                .mapToLong(ds -> ds.getDataSize() != null ? ds.getDataSize() : 0)
+                .sum();
+        
+        return new StorageSavingsReport(archivedSize, activeSize, archivedDataSets.size(), activeDataSets.size());
+    }
+    
+    // Private Helper Methods
+    
+    private boolean shouldArchiveDataSet(TestDataSet dataSet, RetentionPolicy policy) {
+        if (dataSet.getCreatedAt() == null || policy.getArchiveDays() == null) {
+            return false;
+        }
+        
+        LocalDateTime archiveDate = dataSet.getCreatedAt().plusDays(policy.getArchiveDays());
+        return LocalDateTime.now().isAfter(archiveDate) && !Boolean.TRUE.equals(dataSet.getIsArchived());
+    }
+    
+    private boolean shouldDeleteDataSet(TestDataSet dataSet, RetentionPolicy policy) {
+        if (dataSet.getCreatedAt() == null || policy.getRetentionDays() == null) {
+            return false;
+        }
+        
+        LocalDateTime deletionDate = dataSet.getCreatedAt().plusDays(policy.getRetentionDays());
+        boolean isOldEnough = LocalDateTime.now().isAfter(deletionDate);
+        
+        // Check grace period
+        if (policy.hasGracePeriod()) {
+            LocalDateTime graceEndDate = deletionDate.plusDays(policy.getGracePeriodDays());
+            return LocalDateTime.now().isAfter(graceEndDate);
+        }
+        
+        return isOldEnough;
+    }
+    
+    private boolean canDeleteDataSet(TestDataSet dataSet) {
+        // Check if data set has any legal holds or compliance requirements
+        // Simplified implementation
+        return !Boolean.TRUE.equals(dataSet.getIsArchived()) || // Only delete non-archived data
+               (dataSet.getCreatedAt() != null && ChronoUnit.DAYS.between(dataSet.getCreatedAt(), LocalDateTime.now()) > 30);
+    }
+    
+    private boolean isRetentionPolicyViolated(TestDataSet dataSet, List<RetentionPolicy> policies) {
+        for (RetentionPolicy policy : policies) {
+            if (shouldDeleteDataSet(dataSet, policy) && !dataSet.getIsArchived()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    // Inner classes for return types
+    
+    public static class ArchiveReport {
+        private final List<String> successfullyArchived;
+        private final List<String> failedToArchive;
+        private final String executedBy;
+        private final LocalDateTime executedAt;
+        
+        public ArchiveReport(List<String> successfullyArchived, List<String> failedToArchive, String executedBy) {
+            this.successfullyArchived = successfullyArchived != null ? successfullyArchived : new ArrayList<>();
+            this.failedToArchive = failedToArchive != null ? failedToArchive : new ArrayList<>();
+            this.executedBy = executedBy;
+            this.executedAt = LocalDateTime.now();
+        }
+        
+        // Getters
+        public List<String> getSuccessfullyArchived() { return successfullyArchived; }
+        public List<String> getFailedToArchive() { return failedToArchive; }
+        public String getExecutedBy() { return executedBy; }
+        public LocalDateTime getExecutedAt() { return executedAt; }
+        
+        public int getTotalProcessed() {
+            return successfullyArchived.size() + failedToArchive.size();
+        }
+        
+        public int getSuccessCount() {
+            return successfullyArchived.size();
+        }
+        
+        public int getFailureCount() {
+            return failedToArchive.size();
+        }
+    }
+    
+    public static class DeletionReport {
+        private final List<String> successfullyDeleted;
+        private final List<String> failedToDelete;
+        private final String executedBy;
+        private final LocalDateTime executedAt;
+        
+        public DeletionReport(List<String> successfullyDeleted, List<String> failedToDelete, String executedBy) {
+            this.successfullyDeleted = successfullyDeleted != null ? successfullyDeleted : new ArrayList<>();
+            this.failedToDelete = failedToDelete != null ? failedToDelete : new ArrayList<>();
+            this.executedBy = executedBy;
+            this.executedAt = LocalDateTime.now();
+        }
+        
+        // Getters
+        public List<String> getSuccessfullyDeleted() { return successfullyDeleted; }
+        public List<String> getFailedToDelete() { return failedToDelete; }
+        public String getExecutedBy() { return executedBy; }
+        public LocalDateTime getExecutedAt() { return executedAt; }
+        
+        public int getTotalProcessed() {
+            return successfullyDeleted.size() + failedToDelete.size();
+        }
+        
+        public int getSuccessCount() {
+            return successfullyDeleted.size();
+        }
+        
+        public int getFailureCount() {
+            return failedToDelete.size();
+        }
+    }
+    
+    public static class RetentionComplianceReport {
+        private final Map<String, Object> statistics;
+        private final List<String> violations;
+        private final List<String> recommendations;
+        
+        public RetentionComplianceReport(Map<String, Object> statistics, List<String> violations, List<String> recommendations) {
+            this.statistics = statistics != null ? statistics : new HashMap<>();
+            this.violations = violations != null ? violations : new ArrayList<>();
+            this.recommendations = recommendations != null ? recommendations : new ArrayList<>();
+        }
+        
+        // Getters
+        public Map<String, Object> getStatistics() { return statistics; }
+        public List<String> getViolations() { return violations; }
+        public List<String> getRecommendations() { return recommendations; }
+        
+        public boolean isCompliant() {
+            return violations.isEmpty();
+        }
+        
+        public int getViolationCount() {
+            return violations.size();
+        }
+        
+        public int getRecommendationCount() {
+            return recommendations.size();
+        }
+    }
+    
+    public static class StorageSavingsReport {
+        private final long archivedSizeBytes;
+        private final long activeSizeBytes;
+        private final int archivedDataSetCount;
+        private final int activeDataSetCount;
+        
+        public StorageSavingsReport(long archivedSizeBytes, long activeSizeBytes, int archivedDataSetCount, int activeDataSetCount) {
+            this.archivedSizeBytes = archivedSizeBytes;
+            this.activeSizeBytes = activeSizeBytes;
+            this.archivedDataSetCount = archivedDataSetCount;
+            this.activeDataSetCount = activeDataSetCount;
+        }
+        
+        // Getters
+        public long getArchivedSizeBytes() { return archivedSizeBytes; }
+        public long getActiveSizeBytes() { return activeSizeBytes; }
+        public int getArchivedDataSetCount() { return archivedDataSetCount; }
+        public int getActiveDataSetCount() { return activeDataSetCount; }
+        
+        public long getTotalSizeBytes() {
+            return archivedSizeBytes + activeSizeBytes;
+        }
+        
+        public double getArchivedSizeMB() {
+            return archivedSizeBytes / (1024.0 * 1024.0);
+        }
+        
+        public double getActiveSizeMB() {
+            return activeSizeBytes / (1024.0 * 1024.0);
+        }
+        
+        public double getTotalSizeMB() {
+            return getTotalSizeBytes() / (1024.0 * 1024.0);
+        }
+        
+        public double getArchivePercentage() {
+            long total = getTotalSizeBytes();
+            return total > 0 ? (double) archivedSizeBytes / total * 100 : 0;
+        }
     }
 }

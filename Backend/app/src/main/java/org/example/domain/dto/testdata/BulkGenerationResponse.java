@@ -340,7 +340,7 @@ public class BulkGenerationResponse {
     public static class BatchItemStatus {
         private String requestId;
         private String generationId;
-        private BatchItemStatus status;
+        private ItemStatus status;
         private LocalDateTime startedAt;
         private LocalDateTime completedAt;
         private int recordsGenerated;
@@ -354,7 +354,7 @@ public class BulkGenerationResponse {
         public BatchItemStatus(String requestId) {
             this.requestId = requestId;
             this.startedAt = LocalDateTime.now();
-            this.status = BatchItemStatus.PENDING;
+            this.status = ItemStatus.PENDING;
         }
         
         // Getters and Setters
@@ -364,8 +364,8 @@ public class BulkGenerationResponse {
         public String getGenerationId() { return generationId; }
         public void setGenerationId(String generationId) { this.generationId = generationId; }
         
-        public BatchItemStatus getStatus() { return status; }
-        public void setStatus(BatchItemStatus status) { this.status = status; }
+        public ItemStatus getStatus() { return status; }
+        public void setStatus(ItemStatus status) { this.status = status; }
         
         public LocalDateTime getStartedAt() { return startedAt; }
         public void setStartedAt(LocalDateTime startedAt) { this.startedAt = startedAt; }

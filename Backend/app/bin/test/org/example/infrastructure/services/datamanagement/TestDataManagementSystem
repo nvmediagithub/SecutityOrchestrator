@@ -1,0 +1,129 @@
+package org.example.infrastructure.services.datamanagement;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Integration test for the complete test data management system
+ */
+@SpringBootTest
+@ActiveProfiles("test")
+@Transactional
+public class TestDataManagementSystemIntegrationTest {
+    
+    @Autowired
+    private DataVersioningService versioningService;
+    
+    @Autowired
+    private DataPrivacyService privacyService;
+    
+    @Autowired
+    private DataRetentionService retentionService;
+    
+    @Autowired
+    private DataMaskingService maskingService;
+    
+    private String testDataSetId;
+    private String testUserId = "test_user";
+    
+    @BeforeEach
+    void setUp() {
+        // Create a test data set
+        testDataSetId = "TEST_DATA_SET_" + System.currentTimeMillis();
+    }
+    
+    @Test
+    void testCompleteDataManagementWorkflow() {
+        // Step 1: Create initial data set
+        String initialContent = "{\"name\": \"John Doe\", \"email\": \"john@example.com\", \"phone\": \"555-1234\", \"ssn\": \"123-45-6789\"}";
+        
+        // Test versioning service
+        DataVersion version1 = versioningService.createVersion(testDataSetId, initialContent, testUserId);
+        assertNotNull(version1);
+        assertEquals(1, version1.getVersionNumber());
+        assertEquals("MINOR", version1.getVersionType());
+        
+        // Step 2: Test privacy classification
+        DataPrivacyService.ComplianceReport complianceReport = privacyService.checkCompliance(testDataSetId);
+        assertNotNull(complianceReport);
+        // Should detect PII violations
+        assertTrue(complianceReport.getViolations().size() > 0);
+        
+        // Step 3: Test data masking
+        String maskedContent = maskingService.maskPII(initialContent);
+        assertNotNull(maskedContent);
+        assertNotEquals(initialContent, maskedContent);
+        assertTrue(maskedContent.contains("email@masked.com"));
+        assertTrue(maskedContent.contains("XXX-XXX-XXXX"));
+        assertTrue(maskedContent.contains("XXX-XX-XXXX"));
+        
+        // Step 4: Test PII detection
+        List<String> piiTypes = privacyService.detectPII(initialContent);
+        assertNotNull(piiTypes);
+        assertTrue(piiTypes.contains("EMAIL"));
+        assertTrue(piiTypes.contains("PHONE"));
+        assertTrue(piiTypes.contains("SSN"));
+    }
+    
+    @Test
+    void testDataMaskingServiceEdgeCases() {
+        // Test masking with null content
+        String nullResult = maskingService.maskPII(null);
+        assertNull(nullResult);
+        
+        // Test masking with empty content
+        String emptyResult = maskingService.maskPII("");
+        assertEquals("", emptyResult);
+        
+        // Test masking with content that has no PII
+        String cleanContent = "This is clean data with no sensitive information.";
+        String maskedClean = maskingService.maskPII(cleanContent);
+        assertEquals(cleanContent, maskedClean); // Should remain unchanged
+    }
+    
+    @Test
+    void testPrivacyServiceCompliance() {
+        // Test PII detection edge cases
+        List<String> emptyPII = privacyService.detectPII("");
+        assertNotNull(emptyPII);
+        assertTrue(emptyPII.isEmpty());
+        
+        List<String> nullPII = privacyService.detectPII(null);
+        assertNotNull(nullPII);
+        assertTrue(nullPII.isEmpty());
+        
+        // Test sensitive data detection
+        boolean hasSensitive = privacyService.containsSensitiveData("user@test.com");
+        assertTrue(hasSensitive);
+        
+        boolean noSensitive = privacyService.containsSensitiveData("This is normal text");
+        assertFalse(noSensitive);
+    }
+    
+    @Test
+    void testDataSetOperations() {
+        // Test masking service methods
+        String testContent = "test@example.com";
+        String masked = maskingService.maskPII(testContent);
+        assertEquals("email@masked.com", masked);
+        
+        // Test privacy service PII detection
+        List<String> piiTypes = privacyService.detectPII(testContent);
+        assertTrue(piiTypes.contains("EMAIL"));
+        
+        // Test data access control
+        boolean canAccess = privacyService.canUserAccessData("ADMIN", "CONFIDENTIAL");
+        assertTrue(canAccess);
+        
+        canAccess = privacyService.canUserAccessData("GUEST", "RESTRICTED");
+        assertFalse(canAccess);
+    }
+}
