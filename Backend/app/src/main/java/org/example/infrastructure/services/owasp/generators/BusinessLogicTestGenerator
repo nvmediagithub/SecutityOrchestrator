@@ -1,0 +1,279 @@
+package org.example.infrastructure.services.owasp.generators;
+
+import org.example.infrastructure.services.owasp.base.OwaspTestGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
+
+/**
+ * Генератор тестов безопасности для проверки бизнес-логики (OWASP-A06: Security Misconfiguration)
+ * Обеспечивает testing бизнес-правил и логики приложения
+ */
+public class BusinessLogicTestGenerator implements OwaspTestGenerator {
+    
+    private static final Logger logger = LoggerFactory.getLogger(BusinessLogicTestGenerator.class);
+    private static final Pattern BUSINESS_RULE_PATTERN = Pattern.compile("^[a-zA-Z0-9_\\s]{2,100}$");
+    
+    private final Builder builder;
+    
+    private BusinessLogicTestGenerator(Builder builder) {
+        this.builder = builder;
+    }
+    
+    public static class Builder {
+        private boolean enableWorkflowTesting = true;
+        private boolean enableStateValidation = true;
+        private boolean enableBusinessRuleTesting = true;
+        private boolean enableSequenceTesting = true;
+        private boolean enableLogicBypassTesting = true;
+        private List<String> testWorkflows = Arrays.asList(
+            "payment_process", "order_creation", "user_registration", "file_upload"
+        );
+        private List<String> testBusinessRules = Arrays.asList(
+            "amount_limits", "frequency_limits", "value_validation", "transaction_limits"
+        );
+        
+        public Builder enableWorkflowTesting(boolean enable) {
+            this.enableWorkflowTesting = enable;
+            return this;
+        }
+        
+        public Builder enableStateValidation(boolean enable) {
+            this.enableStateValidation = enable;
+            return this;
+        }
+        
+        public Builder enableBusinessRuleTesting(boolean enable) {
+            this.enableBusinessRuleTesting = enable;
+            return this;
+        }
+        
+        public Builder enableSequenceTesting(boolean enable) {
+            this.enableSequenceTesting = enable;
+            return this;
+        }
+        
+        public Builder enableLogicBypassTesting(boolean enable) {
+            this.enableLogicBypassTesting = enable;
+            return this;
+        }
+        
+        public Builder setTestWorkflows(List<String> testWorkflows) {
+            if (testWorkflows == null || testWorkflows.isEmpty()) 
+                throw new IllegalArgumentException("testWorkflows cannot be null or empty");
+            this.testWorkflows = new ArrayList<>(testWorkflows);
+            return this;
+        }
+        
+        public Builder setTestBusinessRules(List<String> testBusinessRules) {
+            if (testBusinessRules == null || testBusinessRules.isEmpty()) 
+                throw new IllegalArgumentException("testBusinessRules cannot be null or empty");
+            this.testBusinessRules = new ArrayList<>(testBusinessRules);
+            return this;
+        }
+        
+        public BusinessLogicTestGenerator build() {
+            return new BusinessLogicTestGenerator(this);
+        }
+    }
+    
+    public static Builder builder() {
+        return new Builder();
+    }
+    
+    @Override
+    public CompletableFuture<GeneratedTestResult> generateTests(String targetEndpoint, Map<String, Object> parameters) {
+        logger.info("Generating business logic tests for endpoint: {}", targetEndpoint);
+        
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                validateInputs(targetEndpoint, parameters);
+                
+                List<String> testCases = new ArrayList<>();
+                List<String> dependencies = Arrays.asList("junit-jupiter", "rest-assured");
+                
+                if (builder.enableWorkflowTesting) {
+                    testCases.addAll(generateWorkflowTests());
+                }
+                
+                if (builder.enableStateValidation) {
+                    testCases.addAll(generateStateValidationTests());
+                }
+                
+                if (builder.enableBusinessRuleTesting) {
+                    testCases.addAll(generateBusinessRuleTests());
+                }
+                
+                if (builder.enableSequenceTesting) {
+                    testCases.addAll(generateSequenceTests());
+                }
+                
+                if (builder.enableLogicBypassTesting) {
+                    testCases.addAll(generateLogicBypassTests());
+                }
+                
+                String testCode = generateTestCode(targetEndpoint, testCases);
+                Map<String, Object> metadata = createMetadata(parameters);
+                
+                return new GeneratedTestResult(
+                    "BIZ-" + System.currentTimeMillis(),
+                    "Business Logic Security Tests",
+                    "Testing business rules, workflow validation, and logic bypass vulnerabilities",
+                    testCode,
+                    "Business logic should enforce proper rules and prevent bypass",
+                    "HIGH",
+                    dependencies,
+                    true,
+                    metadata
+                );
+                
+            } catch (Exception e) {
+                logger.error("Failed to generate business logic tests", e);
+                throw new RuntimeException("Business logic test generation failed: " + e.getMessage(), e);
+            }
+        });
+    }
+    
+    @Override
+    public CompletableFuture<SecurityCheckResult> performSecurityCheck(String specification) {
+        logger.info("Performing business logic security check for specification: {}", specification);
+        
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                List<String> vulnerabilities = new ArrayList<>();
+                List<String> evidence = new ArrayList<>();
+                
+                if (!specification.contains("validation") && !specification.contains("rule")) {
+                    vulnerabilities.add("Insufficient business rule validation");
+                    evidence.add("Missing business logic validation rules");
+                }
+                
+                String status = vulnerabilities.isEmpty() ? "SECURE" : "VULNERABLE";
+                String remediation = generateRemediation(vulnerabilities);
+                Double confidenceScore = calculateConfidenceScore(vulnerabilities.size());
+                
+                return new SecurityCheckResult(
+                    "BIZ-SEC-" + System.currentTimeMillis(),
+                    "Business Logic Security Check",
+                    status,
+                    "Security assessment of business logic implementation",
+                    String.join("; ", vulnerabilities),
+                    remediation,
+                    confidenceScore,
+                    evidence
+                );
+                
+            } catch (Exception e) {
+                logger.error("Failed to perform business logic security check", e);
+                return new SecurityCheckResult(
+                    "BIZ-SEC-ERROR",
+                    "Business Logic Security Check",
+                    "ERROR",
+                    "Failed to perform security check",
+                    "System error: " + e.getMessage(),
+                    "Review system configuration and try again",
+                    0.0,
+                    Arrays.asList("Error: " + e.getMessage())
+                );
+            }
+        });
+    }
+    
+    @Override
+    public String getCategoryName() {
+        return "Business Logic Security Testing";
+    }
+    
+    @Override
+    public boolean supportsTestType(String testType) {
+        return Arrays.asList(
+            "workflow", "state-validation", "business-rule", "sequence", "logic-bypass"
+        ).contains(testType.toLowerCase());
+    }
+    
+    private void validateInputs(String targetEndpoint, Map<String, Object> parameters) {
+        if (targetEndpoint == null || targetEndpoint.trim().isEmpty()) {
+            throw new IllegalArgumentException("Target endpoint cannot be null or empty");
+        }
+        if (parameters == null) {
+            throw new IllegalArgumentException("Parameters cannot be null");
+        }
+    }
+    
+    private List<String> generateWorkflowTests() {
+        return Arrays.asList(
+            "TestWorkflowSequence", "TestWorkflowBypass", "TestStateTransition"
+        );
+    }
+    
+    private List<String> generateStateValidationTests() {
+        return Arrays.asList(
+            "TestStateValidation", "TestStateManipulation", "TestInvalidState"
+        );
+    }
+    
+    private List<String> generateBusinessRuleTests() {
+        return Arrays.asList(
+            "TestBusinessRuleValidation", "TestRuleBypass", "TestLogicFlaw"
+        );
+    }
+    
+    private List<String> generateSequenceTests() {
+        return Arrays.asList(
+            "TestSequenceValidation", "TestStepSkipping", "TestTimingAttack"
+        );
+    }
+    
+    private List<String> generateLogicBypassTests() {
+        return Arrays.asList(
+            "TestLogicBypass", "TestParameterManipulation", "TestValueChange"
+        );
+    }
+    
+    private String generateTestCode(String targetEndpoint, List<String> testCases) {
+        StringBuilder code = new StringBuilder();
+        code.append("import org.junit.jupiter.api.Test;\n");
+        code.append("import static org.junit.jupiter.api.Assertions.*;\n\n");
+        code.append("public class BusinessLogicSecurityTest {\n\n");
+        code.append("    private static final String BASE_URL = \"").append(targetEndpoint).append("\";\n\n");
+        
+        for (String testCase : testCases) {
+            code.append("    @Test\n");
+            code.append("    public void test").append(testCase).append("() {\n");
+            code.append("        // Test implementation for ").append(testCase).append("\n");
+            code.append("    }\n\n");
+        }
+        
+        code.append("}\n");
+        return code.toString();
+    }
+    
+    private Map<String, Object> createMetadata(Map<String, Object> parameters) {
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("generator", "BusinessLogicTestGenerator");
+        metadata.put("version", "1.0.0");
+        metadata.put("timestamp", System.currentTimeMillis());
+        metadata.put("supportedTests", Arrays.asList(
+            "workflow", "state-validation", "business-rule", "sequence", "logic-bypass"
+        ));
+        metadata.put("parameters", parameters);
+        return metadata;
+    }
+    
+    private String generateRemediation(List<String> vulnerabilities) {
+        List<String> recommendations = new ArrayList<>();
+        if (vulnerabilities.stream().anyMatch(v -> v.contains("validation") || v.contains("rule"))) {
+            recommendations.add("Implement comprehensive business rule validation");
+        }
+        return String.join(". ", recommendations) + ".";
+    }
+    
+    private Double calculateConfidenceScore(int vulnerabilityCount) {
+        if (vulnerabilityCount == 0) return 1.0;
+        if (vulnerabilityCount <= 2) return 0.8;
+        return 0.5;
+    }
+}

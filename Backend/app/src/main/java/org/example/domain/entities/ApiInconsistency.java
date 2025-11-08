@@ -153,10 +153,6 @@ public class ApiInconsistency {
         tags.remove(tag);
     }
     
-    public void setConfidenceScore(Double score) {
-        this.confidenceScore = score;
-    }
-    
     public boolean isHighSeverity() {
         return "HIGH".equals(severity) || "CRITICAL".equals(severity);
     }

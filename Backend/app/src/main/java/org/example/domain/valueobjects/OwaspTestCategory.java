@@ -4,119 +4,166 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * OWASP API Security Test Categories (OWASP API Security Top 10 2019)
+ * OWASP API Security Test Categories (OWASP API Security Top 10 2023+)
  * https://owasp.org/www-project-api-security/
+ * 
+ * Updated to reflect the latest OWASP API Security Top 10 (2023) which includes:
+ * - A01:2023 Broken Object Level Authorization
+ * - A02:2023 Broken Authentication  
+ * - A03:2023 Broken Object Property Level Authorization
+ * - A04:2023 Unrestricted Resource Consumption
+ * - A05:2023 Broken Function Level Authorization
+ * - A06:2023 Unrestricted Access to Sensitive Business Workflows
+ * - A07:2023 Server Side Request Forgery
+ * - A08:2023 Security Misconfiguration
+ * - A09:2023 Improper Inventory Management
+ * - A10:2023 Unsafe Consumption of APIs
  */
 public enum OwaspTestCategory {
     
-    API1_2019_BROKEN_OBJECT_LEVEL_AUTHORIZATION(
-        "API1:2019",
-        "Broken Object Level Authorization (BOLA)",
-        "Test scenarios for Insecure Direct Object References (IDOR) vulnerabilities",
+    // OWASP API Security Top 10 (2023)
+    A01_2023_BROKEN_OBJECT_LEVEL_AUTHORIZATION(
+        "A01:2023",
+        "Broken Object Level Authorization",
+        "Test scenarios for Insecure Direct Object References (IDOR) and broken object level authorization",
         Arrays.asList(
-            "Access other users' objects",
-            "ID manipulation testing", 
-            "Object-level access control testing"
+            "Object ID enumeration",
+            "Direct object reference testing",
+            "IDOR vulnerability testing",
+            "Object-level access control bypass",
+            "Horizontal privilege escalation through objects",
+            "Parameter pollution for object access"
         )
     ),
     
-    API2_2019_BROKEN_USER_AUTHENTICATION(
-        "API2:2019", 
-        "Broken User Authentication",
-        "Test scenarios for authentication weaknesses and bypasses",
+    A02_2023_BROKEN_AUTHENTICATION(
+        "A02:2023", 
+        "Broken Authentication",
+        "Test scenarios for authentication weaknesses, credential stuffing, and session management flaws",
         Arrays.asList(
-            "Weak password policies",
-            "Authentication token manipulation",
-            "Session management testing"
+            "Credential stuffing attacks",
+            "Brute force authentication",
+            "Session token manipulation",
+            "JWT token vulnerabilities",
+            "Multi-factor authentication bypass",
+            "Password policy weaknesses",
+            "Account enumeration",
+            "Session fixation attacks"
         )
     ),
     
-    API3_2019_EXCESSIVE_DATA_EXPOSURE(
-        "API3:2019",
-        "Excessive Data Exposure", 
-        "Test scenarios for data leakage and information disclosure",
+    A03_2023_BROKEN_OBJECT_PROPERTY_LEVEL_AUTHORIZATION(
+        "A03:2023",
+        "Broken Object Property Level Authorization", 
+        "Test scenarios for excessive data exposure and property-level authorization issues",
         Arrays.asList(
-            "Metadata exposure testing",
-            "Verbose error messages",
-            "Sensitive data in responses"
+            "Property enumeration attacks",
+            "Excessive data exposure",
+            "Property-level access control bypass",
+            "Mass assignment vulnerabilities",
+            "Property injection attacks",
+            "Field-level authorization testing"
         )
     ),
     
-    API4_2019_LACK_OF_RESOURCES_RATE_LIMITING(
-        "API4:2019",
-        "Lack of Resources & Rate Limiting",
-        "Test scenarios for DoS attacks and resource exhaustion",
+    A04_2023_UNRESTRICTED_RESOURCE_CONSUMPTION(
+        "A04:2023",
+        "Unrestricted Resource Consumption",
+        "Test scenarios for DoS attacks, resource exhaustion, and rate limiting bypasses",
         Arrays.asList(
-            "Large request payload testing",
+            "Large payload attacks",
+            "Resource exhaustion through requests",
             "Rate limiting bypass",
-            "Resource exhaustion attacks"
+            "Memory exhaustion attacks",
+            "CPU consumption attacks",
+            "Concurrent request flooding",
+            "Database query complexity attacks"
         )
     ),
     
-    API5_2019_BROKEN_FUNCTION_LEVEL_AUTHORIZATION(
-        "API5:2019", 
+    A05_2023_BROKEN_FUNCTION_LEVEL_AUTHORIZATION(
+        "A05:2023", 
         "Broken Function Level Authorization",
-        "Test scenarios for privilege escalation and function access control",
+        "Test scenarios for privilege escalation and function-level access control",
         Arrays.asList(
             "Horizontal privilege escalation",
             "Vertical privilege escalation", 
-            "Function-level access control testing"
+            "Function-level access control bypass",
+            "Method access control testing",
+            "Endpoint privilege escalation",
+            "Administrative function access"
         )
     ),
     
-    API6_2019_MASS_ASSIGNMENT(
-        "API6:2019",
-        "Mass Assignment",
-        "Test scenarios for binding vulnerabilities and mass assignment attacks",
+    A06_2023_UNRESTRICTED_ACCESS_TO_SENSITIVE_BUSINESS_WORKFLOWS(
+        "A06:2023",
+        "Unrestricted Access to Sensitive Business Workflows",
+        "Test scenarios for bypassing business process controls and workflow restrictions",
         Arrays.asList(
-            "Unexpected field binding",
-            "Privilege escalation through binding",
-            "Property binding manipulation"
+            "Business logic bypass",
+            "Workflow sequence manipulation",
+            "State transition attacks",
+            "Business rule circumvention",
+            "Multi-step process manipulation",
+            "Competitive process exploitation"
         )
     ),
     
-    API7_2019_SECURITY_MISCONFIGURATION(
-        "API7:2019",
+    A07_2023_SERVER_SIDE_REQUEST_FORGERY(
+        "A07:2023",
+        "Server Side Request Forgery",
+        "Test scenarios for SSRF vulnerabilities and server-side request manipulation",
+        Arrays.asList(
+            "SSRF through URL parameters",
+            "SSRF through file uploads",
+            "SSRF through redirects",
+            "Internal network access",
+            "Cloud metadata access",
+            "Port scanning through SSRF"
+        )
+    ),
+    
+    A08_2023_SECURITY_MISCONFIGURATION(
+        "A08:2023",
         "Security Misconfiguration", 
-        "Test scenarios for security configuration issues",
+        "Test scenarios for security configuration issues, default settings, and insecure defaults",
         Arrays.asList(
-            "CORS policy testing",
+            "CORS misconfiguration",
             "Security header validation",
-            "Default configuration testing"
+            "Default credential testing",
+            "Debug mode exposure",
+            "Insecure server configuration",
+            "Information disclosure",
+            "Verbose error messages",
+            "Insecure HTTP methods"
         )
     ),
     
-    API8_2019_INJECTION(
-        "API8:2019",
-        "Injection",
-        "Test scenarios for various injection vulnerabilities",
+    A09_2023_IMPROPER_INVENTORY_MANAGEMENT(
+        "A09:2023",
+        "Improper Inventory Management",
+        "Test scenarios for API version management, deprecated endpoints, and asset inventory issues",
         Arrays.asList(
-            "SQL injection",
-            "NoSQL injection", 
-            "Command injection",
-            "Template injection"
-        )
-    ),
-    
-    API9_2019_IMPROPER_ASSETS_MANAGEMENT(
-        "API9:2019",
-        "Improper Assets Management",
-        "Test scenarios for API versioning and asset management issues",
-        Arrays.asList(
-            "Deprecated endpoint testing",
             "Version enumeration",
-            "Test environment exposure"
+            "Deprecated endpoint testing",
+            "Shadow API discovery",
+            "API documentation exposure",
+            "Beta endpoint testing",
+            "Development environment exposure"
         )
     ),
     
-    API10_2019_INSUFFICIENT_LOGGING_MONITORING(
-        "API10:2019",
-        "Insufficient Logging & Monitoring",
-        "Test scenarios for logging and monitoring gaps",
+    A10_2023_UNSAFE_CONSUMPTION_OF_APIS(
+        "A10:2023",
+        "Unsafe Consumption of APIs",
+        "Test scenarios for insecure API integrations, trust issues, and third-party API vulnerabilities",
         Arrays.asList(
-            "Security event logging",
-            "Alerting mechanism testing", 
-            "Forensic capability testing"
+            "Insecure API integrations",
+            "Trust boundary violations",
+            "Third-party API vulnerabilities",
+            "Input validation from external APIs",
+            "API chain exploitation",
+            "Insufficient logging from external APIs"
         )
     );
     
@@ -157,33 +204,44 @@ public enum OwaspTestCategory {
         throw new IllegalArgumentException("Unknown OWASP test category: " + code);
     }
     
-    public static List<OwaspTestCategory> getSecurityCategories() {
+    // Group categories by risk level
+    public static List<OwaspTestCategory> getCriticalCategories() {
         return Arrays.asList(
-            API1_2019_BROKEN_OBJECT_LEVEL_AUTHORIZATION,
-            API2_2019_BROKEN_USER_AUTHENTICATION,
-            API5_2019_BROKEN_FUNCTION_LEVEL_AUTHORIZATION,
-            API6_2019_MASS_ASSIGNMENT,
-            API7_2019_SECURITY_MISCONFIGURATION,
-            API8_2019_INJECTION
+            A01_2023_BROKEN_OBJECT_LEVEL_AUTHORIZATION,
+            A02_2023_BROKEN_AUTHENTICATION,
+            A05_2023_BROKEN_FUNCTION_LEVEL_AUTHORIZATION
         );
     }
     
-    public static List<OwaspTestCategory> getDataExposureCategories() {
+    public static List<OwaspTestCategory> getHighRiskCategories() {
         return Arrays.asList(
-            API3_2019_EXCESSIVE_DATA_EXPOSURE,
-            API9_2019_IMPROPER_ASSETS_MANAGEMENT
+            A03_2023_BROKEN_OBJECT_PROPERTY_LEVEL_AUTHORIZATION,
+            A06_2023_UNRESTRICTED_ACCESS_TO_SENSITIVE_BUSINESS_WORKFLOWS,
+            A07_2023_SERVER_SIDE_REQUEST_FORGERY,
+            A08_2023_SECURITY_MISCONFIGURATION
         );
     }
     
-    public static List<OwaspTestCategory> getPerformanceCategories() {
+    public static List<OwaspTestCategory> getResourceCategories() {
         return Arrays.asList(
-            API4_2019_LACK_OF_RESOURCES_RATE_LIMITING
+            A04_2023_UNRESTRICTED_RESOURCE_CONSUMPTION
         );
     }
     
-    public static List<OwaspTestCategory> getMonitoringCategories() {
+    public static List<OwaspTestCategory> getInventoryCategories() {
         return Arrays.asList(
-            API10_2019_INSUFFICIENT_LOGGING_MONITORING
+            A09_2023_IMPROPER_INVENTORY_MANAGEMENT
         );
+    }
+    
+    public static List<OwaspTestCategory> getIntegrationCategories() {
+        return Arrays.asList(
+            A10_2023_UNSAFE_CONSUMPTION_OF_APIS
+        );
+    }
+    
+    // Legacy categories - return empty list since we're using OWASP 2023+
+    public static List<OwaspTestCategory> getLegacy2019Categories() {
+        return Arrays.asList();
     }
 }

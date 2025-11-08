@@ -53,10 +53,22 @@ dependencies {
     // Logging
     implementation("ch.qos.logback:logback-classic:1.4.14")
 
-    // Basic OpenAPI support (using stable versions)
-    implementation("org.openapitools:openapi-generator:7.4.0")
-    implementation("io.swagger.parser.v3:swagger-parser-v3:2.1.22")
-    implementation("io.swagger.parser.v2:swagger-parser-v2:2.1.22")
+    // OpenAPI v3 support (SpringDoc - основная зависимость)
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
+    implementation("org.openapitools:openapi-generator:6.6.0")
+    // OpenAPI v3 parser - совместимая версия
+    implementation("io.swagger.parser.v3:swagger-parser-v3:2.1.10")
+    // LLM and AI dependencies
+    implementation("com.github.tomakehurst:wiremock:2.27.2")
+    implementation("com.google.code.gson:gson:2.10.1")
+    
+    // BPMN processing (опциональные)
+    // implementation("org.camunda.bpm:camunda-bpm-junit5:7.21.0")
+    // implementation("org.camunda.bpm:camunda-bpm-model-xml:7.21.0")
+    
+    // LLM and AI dependencies
+    implementation("com.github.tomakehurst:wiremock:2.27.2")
+    implementation("com.google.code.gson:gson:2.10.1")
     
     // YAML and JSON processing
     implementation("org.yaml:snakeyaml:2.2")

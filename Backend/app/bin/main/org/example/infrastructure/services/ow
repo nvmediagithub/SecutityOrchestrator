@@ -1,0 +1,326 @@
+package org.example.infrastructure.services.owasp.generators;
+
+import org.example.infrastructure.services.owasp.base.OwaspTestGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
+
+/**
+ * Генератор тестов безопасности для проверки DoS атак (OWASP-A04: Insecure Design)
+ * Обеспечивает testing против DoS и resource exhaustion атак
+ */
+public class DosAttackTestGenerator implements OwaspTestGenerator {
+    
+    private static final Logger logger = LoggerFactory.getLogger(DosAttackTestGenerator.class);
+    private static final Pattern RATE_PATTERN = Pattern.compile("^\\d+$");
+    
+    private final Builder builder;
+    
+    private DosAttackTestGenerator(Builder builder) {
+        this.builder = builder;
+    }
+    
+    public static class Builder {
+        private boolean enableRateLimitTesting = true;
+        private boolean enableResourceExhaustionTesting = true;
+        private boolean enableSlowRequestTesting = true;
+        private boolean enableLargePayloadTesting = true;
+        private boolean enableConcurrentConnectionTesting = true;
+        private int maxRequestsPerSecond = 100;
+        private int maxConcurrentConnections = 50;
+        private long maxPayloadSize = 1024 * 1024; // 1MB
+        private List<String> attackVectors = Arrays.asList(
+            "slowloris", "slowpost", "slowread", "rudy", "kampf"
+        );
+        
+        public Builder enableRateLimitTesting(boolean enable) {
+            this.enableRateLimitTesting = enable;
+            return this;
+        }
+        
+        public Builder enableResourceExhaustionTesting(boolean enable) {
+            this.enableResourceExhaustionTesting = enable;
+            return this;
+        }
+        
+        public Builder enableSlowRequestTesting(boolean enable) {
+            this.enableSlowRequestTesting = enable;
+            return this;
+        }
+        
+        public Builder enableLargePayloadTesting(boolean enable) {
+            this.enableLargePayloadTesting = enable;
+            return this;
+        }
+        
+        public Builder enableConcurrentConnectionTesting(boolean enable) {
+            this.enableConcurrentConnectionTesting = enable;
+            return this;
+        }
+        
+        public Builder setMaxRequestsPerSecond(int maxRequestsPerSecond) {
+            if (maxRequestsPerSecond <= 0) throw new IllegalArgumentException("maxRequestsPerSecond must be positive");
+            this.maxRequestsPerSecond = maxRequestsPerSecond;
+            return this;
+        }
+        
+        public Builder setMaxConcurrentConnections(int maxConcurrentConnections) {
+            if (maxConcurrentConnections <= 0) throw new IllegalArgumentException("maxConcurrentConnections must be positive");
+            this.maxConcurrentConnections = maxConcurrentConnections;
+            return this;
+        }
+        
+        public Builder setMaxPayloadSize(long maxPayloadSize) {
+            if (maxPayloadSize <= 0) throw new IllegalArgumentException("maxPayloadSize must be positive");
+            this.maxPayloadSize = maxPayloadSize;
+            return this;
+        }
+        
+        public Builder setAttackVectors(List<String> attackVectors) {
+            if (attackVectors == null || attackVectors.isEmpty()) 
+                throw new IllegalArgumentException("attackVectors cannot be null or empty");
+            this.attackVectors = new ArrayList<>(attackVectors);
+            return this;
+        }
+        
+        public DosAttackTestGenerator build() {
+            return new DosAttackTestGenerator(this);
+        }
+    }
+    
+    public static Builder builder() {
+        return new Builder();
+    }
+    
+    @Override
+    public CompletableFuture<GeneratedTestResult> generateTests(String targetEndpoint, Map<String, Object> parameters) {
+        logger.info("Generating DoS attack tests for endpoint: {}", targetEndpoint);
+        
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                validateInputs(targetEndpoint, parameters);
+                
+                List<String> testCases = new ArrayList<>();
+                List<String> dependencies = Arrays.asList("junit-jupiter", "rest-assured", "async-http-client");
+                
+                if (builder.enableRateLimitTesting) {
+                    testCases.addAll(generateRateLimitTests());
+                }
+                
+                if (builder.enableResourceExhaustionTesting) {
+                    testCases.addAll(generateResourceExhaustionTests());
+                }
+                
+                if (builder.enableSlowRequestTesting) {
+                    testCases.addAll(generateSlowRequestTests());
+                }
+                
+                if (builder.enableLargePayloadTesting) {
+                    testCases.addAll(generateLargePayloadTests());
+                }
+                
+                if (builder.enableConcurrentConnectionTesting) {
+                    testCases.addAll(generateConcurrentConnectionTests());
+                }
+                
+                String testCode = generateTestCode(targetEndpoint, testCases);
+                Map<String, Object> metadata = createMetadata(parameters);
+                
+                return new GeneratedTestResult(
+                    "DOS-" + System.currentTimeMillis(),
+                    "DoS Attack Security Tests",
+                    "Comprehensive testing against Denial of Service attacks including rate limiting, resource exhaustion, slow requests, large payloads, and concurrent connections",
+                    testCode,
+                    "System should be protected against DoS and resource exhaustion attacks",
+                    "CRITICAL",
+                    dependencies,
+                    true,
+                    metadata
+                );
+                
+            } catch (Exception e) {
+                logger.error("Failed to generate DoS attack tests", e);
+                throw new RuntimeException("DoS attack test generation failed: " + e.getMessage(), e);
+            }
+        });
+    }
+    
+    @Override
+    public CompletableFuture<SecurityCheckResult> performSecurityCheck(String specification) {
+        logger.info("Performing DoS attack security check for specification: {}", specification);
+        
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                List<String> vulnerabilities = new ArrayList<>();
+                List<String> evidence = new ArrayList<>();
+                
+                // Проверка на отсутствие rate limiting
+                if (!specification.contains("rate") && !specification.contains("throttle")) {
+                    vulnerabilities.add("No rate limiting protection");
+                    evidence.add("Missing rate limiting or throttling mechanisms");
+                }
+                
+                // Проверка на отсутствие resource limits
+                if (!specification.contains("limit") && !specification.contains("quota")) {
+                    vulnerabilities.add("Missing resource limits");
+                    evidence.add("No resource consumption limits found");
+                }
+                
+                // Проверка на слабую обработку больших запросов
+                if (!specification.contains("size") && !specification.contains("timeout")) {
+                    vulnerabilities.add("Insufficient protection against large payloads");
+                    evidence.add("No size limits or timeout configurations");
+                }
+                
+                String status = vulnerabilities.isEmpty() ? "SECURE" : "VULNERABLE";
+                String remediation = generateRemediation(vulnerabilities);
+                Double confidenceScore = calculateConfidenceScore(vulnerabilities.size());
+                
+                return new SecurityCheckResult(
+                    "DOS-SEC-" + System.currentTimeMillis(),
+                    "DoS Attack Security Check",
+                    status,
+                    "Security assessment of DoS protection implementation",
+                    String.join("; ", vulnerabilities),
+                    remediation,
+                    confidenceScore,
+                    evidence
+                );
+                
+            } catch (Exception e) {
+                logger.error("Failed to perform DoS attack security check", e);
+                return new SecurityCheckResult(
+                    "DOS-SEC-ERROR",
+                    "DoS Attack Security Check",
+                    "ERROR",
+                    "Failed to perform security check",
+                    "System error: " + e.getMessage(),
+                    "Review system configuration and try again",
+                    0.0,
+                    Arrays.asList("Error: " + e.getMessage())
+                );
+            }
+        });
+    }
+    
+    @Override
+    public String getCategoryName() {
+        return "DoS Attack Security Testing";
+    }
+    
+    @Override
+    public boolean supportsTestType(String testType) {
+        return Arrays.asList(
+            "rate-limiting", "resource-exhaustion", "slow-requests", "large-payload", 
+            "concurrent-connections", "slowloris", "slowpost", "flood"
+        ).contains(testType.toLowerCase());
+    }
+    
+    private void validateInputs(String targetEndpoint, Map<String, Object> parameters) {
+        if (targetEndpoint == null || targetEndpoint.trim().isEmpty()) {
+            throw new IllegalArgumentException("Target endpoint cannot be null or empty");
+        }
+        if (parameters == null) {
+            throw new IllegalArgumentException("Parameters cannot be null");
+        }
+    }
+    
+    private List<String> generateRateLimitTests() {
+        return Arrays.asList(
+            "TestRateLimiting", "TestRequestThrottling", "TestConnectionLimits", "TestBurstTraffic"
+        );
+    }
+    
+    private List<String> generateResourceExhaustionTests() {
+        return Arrays.asList(
+            "TestMemoryExhaustion", "TestCPUExhaustion", "TestConnectionPool", "TestFileDescriptors"
+        );
+    }
+    
+    private List<String> generateSlowRequestTests() {
+        return Arrays.asList(
+            "TestSlowLoris", "TestSlowPost", "TestSlowRead", "TestTimeoutHandling"
+        );
+    }
+    
+    private List<String> generateLargePayloadTests() {
+        return Arrays.asList(
+            "TestLargeRequest", "TestPayloadSize", "TestMultipartLimits", "TestBufferOverflow"
+        );
+    }
+    
+    private List<String> generateConcurrentConnectionTests() {
+        return Arrays.asList(
+            "TestConcurrentConnections", "TestConnectionFlood", "TestKeepAlive", "TestThreadPool"
+        );
+    }
+    
+    private String generateTestCode(String targetEndpoint, List<String> testCases) {
+        StringBuilder code = new StringBuilder();
+        
+        code.append("import org.junit.jupiter.api.Test;\n");
+        code.append("import org.junit.jupiter.api.BeforeEach;\n");
+        code.append("import io.restassured.RestAssured;\n");
+        code.append("import io.restassured.response.Response;\n");
+        code.append("import static org.junit.jupiter.api.Assertions.*;\n\n");
+        
+        code.append("public class DosAttackSecurityTest {\n\n");
+        code.append("    private static final String BASE_URL = \"").append(targetEndpoint).append("\";\n\n");
+        
+        for (String testCase : testCases) {
+            code.append("    @Test\n");
+            code.append("    public void test").append(testCase).append("() {\n");
+            code.append("        // Test implementation for ").append(testCase).append("\n");
+            code.append("    }\n\n");
+        }
+        
+        code.append("}\n");
+        
+        return code.toString();
+    }
+    
+    private Map<String, Object> createMetadata(Map<String, Object> parameters) {
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("generator", "DosAttackTestGenerator");
+        metadata.put("version", "1.0.0");
+        metadata.put("timestamp", System.currentTimeMillis());
+        metadata.put("supportedTests", Arrays.asList(
+            "rate-limiting", "resource-exhaustion", "slow-requests", "large-payload", 
+            "concurrent-connections", "slowloris", "slowpost", "flood"
+        ));
+        metadata.put("parameters", parameters);
+        return metadata;
+    }
+    
+    private String generateRemediation(List<String> vulnerabilities) {
+        List<String> recommendations = new ArrayList<>();
+        
+        if (vulnerabilities.stream().anyMatch(v -> v.contains("rate") || v.contains("throttle"))) {
+            recommendations.add("Implement rate limiting and request throttling mechanisms");
+        }
+        
+        if (vulnerabilities.stream().anyMatch(v -> v.contains("resource") || v.contains("limit"))) {
+            recommendations.add("Add resource consumption limits and quotas");
+        }
+        
+        if (vulnerabilities.stream().anyMatch(v -> v.contains("payload") || v.contains("size"))) {
+            recommendations.add("Implement payload size limits and timeout configurations");
+        }
+        
+        if (vulnerabilities.stream().anyMatch(v -> v.contains("connection") || v.contains("concurrent"))) {
+            recommendations.add("Configure connection limits and timeout handling");
+        }
+        
+        return String.join(". ", recommendations) + ".";
+    }
+    
+    private Double calculateConfidenceScore(int vulnerabilityCount) {
+        if (vulnerabilityCount == 0) return 1.0;
+        if (vulnerabilityCount <= 2) return 0.9;
+        if (vulnerabilityCount <= 3) return 0.7;
+        return 0.4;
+    }
+}

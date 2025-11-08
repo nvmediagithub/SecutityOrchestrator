@@ -1,284 +1,224 @@
 package org.example.domain.entities.openapi;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
- * Схема данных API
+ * Сущность для хранения схем данных API
  */
+@Entity
+@Table(name = "api_schemas")
+@EntityListeners(AuditingEntityListener.class)
 public class ApiSchema {
     
-    private String name;
-    private String type; // object, array, string, number, boolean, integer
-    private String format; // int32, int64, float, double, string, date, date-time, etc.
-    private String description;
-    private Object example;
-    private Map<String, Object> examples;
-    private Object defaultValue;
-    private List<String> enumValues;
-    private List<String> requiredFields;
-    private Map<String, ApiSchema> properties;
-    private ApiSchema items; // for arrays
-    private Object minimum;
-    private Object maximum;
-    private String pattern;
-    private int minLength;
-    private int maxLength;
-    private int minItems;
-    private int maxItems;
-    private boolean uniqueItems;
-    private boolean nullable;
-    private String discriminator;
-    private Map<String, Object> externalDocs;
-    private Map<String, Object> extensions;
-    private String originalRef;
-    private boolean deprecated;
-    private String xml;
+    @Id
+    @GeneratedValue
+    private UUID id;
     
-    public ApiSchema() {
-        this.properties = new java.util.HashMap<>();
-        this.enumValues = new ArrayList<>();
-        this.requiredFields = new ArrayList<>();
-        this.examples = new java.util.HashMap<>();
-        this.extensions = new java.util.HashMap<>();
-        this.externalDocs = new java.util.HashMap<>();
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_id")
+    private OpenApiService service;
+    
+    @NotBlank
+    private String name;
+    
+    private String type;
+    
+    private String format;
+    
+    private String description;
+    
+    private String title;
+    
+    @Column(name = "is_abstract")
+    private Boolean isAbstract = false;
+    
+    @Column(name = "is_deprecated")
+    private Boolean isDeprecated = false;
+    
+    @Column(name = "example_value")
+    private String exampleValue;
+    
+    @ElementCollection
+    @CollectionTable(name = "schema_required_fields", joinColumns = @JoinColumn(name = "schema_id"))
+    @Column(name = "required_field")
+    private List<String> requiredFields = new ArrayList<>();
+    
+    @ElementCollection
+    @CollectionTable(name = "schema_properties", joinColumns = @JoinColumn(name = "schema_id"))
+    @MapKeyColumn(name = "property_name")
+    @Column(name = "property_value", columnDefinition = "CLOB")
+    private Map<String, String> properties = new HashMap<>();
+    
+    @ElementCollection
+    @CollectionTable(name = "schema_constraints", joinColumns = @JoinColumn(name = "schema_id"))
+    @MapKeyColumn(name = "constraint_name")
+    @Column(name = "constraint_value", columnDefinition = "CLOB")
+    private Map<String, String> constraints = new HashMap<>();
+    
+    @ElementCollection
+    @CollectionTable(name = "schema_examples", joinColumns = @JoinColumn(name = "schema_id"))
+    @MapKeyColumn(name = "example_name")
+    @Column(name = "example_value", columnDefinition = "CLOB")
+    private Map<String, String> examples = new HashMap<>();
+    
+    @Column(name = "external_docs")
+    private String externalDocs;
+    
+    @Column(name = "raw_schema", columnDefinition = "CLOB")
+    private String rawSchema;
+    
+    @CreatedDate
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+    
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
+    // Конструкторы
+    public ApiSchema() {}
     
     public ApiSchema(String name, String type) {
-        this();
         this.name = name;
         this.type = type;
     }
     
-    public void addProperty(String propertyName, ApiSchema property) {
-        this.properties.put(propertyName, property);
-    }
-    
-    public void addRequiredField(String field) {
-        this.requiredFields.add(field);
-    }
-    
-    public void addEnumValue(String value) {
-        this.enumValues.add(value);
-    }
-    
-    // Getters and Setters
-    public String getName() {
-        return name;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public String getType() {
-        return type;
-    }
-    
-    public void setType(String type) {
-        this.type = type;
-    }
-    
-    public String getFormat() {
-        return format;
-    }
-    
-    public void setFormat(String format) {
-        this.format = format;
-    }
-    
-    public String getDescription() {
-        return description;
-    }
-    
-    public void setDescription(String description) {
+    public ApiSchema(String name, String type, String description) {
+        this(name, type);
         this.description = description;
     }
     
-    public Object getExample() {
-        return example;
+    // Геттеры и сеттеры
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+    
+    public OpenApiService getService() { return service; }
+    public void setService(OpenApiService service) { this.service = service; }
+    
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+    
+    public String getFormat() { return format; }
+    public void setFormat(String format) { this.format = format; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    
+    public Boolean getIsAbstract() { return isAbstract; }
+    public void setIsAbstract(Boolean isAbstract) { this.isAbstract = isAbstract; }
+    
+    public Boolean getIsDeprecated() { return isDeprecated; }
+    public void setIsDeprecated(Boolean isDeprecated) { this.isDeprecated = isDeprecated; }
+    
+    public String getExampleValue() { return exampleValue; }
+    public void setExampleValue(String exampleValue) { this.exampleValue = exampleValue; }
+    
+    public List<String> getRequiredFields() { return requiredFields; }
+    public void setRequiredFields(List<String> requiredFields) { this.requiredFields = requiredFields; }
+    
+    public Map<String, String> getProperties() { return properties; }
+    public void setProperties(Map<String, String> properties) { this.properties = properties; }
+    
+    public Map<String, String> getConstraints() { return constraints; }
+    public void setConstraints(Map<String, String> constraints) { this.constraints = constraints; }
+    
+    public Map<String, String> getExamples() { return examples; }
+    public void setExamples(Map<String, String> examples) { this.examples = examples; }
+    
+    public String getExternalDocs() { return externalDocs; }
+    public void setExternalDocs(String externalDocs) { this.externalDocs = externalDocs; }
+    
+    public String getRawSchema() { return rawSchema; }
+    public void setRawSchema(String rawSchema) { this.rawSchema = rawSchema; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    // Вспомогательные методы
+    public void addRequiredField(String field) {
+        if (!requiredFields.contains(field)) {
+            requiredFields.add(field);
+        }
     }
     
-    public void setExample(Object example) {
-        this.example = example;
+    public void removeRequiredField(String field) {
+        requiredFields.remove(field);
     }
     
-    public Map<String, Object> getExamples() {
-        return examples;
+    public void addProperty(String name, String definition) {
+        properties.put(name, definition);
     }
     
-    public void setExamples(Map<String, Object> examples) {
-        this.examples = examples;
+    public void removeProperty(String name) {
+        properties.remove(name);
     }
     
-    public Object getDefaultValue() {
-        return defaultValue;
+    public void addConstraint(String name, String value) {
+        constraints.put(name, value);
     }
     
-    public void setDefaultValue(Object defaultValue) {
-        this.defaultValue = defaultValue;
+    public void addExample(String name, String value) {
+        examples.put(name, value);
     }
     
-    public List<String> getEnumValues() {
-        return enumValues;
+    public boolean hasProperty(String propertyName) {
+        return properties.containsKey(propertyName);
     }
     
-    public void setEnumValues(List<String> enumValues) {
-        this.enumValues = enumValues;
+    public boolean isRequired(String field) {
+        return requiredFields.contains(field);
     }
     
-    public List<String> getRequiredFields() {
-        return requiredFields;
+    public int getPropertyCount() {
+        return properties.size();
     }
     
-    public void setRequiredFields(List<String> requiredFields) {
-        this.requiredFields = requiredFields;
+    public int getRequiredFieldCount() {
+        return requiredFields.size();
     }
     
-    public Map<String, ApiSchema> getProperties() {
-        return properties;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ApiSchema apiSchema = (ApiSchema) o;
+        return Objects.equals(id, apiSchema.id);
     }
     
-    public void setProperties(Map<String, ApiSchema> properties) {
-        this.properties = properties;
-    }
-    
-    public ApiSchema getItems() {
-        return items;
-    }
-    
-    public void setItems(ApiSchema items) {
-        this.items = items;
-    }
-    
-    public Object getMinimum() {
-        return minimum;
-    }
-    
-    public void setMinimum(Object minimum) {
-        this.minimum = minimum;
-    }
-    
-    public Object getMaximum() {
-        return maximum;
-    }
-    
-    public void setMaximum(Object maximum) {
-        this.maximum = maximum;
-    }
-    
-    public String getPattern() {
-        return pattern;
-    }
-    
-    public void setPattern(String pattern) {
-        this.pattern = pattern;
-    }
-    
-    public int getMinLength() {
-        return minLength;
-    }
-    
-    public void setMinLength(int minLength) {
-        this.minLength = minLength;
-    }
-    
-    public int getMaxLength() {
-        return maxLength;
-    }
-    
-    public void setMaxLength(int maxLength) {
-        this.maxLength = maxLength;
-    }
-    
-    public int getMinItems() {
-        return minItems;
-    }
-    
-    public void setMinItems(int minItems) {
-        this.minItems = minItems;
-    }
-    
-    public int getMaxItems() {
-        return maxItems;
-    }
-    
-    public void setMaxItems(int maxItems) {
-        this.maxItems = maxItems;
-    }
-    
-    public boolean isUniqueItems() {
-        return uniqueItems;
-    }
-    
-    public void setUniqueItems(boolean uniqueItems) {
-        this.uniqueItems = uniqueItems;
-    }
-    
-    public boolean isNullable() {
-        return nullable;
-    }
-    
-    public void setNullable(boolean nullable) {
-        this.nullable = nullable;
-    }
-    
-    public String getDiscriminator() {
-        return discriminator;
-    }
-    
-    public void setDiscriminator(String discriminator) {
-        this.discriminator = discriminator;
-    }
-    
-    public Map<String, Object> getExternalDocs() {
-        return externalDocs;
-    }
-    
-    public void setExternalDocs(Map<String, Object> externalDocs) {
-        this.externalDocs = externalDocs;
-    }
-    
-    public Map<String, Object> getExtensions() {
-        return extensions;
-    }
-    
-    public void setExtensions(Map<String, Object> extensions) {
-        this.extensions = extensions;
-    }
-    
-    public String getOriginalRef() {
-        return originalRef;
-    }
-    
-    public void setOriginalRef(String originalRef) {
-        this.originalRef = originalRef;
-    }
-    
-    public boolean isDeprecated() {
-        return deprecated;
-    }
-    
-    public void setDeprecated(boolean deprecated) {
-        this.deprecated = deprecated;
-    }
-    
-    public String getXml() {
-        return xml;
-    }
-    
-    public void setXml(String xml) {
-        this.xml = xml;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
     
     @Override
     public String toString() {
         return "ApiSchema{" +
-                "name='" + name + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 ", format='" + format + '\'' +
-                ", properties=" + properties.size() +
                 '}';
     }
 }

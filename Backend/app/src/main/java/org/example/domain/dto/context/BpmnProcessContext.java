@@ -1,5 +1,7 @@
 package org.example.domain.dto.context;
 
+import org.example.infrastructure.services.bpmn.context.GatewayContext;
+import org.example.infrastructure.services.bpmn.context.EventContext;
 import java.util.List;
 import java.util.Map;
 

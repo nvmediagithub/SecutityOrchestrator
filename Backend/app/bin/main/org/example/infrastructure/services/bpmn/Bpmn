@@ -1,0 +1,701 @@
+package org.example.infrastructure.services.bpmn;
+
+import org.example.domain.entities.bpmn.BpmnTask;
+import org.example.domain.entities.openapi.ApiEndpoint;
+import org.example.domain.entities.openapi.OpenApiService;
+import org.example.domain.entities.bpmn.BusinessProcess;
+import org.example.domain.entities.bpmn.ProcessAnalysis;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+/**
+ * Service for integrating BPMN processes with OpenAPI services
+ * Maps BPMN tasks to API endpoints and analyzes coverage
+ */
+@Service
+@Transactional(readOnly = true)
+public class BpmnApiIntegrationService {
+
+    private static final Logger logger = LoggerFactory.getLogger(BpmnApiIntegrationService.class);
+    
+    // HTTP method patterns
+    private static final Pattern HTTP_METHOD_PATTERN = Pattern.compile(
+        "(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD|TRACE)\\s+/", 
+        Pattern.CASE_INSENSITIVE
+    );
+    
+    // API endpoint patterns that might be found in BPMN task names
+    private static final Pattern API_ENDPOINT_PATTERN = Pattern.compile(
+        "(/\\w+)*(/\\{?\\w+\\}?)*", 
+        Pattern.CASE_INSENSITIVE
+    );
+    
+    private final BpmnParsingService parsingService;
+    private final BusinessProcessAnalysisService analysisService;
+    private final BusinessProcessRepository processRepository;
+    private final BpmnTaskRepository taskRepository;
+    
+    // These would be injected from the OpenAPI module
+    // private final OpenApiServiceRepository openApiServiceRepository;
+    // private final ApiEndpointRepository apiEndpointRepository;
+    
+    public BpmnApiIntegrationService(BpmnParsingService parsingService,
+                                    BusinessProcessAnalysisService analysisService,
+                                    BusinessProcessRepository processRepository,
+                                    BpmnTaskRepository taskRepository) {
+        this.parsingService = parsingService;
+        this.analysisService = analysisService;
+        this.processRepository = processRepository;
+        this.taskRepository = taskRepository;
+    }
+    
+    /**
+     * Map BPMN tasks to API endpoints based on task descriptions
+     */
+    public CompletableFuture<ApiMappingResult> mapBpmnToApi(UUID processId, UUID openApiServiceId) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                BusinessProcess process = processRepository.findById(processId)
+                    .orElseThrow(() -> new IllegalArgumentException("Process not found: " + processId));
+                
+                List<BpmnTask> tasks = taskRepository.findByProcessId(processId);
+                
+                // In a real implementation, you would load the OpenAPI service and its endpoints
+                // For now, we'll simulate the API endpoints
+                List<ApiEndpoint> apiEndpoints = getApiEndpointsFromService(openApiServiceId);
+                
+                ApiMappingResult mappingResult = new ApiMappingResult();
+                mappingResult.setProcessId(processId);
+                mappingResult.setOpenApiServiceId(openApiServiceId);
+                mappingResult.setTotalTasks(tasks.size());
+                
+                List<ApiMapping> mappings = new ArrayList<>();
+                List<String> unmappedTasks = new ArrayList<>();
+                List<String> potentialMappings = new ArrayList<>();
+                
+                for (BpmnTask task : tasks) {
+                    ApiMapping mapping = findApiMapping(task, apiEndpoints);
+                    if (mapping != null) {
+                        mappings.add(mapping);
+                    } else {
+                        unmappedTasks.add(task.getName());
+                        // Look for potential mappings based on similarity
+                        String potentialMapping = findPotentialMapping(task, apiEndpoints);
+                        if (potentialMapping != null) {
+                            potentialMappings.add(task.getName() + " -> " + potentialMapping);
+                        }
+                    }
+                }
+                
+                mappingResult.setMappings(mappings);
+                mappingResult.setUnmappedTasks(unmappedTasks);
+                mappingResult.setPotentialMappings(potentialMappings);
+                mappingResult.setMappedCount(mappings.size());
+                mappingResult.setMappingCoverage(calculateCoverage(mappings.size(), tasks.size()));
+                
+                // Perform API mapping analysis
+                ProcessAnalysis apiAnalysis = analysisService.analyzeProcess(
+                    processId, ProcessAnalysis.AnalysisType.API_MAPPING_ANALYSIS
+                ).get();
+                
+                mappingResult.setAnalysisResult(apiAnalysis);
+                
+                logger.info("API mapping completed for process {}: {}/{} tasks mapped ({:.1f}% coverage)",
+                    processId, mappings.size(), tasks.size(), mappingResult.getMappingCoverage());
+                
+                return mappingResult;
+                
+            } catch (Exception e) {
+                logger.error("Error during API mapping for process: {}", processId, e);
+                throw new RuntimeException("Failed to map BPMN to API", e);
+            }
+        });
+    }
+    
+    /**
+     * Analyze API-BPMN contradictions and inconsistencies
+     */
+    public CompletableFuture<List<ApiBpmnContradiction>> analyzeApiBpmnContradictions(UUID processId, UUID openApiServiceId) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                BusinessProcess process = processRepository.findById(processId)
+                    .orElseThrow(() -> new IllegalArgumentException("Process not found: " + processId));
+                
+                List<BpmnTask> tasks = taskRepository.findByProcessId(processId);
+                List<ApiEndpoint> apiEndpoints = getApiEndpointsFromService(openApiServiceId);
+                
+                List<ApiBpmnContradiction> contradictions = new ArrayList<>();
+                
+                // 1. Find BPMN tasks that should have API endpoints but don't
+                List<String> missingApiForTasks = findMissingApiForTasks(tasks, apiEndpoints);
+                for (String taskName : missingApiForTasks) {
+                    contradictions.add(new ApiBpmnContradiction(
+                        "MISSING_API_ENDPOINT",
+                        "BPMN task '" + taskName + "' appears to require an API endpoint that doesn't exist",
+                        "HIGH",
+                        "Create missing API endpoint or update BPMN task description"
+                    ));
+                }
+                
+                // 2. Find API endpoints that have no corresponding BPMN tasks
+                List<String> missingTasksForApi = findMissingTasksForApi(tasks, apiEndpoints);
+                for (String endpoint : missingTasksForApi) {
+                    contradictions.add(new ApiBpmnContradiction(
+                        "ORPHANED_API_ENDPOINT",
+                        "API endpoint '" + endpoint + "' has no corresponding BPMN task",
+                        "MEDIUM",
+                        "Add BPMN task to represent this API operation or remove unused endpoint"
+                    ));
+                }
+                
+                // 3. Find HTTP method mismatches
+                List<String> methodMismatches = findMethodMismatches(tasks, apiEndpoints);
+                for (String mismatch : methodMismatches) {
+                    contradictions.add(new ApiBpmnContradiction(
+                        "HTTP_METHOD_MISMATCH",
+                        mismatch,
+                        "HIGH",
+                        "Ensure BPMN task descriptions match API HTTP methods"
+                    ));
+                }
+                
+                // 4. Find parameter mismatches
+                List<String> parameterMismatches = findParameterMismatches(tasks, apiEndpoints);
+                for (String mismatch : parameterMismatches) {
+                    contradictions.add(new ApiBpmnContradiction(
+                        "PARAMETER_MISMATCH",
+                        mismatch,
+                        "MEDIUM",
+                        "Review BPMN task parameters and API endpoint parameters for consistency"
+                    ));
+                }
+                
+                // 5. Find security mismatches
+                List<String> securityMismatches = findSecurityMismatches(tasks, apiEndpoints);
+                for (String mismatch : securityMismatches) {
+                    contradictions.add(new ApiBpmnContradiction(
+                        "SECURITY_MISMATCH",
+                        mismatch,
+                        "HIGH",
+                        "Review security requirements for BPMN tasks and API endpoints"
+                    ));
+                }
+                
+                logger.info("Found {} API-BPMN contradictions for process {}", contradictions.size(), processId);
+                return contradictions;
+                
+            } catch (Exception e) {
+                logger.error("Error analyzing API-BPMN contradictions", e);
+                throw new RuntimeException("Failed to analyze API-BPMN contradictions", e);
+            }
+        });
+    }
+    
+    /**
+     * Generate test scenarios that cover both BPMN processes and API endpoints
+     */
+    public CompletableFuture<List<IntegratedTestScenario>> generateIntegratedTestScenarios(UUID processId, UUID openApiServiceId) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                BusinessProcess process = processRepository.findById(processId)
+                    .orElseThrow(() -> new IllegalArgumentException("Process not found: " + processId));
+                
+                List<BpmnTask> tasks = taskRepository.findByProcessId(processId);
+                List<ApiEndpoint> apiEndpoints = getApiEndpointsFromService(openApiServiceId);
+                
+                List<IntegratedTestScenario> scenarios = new ArrayList<>();
+                
+                // 1. Happy path scenario
+                IntegratedTestScenario happyPath = new IntegratedTestScenario();
+                happyPath.setName("Happy Path - " + process.getName());
+                happyPath.setDescription("Standard successful execution path");
+                happyPath.setPriority("HIGH");
+                happyPath.setTestSteps(generateHappyPathSteps(tasks, apiEndpoints));
+                scenarios.add(happyPath);
+                
+                // 2. API error handling scenarios
+                for (ApiEndpoint endpoint : apiEndpoints) {
+                    IntegratedTestScenario errorScenario = new IntegratedTestScenario();
+                    errorScenario.setName("API Error - " + endpoint.getPath() + " " + endpoint.getMethod());
+                    errorScenario.setDescription("Test error handling for API endpoint: " + endpoint.getPath());
+                    errorScenario.setPriority("MEDIUM");
+                    errorScenario.setTestSteps(generateApiErrorSteps(endpoint));
+                    scenarios.add(errorScenario);
+                }
+                
+                // 3. BPMN flow validation scenarios
+                for (int i = 0; i < Math.min(3, tasks.size() - 1); i++) {
+                    BpmnTask task = tasks.get(i);
+                    if (i + 1 < tasks.size()) {
+                        BpmnTask nextTask = tasks.get(i + 1);
+                        
+                        IntegratedTestScenario flowScenario = new IntegratedTestScenario();
+                        flowScenario.setName("Flow Validation - " + task.getName() + " to " + nextTask.getName());
+                        flowScenario.setDescription("Validate flow between: " + task.getName() + " -> " + nextTask.getName());
+                        flowScenario.setPriority("MEDIUM");
+                        flowScenario.setTestSteps(generateFlowValidationSteps(task, nextTask));
+                        scenarios.add(flowScenario);
+                    }
+                }
+                
+                // 4. Data consistency scenarios
+                IntegratedTestScenario dataConsistency = new IntegratedTestScenario();
+                dataConsistency.setName("Data Consistency - " + process.getName());
+                dataConsistency.setDescription("Test data consistency across BPMN tasks and API calls");
+                dataConsistency.setPriority("HIGH");
+                dataConsistency.setTestSteps(generateDataConsistencySteps(tasks, apiEndpoints));
+                scenarios.add(dataConsistency);
+                
+                // 5. Performance scenarios
+                IntegratedTestScenario performance = new IntegratedTestScenario();
+                performance.setName("Performance - " + process.getName());
+                performance.setDescription("Test performance of complete BPMN flow with API calls");
+                performance.setPriority("LOW");
+                performance.setTestSteps(generatePerformanceSteps(tasks, apiEndpoints));
+                scenarios.add(performance);
+                
+                logger.info("Generated {} integrated test scenarios for process {}", scenarios.size(), processId);
+                return scenarios;
+                
+            } catch (Exception e) {
+                logger.error("Error generating integrated test scenarios", e);
+                throw new RuntimeException("Failed to generate integrated test scenarios", e);
+            }
+        });
+    }
+    
+    // Helper methods for API mapping
+    
+    private ApiMapping findApiMapping(BpmnTask task, List<ApiEndpoint> apiEndpoints) {
+        String taskName = task.getName().toLowerCase();
+        String taskDescription = task.getDescription() != null ? task.getDescription().toLowerCase() : "";
+        
+        for (ApiEndpoint endpoint : apiEndpoints) {
+            if (isTaskMatchingEndpoint(task, endpoint)) {
+                ApiMapping mapping = new ApiMapping();
+                mapping.setTaskId(task.getId());
+                mapping.setTaskName(task.getName());
+                mapping.setApiEndpointId(endpoint.getId());
+                mapping.setEndpointPath(endpoint.getPath());
+                mapping.setHttpMethod(endpoint.getMethod());
+                mapping.setMappingConfidence(calculateMappingConfidence(task, endpoint));
+                mapping.setMappingReason(getMappingReason(task, endpoint));
+                return mapping;
+            }
+        }
+        
+        return null;
+    }
+    
+    private boolean isTaskMatchingEndpoint(BpmnTask task, ApiEndpoint endpoint) {
+        String taskName = task.getName().toLowerCase();
+        String taskDescription = task.getDescription() != null ? task.getDescription().toLowerCase() : "";
+        String endpointPath = endpoint.getPath().toLowerCase();
+        String endpointDescription = endpoint.getDescription() != null ? endpoint.getDescription().toLowerCase() : "";
+        
+        // Direct name match
+        if (taskName.contains(endpointPath) || endpointPath.contains(extractResourceName(taskName))) {
+            return true;
+        }
+        
+        // Description match
+        if (!taskDescription.isEmpty() && (taskDescription.contains(endpointPath) || 
+            endpointDescription.contains(extractResourceName(taskName)))) {
+            return true;
+        }
+        
+        // HTTP method and action match
+        String httpMethod = endpoint.getMethod();
+        if (httpMethod != null && taskDescription.contains(httpMethod.toLowerCase())) {
+            return extractActionFromTaskName(taskName).equals(extractActionFromEndpointPath(endpointPath));
+        }
+        
+        return false;
+    }
+    
+    private String extractResourceName(String taskName) {
+        // Extract resource name from task like "Get User Account" -> "user"
+        String[] words = taskName.split("\\s+");
+        if (words.length >= 2) {
+            return words[words.length - 1].toLowerCase();
+        }
+        return taskName.toLowerCase();
+    }
+    
+    private String extractActionFromTaskName(String taskName) {
+        // Extract action from task like "Get User Account" -> "get"
+        String[] words = taskName.split("\\s+");
+        return words.length > 0 ? words[0].toLowerCase() : "";
+    }
+    
+    private String extractActionFromEndpointPath(String endpointPath) {
+        // Extract action from endpoint like "/api/users/{id}" -> "users"
+        String[] parts = endpointPath.split("/");
+        for (String part : parts) {
+            if (!part.isEmpty() && !part.startsWith("{") && !part.equals("api")) {
+                return part.toLowerCase();
+            }
+        }
+        return "";
+    }
+    
+    private double calculateMappingConfidence(BpmnTask task, ApiEndpoint endpoint) {
+        double confidence = 0.0;
+        String taskName = task.getName().toLowerCase();
+        String taskDescription = task.getDescription() != null ? task.getDescription().toLowerCase() : "";
+        String endpointPath = endpoint.getPath().toLowerCase();
+        String endpointDescription = endpoint.getDescription() != null ? endpoint.getDescription().toLowerCase() : "";
+        
+        // Name similarity
+        if (taskName.contains(endpointPath) || endpointPath.contains(extractResourceName(taskName))) {
+            confidence += 0.6;
+        }
+        
+        // Description similarity
+        if (!taskDescription.isEmpty() && taskDescription.contains(endpointPath)) {
+            confidence += 0.3;
+        }
+        
+        // HTTP method match
+        String httpMethod = endpoint.getMethod();
+        if (httpMethod != null && taskDescription.contains(httpMethod.toLowerCase())) {
+            confidence += 0.1;
+        }
+        
+        return Math.min(confidence, 1.0);
+    }
+    
+    private String getMappingReason(BpmnTask task, ApiEndpoint endpoint) {
+        String taskName = task.getName();
+        String endpointPath = endpoint.getPath();
+        String httpMethod = endpoint.getMethod();
+        
+        if (taskName.toLowerCase().contains(endpointPath.toLowerCase())) {
+            return "Task name contains endpoint path";
+        }
+        
+        if (task.getDescription() != null && task.getDescription().contains(httpMethod)) {
+            return "Task description matches HTTP method";
+        }
+        
+        return "Similar naming pattern detected";
+    }
+    
+    private String findPotentialMapping(BpmnTask task, List<ApiEndpoint> apiEndpoints) {
+        for (ApiEndpoint endpoint : apiEndpoints) {
+            if (calculateMappingConfidence(task, endpoint) > 0.3) {
+                return endpoint.getMethod() + " " + endpoint.getPath();
+            }
+        }
+        return null;
+    }
+    
+    private double calculateCoverage(int mappedCount, int totalCount) {
+        return totalCount > 0 ? (double) mappedCount / totalCount * 100 : 0;
+    }
+    
+    // Placeholder methods - in real implementation these would query the OpenAPI module
+    private List<ApiEndpoint> getApiEndpointsFromService(UUID serviceId) {
+        // Simulate API endpoints
+        List<ApiEndpoint> endpoints = new ArrayList<>();
+        
+        ApiEndpoint authEndpoint = new ApiEndpoint();
+        authEndpoint.setId(UUID.randomUUID());
+        authEndpoint.setPath("/auth/bank-token");
+        authEndpoint.setMethod("POST");
+        authEndpoint.setDescription("Authenticate and get bank token");
+        endpoints.add(authEndpoint);
+        
+        ApiEndpoint accountsEndpoint = new ApiEndpoint();
+        accountsEndpoint.setId(UUID.randomUUID());
+        accountsEndpoint.setPath("/accounts");
+        accountsEndpoint.setMethod("GET");
+        accountsEndpoint.setDescription("Get user accounts");
+        endpoints.add(accountsEndpoint);
+        
+        ApiEndpoint balancesEndpoint = new ApiEndpoint();
+        balancesEndpoint.setId(UUID.randomUUID());
+        balancesEndpoint.setPath("/accounts/{account_id}/balances");
+        balancesEndpoint.setMethod("GET");
+        balancesEndpoint.setDescription("Get account balances");
+        endpoints.add(balancesEndpoint);
+        
+        return endpoints;
+    }
+    
+    // Contradiction detection methods
+    private List<String> findMissingApiForTasks(List<BpmnTask> tasks, List<ApiEndpoint> apiEndpoints) {
+        List<String> missing = new ArrayList<>();
+        for (BpmnTask task : tasks) {
+            if (containsApiCall(task) && findApiMapping(task, apiEndpoints) == null) {
+                missing.add(task.getName());
+            }
+        }
+        return missing;
+    }
+    
+    private List<String> findMissingTasksForApi(List<BpmnTask> tasks, List<ApiEndpoint> apiEndpoints) {
+        List<String> missing = new ArrayList<>();
+        for (ApiEndpoint endpoint : apiEndpoints) {
+            boolean hasCorrespondingTask = tasks.stream()
+                .anyMatch(task -> findApiMapping(task, Arrays.asList(endpoint)) != null);
+            if (!hasCorrespondingTask) {
+                missing.add(endpoint.getMethod() + " " + endpoint.getPath());
+            }
+        }
+        return missing;
+    }
+    
+    private List<String> findMethodMismatches(List<BpmnTask> tasks, List<ApiEndpoint> apiEndpoints) {
+        List<String> mismatches = new ArrayList<>();
+        for (BpmnTask task : tasks) {
+            String description = task.getDescription() != null ? task.getDescription().toLowerCase() : "";
+            for (ApiEndpoint endpoint : apiEndpoints) {
+                if (findApiMapping(task, Arrays.asList(endpoint)) != null) {
+                    String httpMethod = endpoint.getMethod().toLowerCase();
+                    if (description.contains("get") && !httpMethod.equals("get")) {
+                        mismatches.add("Task '" + task.getName() + "' uses GET in description but maps to " + httpMethod.toUpperCase());
+                    } else if (description.contains("post") && !httpMethod.equals("post")) {
+                        mismatches.add("Task '" + task.getName() + "' uses POST in description but maps to " + httpMethod.toUpperCase());
+                    }
+                }
+            }
+        }
+        return mismatches;
+    }
+    
+    private List<String> findParameterMismatches(List<BpmnTask> tasks, List<ApiEndpoint> apiEndpoints) {
+        // Simplified parameter mismatch detection
+        return new ArrayList<>(); // Would implement detailed parameter analysis
+    }
+    
+    private List<String> findSecurityMismatches(List<BpmnTask> tasks, List<ApiEndpoint> apiEndpoints) {
+        // Simplified security mismatch detection
+        return new ArrayList<>(); // Would implement security analysis
+    }
+    
+    private boolean containsApiCall(BpmnTask task) {
+        String name = task.getName().toLowerCase();
+        String description = task.getDescription() != null ? task.getDescription().toLowerCase() : "";
+        return name.contains("api") || name.contains("http") || description.contains("/") || 
+               description.contains("get") || description.contains("post");
+    }
+    
+    // Test scenario generation methods
+    private List<TestStep> generateHappyPathSteps(List<BpmnTask> tasks, List<ApiEndpoint> apiEndpoints) {
+        List<TestStep> steps = new ArrayList<>();
+        for (BpmnTask task : tasks) {
+            ApiMapping mapping = findApiMapping(task, apiEndpoints);
+            if (mapping != null) {
+                TestStep step = new TestStep();
+                step.setStepNumber(steps.size() + 1);
+                step.setDescription("Execute: " + task.getName());
+                step.setExpectedResult("Task completed successfully");
+                step.setApiCall(mapping.getHttpMethod() + " " + mapping.getEndpointPath());
+                steps.add(step);
+            }
+        }
+        return steps;
+    }
+    
+    private List<TestStep> generateApiErrorSteps(ApiEndpoint endpoint) {
+        List<TestStep> steps = new ArrayList<>();
+        
+        TestStep step1 = new TestStep();
+        step1.setStepNumber(1);
+        step1.setDescription("Call API endpoint with invalid data");
+        step1.setExpectedResult("API returns appropriate error response");
+        step1.setApiCall(endpoint.getMethod() + " " + endpoint.getPath());
+        steps.add(step1);
+        
+        TestStep step2 = new TestStep();
+        step2.setStepNumber(2);
+        step2.setDescription("Verify error handling in BPMN flow");
+        step2.setExpectedResult("Process handles API error gracefully");
+        steps.add(step2);
+        
+        return steps;
+    }
+    
+    private List<TestStep> generateFlowValidationSteps(BpmnTask task1, BpmnTask task2) {
+        List<TestStep> steps = new ArrayList<>();
+        
+        TestStep step1 = new TestStep();
+        step1.setStepNumber(1);
+        step1.setDescription("Execute first task: " + task1.getName());
+        step1.setExpectedResult("First task completes and passes data to next task");
+        steps.add(step1);
+        
+        TestStep step2 = new TestStep();
+        step2.setStepNumber(2);
+        step2.setDescription("Execute second task: " + task2.getName());
+        step2.setExpectedResult("Second task receives correct data and completes");
+        steps.add(step2);
+        
+        return steps;
+    }
+    
+    private List<TestStep> generateDataConsistencySteps(List<BpmnTask> tasks, List<ApiEndpoint> apiEndpoints) {
+        List<TestStep> steps = new ArrayList<>();
+        
+        TestStep step1 = new TestStep();
+        step1.setStepNumber(1);
+        step1.setDescription("Start BPMN process");
+        step1.setExpectedResult("Process initiates with correct initial data");
+        steps.add(step1);
+        
+        TestStep step2 = new TestStep();
+        step2.setStepNumber(2);
+        step2.setDescription("Execute all tasks in sequence");
+        step2.setExpectedResult("Data remains consistent across all API calls");
+        steps.add(step2);
+        
+        TestStep step3 = new TestStep();
+        step3.setStepNumber(3);
+        step3.setDescription("Verify final state");
+        step3.setExpectedResult("Process completes with correct final data state");
+        steps.add(step3);
+        
+        return steps;
+    }
+    
+    private List<TestStep> generatePerformanceSteps(List<BpmnTask> tasks, List<ApiEndpoint> apiEndpoints) {
+        List<TestStep> steps = new ArrayList<>();
+        
+        TestStep step1 = new TestStep();
+        step1.setStepNumber(1);
+        step1.setDescription("Execute complete BPMN flow");
+        step1.setExpectedResult("All tasks complete within acceptable time limits");
+        step1.setPerformanceTarget("Total execution time < 30 seconds");
+        steps.add(step1);
+        
+        return steps;
+    }
+    
+    // DTO classes for results
+    public static class ApiMappingResult {
+        private UUID processId;
+        private UUID openApiServiceId;
+        private int totalTasks;
+        private int mappedCount;
+        private double mappingCoverage;
+        private List<ApiMapping> mappings;
+        private List<String> unmappedTasks;
+        private List<String> potentialMappings;
+        private ProcessAnalysis analysisResult;
+        
+        // Getters and setters
+        public UUID getProcessId() { return processId; }
+        public void setProcessId(UUID processId) { this.processId = processId; }
+        public UUID getOpenApiServiceId() { return openApiServiceId; }
+        public void setOpenApiServiceId(UUID openApiServiceId) { this.openApiServiceId = openApiServiceId; }
+        public int getTotalTasks() { return totalTasks; }
+        public void setTotalTasks(int totalTasks) { this.totalTasks = totalTasks; }
+        public int getMappedCount() { return mappedCount; }
+        public void setMappedCount(int mappedCount) { this.mappedCount = mappedCount; }
+        public double getMappingCoverage() { return mappingCoverage; }
+        public void setMappingCoverage(double mappingCoverage) { this.mappingCoverage = mappingCoverage; }
+        public List<ApiMapping> getMappings() { return mappings; }
+        public void setMappings(List<ApiMapping> mappings) { this.mappings = mappings; }
+        public List<String> getUnmappedTasks() { return unmappedTasks; }
+        public void setUnmappedTasks(List<String> unmappedTasks) { this.unmappedTasks = unmappedTasks; }
+        public List<String> getPotentialMappings() { return potentialMappings; }
+        public void setPotentialMappings(List<String> potentialMappings) { this.potentialMappings = potentialMappings; }
+        public ProcessAnalysis getAnalysisResult() { return analysisResult; }
+        public void setAnalysisResult(ProcessAnalysis analysisResult) { this.analysisResult = analysisResult; }
+    }
+    
+    public static class ApiMapping {
+        private UUID taskId;
+        private String taskName;
+        private UUID apiEndpointId;
+        private String endpointPath;
+        private String httpMethod;
+        private double mappingConfidence;
+        private String mappingReason;
+        
+        // Getters and setters
+        public UUID getTaskId() { return taskId; }
+        public void setTaskId(UUID taskId) { this.taskId = taskId; }
+        public String getTaskName() { return taskName; }
+        public void setTaskName(String taskName) { this.taskName = taskName; }
+        public UUID getApiEndpointId() { return apiEndpointId; }
+        public void setApiEndpointId(UUID apiEndpointId) { this.apiEndpointId = apiEndpointId; }
+        public String getEndpointPath() { return endpointPath; }
+        public void setEndpointPath(String endpointPath) { this.endpointPath = endpointPath; }
+        public String getHttpMethod() { return httpMethod; }
+        public void setHttpMethod(String httpMethod) { this.httpMethod = httpMethod; }
+        public double getMappingConfidence() { return mappingConfidence; }
+        public void setMappingConfidence(double mappingConfidence) { this.mappingConfidence = mappingConfidence; }
+        public String getMappingReason() { return mappingReason; }
+        public void setMappingReason(String mappingReason) { this.mappingReason = mappingReason; }
+    }
+    
+    public static class ApiBpmnContradiction {
+        private String type;
+        private String description;
+        private String severity;
+        private String recommendation;
+        
+        public ApiBpmnContradiction(String type, String description, String severity, String recommendation) {
+            this.type = type;
+            this.description = description;
+            this.severity = severity;
+            this.recommendation = recommendation;
+        }
+        
+        // Getters and setters
+        public String getType() { return type; }
+        public void setType(String type) { this.type = type; }
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        public String getSeverity() { return severity; }
+        public void setSeverity(String severity) { this.severity = severity; }
+        public String getRecommendation() { return recommendation; }
+        public void setRecommendation(String recommendation) { this.recommendation = recommendation; }
+    }
+    
+    public static class IntegratedTestScenario {
+        private String name;
+        private String description;
+        private String priority;
+        private List<TestStep> testSteps;
+        
+        // Getters and setters
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        public String getPriority() { return priority; }
+        public void setPriority(String priority) { this.priority = priority; }
+        public List<TestStep> getTestSteps() { return testSteps; }
+        public void setTestSteps(List<TestStep> testSteps) { this.testSteps = testSteps; }
+    }
+    
+    public static class TestStep {
+        private int stepNumber;
+        private String description;
+        private String expectedResult;
+        private String apiCall;
+        private String performanceTarget;
+        
+        // Getters and setters
+        public int getStepNumber() { return stepNumber; }
+        public void setStepNumber(int stepNumber) { this.stepNumber = stepNumber; }
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        public String getExpectedResult() { return expectedResult; }
+        public void setExpectedResult(String expectedResult) { this.expectedResult = expectedResult; }
+        public String getApiCall() { return apiCall; }
+        public void setApiCall(String apiCall) { this.apiCall = apiCall; }
+        public String getPerformanceTarget() { return performanceTarget; }
+        public void setPerformanceTarget(String performanceTarget) { this.performanceTarget = performanceTarget; }
+    }
+}

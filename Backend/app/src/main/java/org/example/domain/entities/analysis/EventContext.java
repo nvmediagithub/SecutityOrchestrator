@@ -1,0 +1,164 @@
+package org.example.domain.entities.analysis;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.UUID;
+
+/**
+ * Контекст событий (event) в BPMN процессе
+ */
+public class EventContext {
+    private final String eventId;
+    private final String eventType;
+    private final String eventName;
+    private final String triggerType;
+    private final List<String> outgoingFlows;
+    private final List<String> incomingFlows;
+    private final Boolean isStartEvent;
+    private final Boolean isEndEvent;
+    private final Boolean isIntermediateEvent;
+    private final String messageRef;
+    private final String timerDefinition;
+    private final String errorRef;
+    
+    public EventContext(Builder builder) {
+        this.eventId = builder.eventId != null ? builder.eventId : UUID.randomUUID().toString();
+        this.eventType = builder.eventType != null ? builder.eventType : "UNKNOWN";
+        this.eventName = builder.eventName != null ? builder.eventName : "";
+        this.triggerType = builder.triggerType != null ? builder.triggerType : "NONE";
+        this.outgoingFlows = builder.outgoingFlows != null ? builder.outgoingFlows : new ArrayList<>();
+        this.incomingFlows = builder.incomingFlows != null ? builder.incomingFlows : new ArrayList<>();
+        this.isStartEvent = builder.isStartEvent != null ? builder.isStartEvent : false;
+        this.isEndEvent = builder.isEndEvent != null ? builder.isEndEvent : false;
+        this.isIntermediateEvent = builder.isIntermediateEvent != null ? builder.isIntermediateEvent : false;
+        this.messageRef = builder.messageRef;
+        this.timerDefinition = builder.timerDefinition;
+        this.errorRef = builder.errorRef;
+    }
+    
+    // Getters
+    public String getEventId() { return eventId; }
+    public String getEventType() { return eventType; }
+    public String getEventName() { return eventName; }
+    public String getTriggerType() { return triggerType; }
+    public List<String> getOutgoingFlows() { return outgoingFlows; }
+    public List<String> getIncomingFlows() { return incomingFlows; }
+    public Boolean getIsStartEvent() { return isStartEvent; }
+    public Boolean getIsEndEvent() { return isEndEvent; }
+    public Boolean getIsIntermediateEvent() { return isIntermediateEvent; }
+    public String getMessageRef() { return messageRef; }
+    public String getTimerDefinition() { return timerDefinition; }
+    public String getErrorRef() { return errorRef; }
+    
+    // Utility methods
+    public boolean isStartEvent() {
+        return isStartEvent || "START".equals(eventType);
+    }
+    
+    public boolean isEndEvent() {
+        return isEndEvent || "END".equals(eventType);
+    }
+    
+    public boolean isIntermediateEvent() {
+        return isIntermediateEvent || "INTERMEDIATE".equals(eventType);
+    }
+    
+    public boolean hasMessageTrigger() {
+        return "MESSAGE".equals(triggerType) || (messageRef != null && !messageRef.trim().isEmpty());
+    }
+    
+    public boolean hasTimerTrigger() {
+        return "TIMER".equals(triggerType) || (timerDefinition != null && !timerDefinition.trim().isEmpty());
+    }
+    
+    public boolean hasErrorTrigger() {
+        return "ERROR".equals(triggerType) || (errorRef != null && !errorRef.trim().isEmpty());
+    }
+    
+    public int getFlowCount() {
+        return outgoingFlows.size() + incomingFlows.size();
+    }
+    
+    public boolean isComplex() {
+        return hasMessageTrigger() && hasTimerTrigger();
+    }
+    
+    public static class Builder {
+        private String eventId;
+        private String eventType;
+        private String eventName;
+        private String triggerType;
+        private List<String> outgoingFlows;
+        private List<String> incomingFlows;
+        private Boolean isStartEvent;
+        private Boolean isEndEvent;
+        private Boolean isIntermediateEvent;
+        private String messageRef;
+        private String timerDefinition;
+        private String errorRef;
+        
+        public Builder eventId(String eventId) {
+            this.eventId = eventId;
+            return this;
+        }
+        
+        public Builder eventType(String eventType) {
+            this.eventType = eventType;
+            return this;
+        }
+        
+        public Builder eventName(String eventName) {
+            this.eventName = eventName;
+            return this;
+        }
+        
+        public Builder triggerType(String triggerType) {
+            this.triggerType = triggerType;
+            return this;
+        }
+        
+        public Builder outgoingFlows(List<String> outgoingFlows) {
+            this.outgoingFlows = outgoingFlows;
+            return this;
+        }
+        
+        public Builder incomingFlows(List<String> incomingFlows) {
+            this.incomingFlows = incomingFlows;
+            return this;
+        }
+        
+        public Builder isStartEvent(Boolean isStartEvent) {
+            this.isStartEvent = isStartEvent;
+            return this;
+        }
+        
+        public Builder isEndEvent(Boolean isEndEvent) {
+            this.isEndEvent = isEndEvent;
+            return this;
+        }
+        
+        public Builder isIntermediateEvent(Boolean isIntermediateEvent) {
+            this.isIntermediateEvent = isIntermediateEvent;
+            return this;
+        }
+        
+        public Builder messageRef(String messageRef) {
+            this.messageRef = messageRef;
+            return this;
+        }
+        
+        public Builder timerDefinition(String timerDefinition) {
+            this.timerDefinition = timerDefinition;
+            return this;
+        }
+        
+        public Builder errorRef(String errorRef) {
+            this.errorRef = errorRef;
+            return this;
+        }
+        
+        public EventContext build() {
+            return new EventContext(this);
+        }
+    }
+}

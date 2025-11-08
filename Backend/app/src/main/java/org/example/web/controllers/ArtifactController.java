@@ -1,8 +1,6 @@
-import org.example.domain.dto.openapi.OpenApiAnalysisResponse;
-import org.example.infrastructure.services.llm.OpenApiAnalysisService;
-import org.springframework.web.bind.annotation.PathVariable;
 package org.example.web.controllers;
 
+import org.example.domain.dto.openapi.OpenApiAnalysisResponse;
 import org.example.domain.dto.test.ApiResponse;
 import org.example.domain.dto.test.BpmnDiagramUploadRequest;
 import org.example.domain.dto.test.OpenApiSpecUploadRequest;
@@ -11,17 +9,18 @@ import org.example.domain.entities.OpenApiSpec;
 import org.example.domain.entities.TestArtifact;
 import org.example.domain.entities.TestProject;
 import org.example.domain.valueobjects.OpenApiVersion;
+import org.example.domain.valueobjects.Version;
 import org.example.infrastructure.services.ArtifactService;
 import org.example.infrastructure.services.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.example.domain.dto.openapi.OpenApiAnalysisResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * REST Controller for managing test artifacts
@@ -66,10 +65,10 @@ public class ArtifactController {
                     int major = parts.length > 0 ? Integer.parseInt(parts[0]) : 1;
                     int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
                     int patch = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
-                    spec.setVersion(new org.example.domain.valueobjects.Version(major, minor, patch));
+                    spec.setVersion(new Version(major, minor, patch));
                 } catch (NumberFormatException e) {
                     // Use default version if parsing fails
-                    spec.setVersion(new org.example.domain.valueobjects.Version(1, 0, 0));
+                    spec.setVersion(new Version(1, 0, 0));
                 }
             }
             if (request.getFileSize() != null) spec.setFileSize(request.getFileSize());
@@ -340,11 +339,11 @@ public class ArtifactController {
      * GET /api/artifacts/stats
      */
     @GetMapping("/stats")
-    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> getArtifactStats() {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getArtifactStats() {
         try {
             // This would require a new method in ArtifactService
             // For now, return a mock response
-            java.util.Map<String, Object> stats = new java.util.HashMap<>();
+            Map<String, Object> stats = new HashMap<>();
             stats.put("total", 0);
             stats.put("active", 0);
             stats.put("openapi_specs", 0);
@@ -352,6 +351,10 @@ public class ArtifactController {
             
             return ResponseEntity.ok(ApiResponse.success(stats));
         } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to get artifact statistics: " + e.getMessage()));
+        }
+    }
     
     // ==================== OPENAPI ANALYSIS ENDPOINTS ====================
     
@@ -379,9 +382,9 @@ public class ArtifactController {
      * GET /api/artifacts/openapi/{id}/analysis/status
      */
     @GetMapping("/openapi/{id}/analysis/status")
-    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> getAnalysisStatus(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getAnalysisStatus(@PathVariable Long id) {
         try {
-            ApiResponse<java.util.Map<String, Object>> response = artifactService.getAnalysisStatus(id.toString());
+            ApiResponse<Map<String, Object>> response = artifactService.getAnalysisStatus(id.toString());
             if (response.isSuccess()) {
                 return ResponseEntity.ok(response);
             } else {
@@ -428,11 +431,6 @@ public class ArtifactController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("Failed to regenerate analysis: " + e.getMessage()));
-        }
-    }
-}
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Failed to get artifact statistics: " + e.getMessage()));
         }
     }
 }

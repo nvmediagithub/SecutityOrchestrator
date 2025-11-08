@@ -1,211 +1,453 @@
 package org.example.domain.entities;
 
-import org.example.domain.valueobjects.OwaspTestCategory;
 import org.example.domain.valueobjects.SeverityLevel;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * Сущность тестового сценария для OWASP API Security тестирования
+ * Шаг выполнения теста - представляет отдельный этап в сквозном тестировании
+ * Может быть OWASP тестом, API тестом, BPMN процессом или анализом
  */
 @Entity
-@Table(name = "test_scenarios")
-public class TestScenario {
+@Table(name = "test_execution_steps")
+public class TestExecutionStep {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     @Column(unique = true, nullable = false)
-    private String scenarioId;
+    private String stepId;
     
     @Column(nullable = false)
-    private String name;
+    private String sessionId; // Связь с TestExecutionSession
+    
+    @Column(length = 1000, nullable = false)
+    private String stepName;
     
     @Column(length = 2000)
     private String description;
     
-    @Column(length = 1000)
-    private String objective;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StepType stepType;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OwaspTestCategory category;
+    private StepStatus status = StepStatus.PENDING;
     
     @Enumerated(EnumType.STRING)
-    private SeverityLevel severity = SeverityLevel.MEDIUM;
+    private SeverityLevel severity = SeverityLevel.INFO;
     
-    @Column(length = 500)
-    private String testType; // FUNCTIONAL, SECURITY, PERFORMANCE, INTEGRATION
-    
-    private String openApiAnalysisId;
-    private String bpmnAnalysisId;
-    
-    private String relatedIssueId;
-    private String riskAssessment;
+    private Integer stepOrder = 0;
     
     @Column(length = 2000)
-    private String preconditions;
+    private String targetComponent; // OpenAPI service, BPMN process, OWASP category
     
     @Column(length = 2000)
-    private String expectedResults;
+    private String testType; // SECURITY, FUNCTIONAL, PERFORMANCE, INTEGRATION
+    
+    private LocalDateTime startedAt;
+    private LocalDateTime completedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    
+    private Long durationMs;
+    private Long preparationTimeMs;
+    private Long executionTimeMs;
+    private Long validationTimeMs;
+    
+    @Column(length = 4000)
+    private String inputData;
+    
+    @Column(length = 4000)
+    private String outputData;
+    
+    @Column(length = 4000)
+    private String expectedResult;
+    
+    @Column(length = 4000)
+    private String actualResult;
+    
+    @Enumerated(EnumType.STRING)
+    private ComparisonResult comparisonResult = ComparisonResult.NOT_COMPARED;
+    
+    @Column(length = 4000)
+    private String errorDetails;
     
     @Column(length = 2000)
-    private String successCriteria;
+    private String errorCode;
     
     @Column(length = 2000)
-    private String failureCriteria;
+    private String errorType; // TIMEOUT, ASSERTION_ERROR, NETWORK_ERROR, CONTRACT_VIOLATION
     
-    private Integer estimatedDurationMinutes = 30;
-    private Integer priority = 3; // 1-5 scale
+    @Column(length = 2000)
+    private String failureReason;
+    
+    @Column(length = 2000)
+    private String executor; // Пользователь или система
+    
+    @Column(length = 2000)
+    private String environment;
     
     @ElementCollection
-    private List<String> tags = new ArrayList<>();
+    private List<String> assertions = new ArrayList<>();
     
     @ElementCollection
-    private List<String> requiredCapabilities = new ArrayList<>();
+    private List<String> failedAssertions = new ArrayList<>();
+    
+    @ElementCollection
+    private List<String> warnings = new ArrayList<>();
+    
+    @ElementCollection
+    private List<String> generatedArtifacts = new ArrayList<>();
+    
+    @ElementCollection
+    private List<String> capturedLogs = new ArrayList<>();
+    
+    @ElementCollection
+    private List<String> networkRequests = new ArrayList<>();
+    
+    @ElementCollection
+    private List<String> securityChecks = new ArrayList<>();
+    
+    @ElementCollection
+    private Map<String, String> metrics = new HashMap<>();
+    
+    @ElementCollection
+    private Map<String, String> performanceData = new HashMap<>();
     
     @ElementCollection
     private List<String> dependencies = new ArrayList<>();
     
-    @Column(length = 1000)
-    private String environment;
+    private Boolean isParallelExecution = false;
+    private String parallelExecutionId;
+    private Integer parallelExecutionIndex;
     
-    @Column(length = 1000)
-    private String testDataSet;
+    private Boolean isCritical = false;
+    private Boolean isRetryable = false;
     
-    private Boolean isAutomated = false;
-    private Boolean isParallelCapable = true;
-    private Boolean isRiskBased = false;
-    private Boolean isIssueDriven = false;
-    
-    @Enumerated(EnumType.STRING)
-    private TestStatus status = TestStatus.DRAFT;
-    
-    @Enumerated(EnumType.STRING)
-    private TestExecutionType executionType = TestExecutionType.ASYNC;
-    
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime lastExecutedAt;
-    
-    private String createdBy;
-    private String lastModifiedBy;
-    
-    private Integer executionCount = 0;
-    private Integer successCount = 0;
-    private Integer failureCount = 0;
-    
-    @Column(length = 1000)
-    private String documentation;
+    private Integer retryCount = 0;
+    private Integer maxRetries = 3;
+    private String retryReason;
     
     @Column(length = 2000)
+    private String testDataSetUsed;
+    
+    @Column(length = 4000)
+    private String configuration;
+    
+    @Column(length = 2000)
+    private String resourceUsage; // CPU, Memory, Disk usage
+    
+    @Column(length = 4000)
+    private String systemInformation;
+    
+    @Column(length = 4000)
+    private String llmAnalysisResult;
+    
+    private Boolean requiresManualReview = false;
+    private Boolean isKnownIssue = false;
+    
+    @Column(length = 2000)
+    private String knownIssueId;
+    
+    @Column(length = 4000)
     private String notes;
     
-    // Constructors
-    public TestScenario() {
-        this.scenarioId = "TS_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 10000);
+    @Column(length = 2000)
+    private String relatedStepId;
+    
+    private String parentStepId;
+    
+    // Конструкторы
+    public TestExecutionStep() {
+        this.stepId = "STEP_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 10000);
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        this.tags = new ArrayList<>();
-        this.requiredCapabilities = new ArrayList<>();
+        this.assertions = new ArrayList<>();
+        this.failedAssertions = new ArrayList<>();
+        this.warnings = new ArrayList<>();
+        this.generatedArtifacts = new ArrayList<>();
+        this.capturedLogs = new ArrayList<>();
+        this.networkRequests = new ArrayList<>();
+        this.securityChecks = new ArrayList<>();
+        this.metrics = new HashMap<>();
+        this.performanceData = new HashMap<>();
         this.dependencies = new ArrayList<>();
     }
     
-    public TestScenario(String name, OwaspTestCategory category) {
+    public TestExecutionStep(String sessionId, String stepName, StepType stepType) {
         this();
-        this.name = name;
-        this.category = category;
+        this.sessionId = sessionId;
+        this.stepName = stepName;
+        this.stepType = stepType;
+    }
+    
+    // Вспомогательные методы
+    public boolean isCompleted() {
+        return status == StepStatus.PASSED || status == StepStatus.FAILED || 
+               status == StepStatus.SKIPPED || status == StepStatus.ERROR ||
+               status == StepStatus.TIMEOUT || status == StepStatus.CANCELLED;
+    }
+    
+    public boolean isSuccess() {
+        return status == StepStatus.PASSED;
+    }
+    
+    public boolean isFailure() {
+        return status == StepStatus.FAILED || status == StepStatus.ERROR;
+    }
+    
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
+    
+    public boolean hasFailedAssertions() {
+        return !failedAssertions.isEmpty();
+    }
+    
+    public boolean canRetry() {
+        return retryCount < maxRetries && isRetryable && 
+               (status == StepStatus.ERROR || status == StepStatus.TIMEOUT ||
+                (status == StepStatus.FAILED && hasFailedAssertions()));
+    }
+    
+    public void start() {
+        this.status = StepStatus.IN_PROGRESS;
+        this.startedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        addLog("Step started: " + stepName);
+    }
+    
+    public void complete(boolean success) {
+        this.completedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        
+        if (success) {
+            this.status = StepStatus.PASSED;
+            this.severity = SeverityLevel.INFO;
+        } else {
+            this.status = StepStatus.FAILED;
+            this.severity = hasFailedAssertions() ? SeverityLevel.HIGH : SeverityLevel.MEDIUM;
+        }
+        
+        if (this.startedAt != null && this.completedAt != null) {
+            this.durationMs = java.time.Duration.between(this.startedAt, this.completedAt).toMillis();
+        }
+        
+        addLog("Step completed: " + stepName + " - " + (success ? "PASSED" : "FAILED"));
+    }
+    
+    public void recordError(String errorMessage, String errorType) {
+        this.status = StepStatus.ERROR;
+        this.errorDetails = errorMessage;
+        this.errorType = errorType;
+        this.completedAt = LocalDateTime.now();
+        this.durationMs = startedAt != null ? 
+            java.time.Duration.between(startedAt, completedAt).toMillis() : 0L;
+        this.severity = SeverityLevel.CRITICAL;
+        addLog("Error recorded: " + errorMessage);
+    }
+    
+    public void recordTimeout(String timeoutMessage) {
+        this.status = StepStatus.TIMEOUT;
+        this.errorDetails = timeoutMessage;
+        this.errorType = "TIMEOUT";
+        this.completedAt = LocalDateTime.now();
+        this.durationMs = startedAt != null ? 
+            java.time.Duration.between(startedAt, completedAt).toMillis() : 0L;
+        this.severity = SeverityLevel.HIGH;
+        addLog("Timeout occurred: " + timeoutMessage);
+    }
+    
+    public void recordContractViolation(String violationDetails) {
+        this.status = StepStatus.FAILED;
+        this.errorDetails = violationDetails;
+        this.errorType = "CONTRACT_VIOLATION";
+        this.comparisonResult = ComparisonResult.MISMATCH;
+        this.severity = SeverityLevel.HIGH;
+        addLog("Contract violation detected: " + violationDetails);
+    }
+    
+    public void recordUnexpectedData(String dataDetails) {
+        this.status = StepStatus.FAILED;
+        this.errorDetails = "Unexpected data: " + dataDetails;
+        this.errorType = "UNEXPECTED_DATA";
+        this.comparisonResult = ComparisonResult.MISMATCH;
+        this.severity = SeverityLevel.MEDIUM;
+        addLog("Unexpected data detected: " + dataDetails);
+    }
+    
+    public void addAssertion(String assertionId) {
+        if (assertionId != null && !assertions.contains(assertionId)) {
+            assertions.add(assertionId);
+            addLog("Assertion added: " + assertionId);
+        }
+    }
+    
+    public void addFailedAssertion(String assertionId) {
+        if (assertionId != null && !failedAssertions.contains(assertionId)) {
+            failedAssertions.add(assertionId);
+            this.severity = SeverityLevel.HIGH;
+            addLog("Failed assertion: " + assertionId);
+        }
+    }
+    
+    public void addWarning(String warning) {
+        if (warning != null && !warnings.contains(warning)) {
+            warnings.add(warning);
+            addLog("Warning: " + warning);
+        }
+    }
+    
+    public void addMetric(String key, String value) {
+        if (key != null && value != null) {
+            metrics.put(key, value);
+        }
+    }
+    
+    public void addPerformanceData(String key, String value) {
+        if (key != null && value != null) {
+            performanceData.put(key, value);
+        }
+    }
+    
+    public void addSecurityCheck(String check, String result) {
+        if (check != null && result != null) {
+            securityChecks.put(check, result);
+            if ("FAILED".equals(result) || "VIOLATION".equals(result)) {
+                this.severity = SeverityLevel.HIGH;
+            }
+        }
+    }
+    
+    public void addLog(String logEntry) {
+        if (logEntry != null) {
+            String timestamp = LocalDateTime.now().toString();
+            capturedLogs.add("[" + timestamp + "] " + logEntry);
+        }
+    }
+    
+    public void addArtifact(String artifact) {
+        if (artifact != null && !generatedArtifacts.contains(artifact)) {
+            generatedArtifacts.add(artifact);
+        }
+    }
+    
+    public void addNetworkRequest(String request) {
+        if (request != null && !networkRequests.contains(request)) {
+            networkRequests.add(request);
+        }
+    }
+    
+    public void recordTiming(String phase, long durationMs) {
+        switch (phase.toLowerCase()) {
+            case "preparation":
+                this.preparationTimeMs = durationMs;
+                break;
+            case "execution":
+                this.executionTimeMs = durationMs;
+                break;
+            case "validation":
+                this.validationTimeMs = durationMs;
+                break;
+        }
+    }
+    
+    public void retry(String reason) {
+        this.retryCount++;
+        this.isRetryable = true;
+        this.retryReason = reason;
+        this.status = StepStatus.PENDING;
+        this.startedAt = null;
+        this.completedAt = null;
+        this.durationMs = null;
+        this.errorDetails = null;
+        addLog("Step retried due to: " + reason);
+    }
+    
+    public void skip(String reason) {
+        this.status = StepStatus.SKIPPED;
+        this.completedAt = LocalDateTime.now();
+        this.failureReason = "Skipped: " + reason;
+        addLog("Step skipped: " + reason);
+    }
+    
+    // Enums
+    public enum StepType {
+        OPENAPI_TEST,
+        BPMN_PROCESS_TEST,
+        OWASP_SECURITY_TEST,
+        LLM_ANALYSIS,
+        TEST_DATA_GENERATION,
+        INTEGRATION_TEST,
+        PERFORMANCE_TEST,
+        CONTRACT_VALIDATION,
+        DATA_VALIDATION,
+        SYSTEM_CHECK
+    }
+    
+    public enum StepStatus {
+        PENDING,
+        PREPARING,
+        IN_PROGRESS,
+        PASSED,
+        FAILED,
+        ERROR,
+        SKIPPED,
+        TIMEOUT,
+        CANCELLED
+    }
+    
+    public enum ComparisonResult {
+        NOT_COMPARED,
+        MATCH,
+        MISMATCH,
+        PARTIAL_MATCH,
+        CONTRACT_VIOLATION
     }
     
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
-    public String getScenarioId() { return scenarioId; }
-    public void setScenarioId(String scenarioId) { this.scenarioId = scenarioId; }
+    public String getStepId() { return stepId; }
+    public void setStepId(String stepId) { this.stepId = stepId; }
     
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getSessionId() { return sessionId; }
+    public void setSessionId(String sessionId) { this.sessionId = sessionId; }
+    
+    public String getStepName() { return stepName; }
+    public void setStepName(String stepName) { this.stepName = stepName; }
     
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     
-    public String getObjective() { return objective; }
-    public void setObjective(String objective) { this.objective = objective; }
+    public StepType getStepType() { return stepType; }
+    public void setStepType(StepType stepType) { this.stepType = stepType; }
     
-    public OwaspTestCategory getCategory() { return category; }
-    public void setCategory(OwaspTestCategory category) { this.category = category; }
+    public StepStatus getStatus() { return status; }
+    public void setStatus(StepStatus status) { this.status = status; }
     
     public SeverityLevel getSeverity() { return severity; }
     public void setSeverity(SeverityLevel severity) { this.severity = severity; }
     
+    public Integer getStepOrder() { return stepOrder; }
+    public void setStepOrder(Integer stepOrder) { this.stepOrder = stepOrder; }
+    
+    public String getTargetComponent() { return targetComponent; }
+    public void setTargetComponent(String targetComponent) { this.targetComponent = targetComponent; }
+    
     public String getTestType() { return testType; }
     public void setTestType(String testType) { this.testType = testType; }
     
-    public String getOpenApiAnalysisId() { return openApiAnalysisId; }
-    public void setOpenApiAnalysisId(String openApiAnalysisId) { this.openApiAnalysisId = openApiAnalysisId; }
+    public LocalDateTime getStartedAt() { return startedAt; }
+    public void setStartedAt(LocalDateTime startedAt) { this.startedAt = startedAt; }
     
-    public String getBpmnAnalysisId() { return bpmnAnalysisId; }
-    public void setBpmnAnalysisId(String bpmnAnalysisId) { this.bpmnAnalysisId = bpmnAnalysisId; }
-    
-    public String getRelatedIssueId() { return relatedIssueId; }
-    public void setRelatedIssueId(String relatedIssueId) { this.relatedIssueId = relatedIssueId; }
-    
-    public String getRiskAssessment() { return riskAssessment; }
-    public void setRiskAssessment(String riskAssessment) { this.riskAssessment = riskAssessment; }
-    
-    public String getPreconditions() { return preconditions; }
-    public void setPreconditions(String preconditions) { this.preconditions = preconditions; }
-    
-    public String getExpectedResults() { return expectedResults; }
-    public void setExpectedResults(String expectedResults) { this.expectedResults = expectedResults; }
-    
-    public String getSuccessCriteria() { return successCriteria; }
-    public void setSuccessCriteria(String successCriteria) { this.successCriteria = successCriteria; }
-    
-    public String getFailureCriteria() { return failureCriteria; }
-    public void setFailureCriteria(String failureCriteria) { this.failureCriteria = failureCriteria; }
-    
-    public Integer getEstimatedDurationMinutes() { return estimatedDurationMinutes; }
-    public void setEstimatedDurationMinutes(Integer estimatedDurationMinutes) { this.estimatedDurationMinutes = estimatedDurationMinutes; }
-    
-    public Integer getPriority() { return priority; }
-    public void setPriority(Integer priority) { this.priority = priority; }
-    
-    public List<String> getTags() { return tags; }
-    public void setTags(List<String> tags) { this.tags = tags; }
-    
-    public List<String> getRequiredCapabilities() { return requiredCapabilities; }
-    public void setRequiredCapabilities(List<String> requiredCapabilities) { this.requiredCapabilities = requiredCapabilities; }
-    
-    public List<String> getDependencies() { return dependencies; }
-    public void setDependencies(List<String> dependencies) { this.dependencies = dependencies; }
-    
-    public String getEnvironment() { return environment; }
-    public void setEnvironment(String environment) { this.environment = environment; }
-    
-    public String getTestDataSet() { return testDataSet; }
-    public void setTestDataSet(String testDataSet) { this.testDataSet = testDataSet; }
-    
-    public Boolean getIsAutomated() { return isAutomated; }
-    public void setIsAutomated(Boolean isAutomated) { this.isAutomated = isAutomated; }
-    
-    public Boolean getIsParallelCapable() { return isParallelCapable; }
-    public void setIsParallelCapable(Boolean isParallelCapable) { this.isParallelCapable = isParallelCapable; }
-    
-    public Boolean getIsRiskBased() { return isRiskBased; }
-    public void setIsRiskBased(Boolean isRiskBased) { this.isRiskBased = isRiskBased; }
-    
-    public Boolean getIsIssueDriven() { return isIssueDriven; }
-    public void setIsIssueDriven(Boolean isIssueDriven) { this.isIssueDriven = isIssueDriven; }
-    
-    public TestStatus getStatus() { return status; }
-    public void setStatus(TestStatus status) { this.status = status; }
-    
-    public TestExecutionType getExecutionType() { return executionType; }
-    public void setExecutionType(TestExecutionType executionType) { this.executionType = executionType; }
+    public LocalDateTime getCompletedAt() { return completedAt; }
+    public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
@@ -213,115 +455,147 @@ public class TestScenario {
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
     
-    public LocalDateTime getLastExecutedAt() { return lastExecutedAt; }
-    public void setLastExecutedAt(LocalDateTime lastExecutedAt) { this.lastExecutedAt = lastExecutedAt; }
+    public Long getDurationMs() { return durationMs; }
+    public void setDurationMs(Long durationMs) { this.durationMs = durationMs; }
     
-    public String getCreatedBy() { return createdBy; }
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public Long getPreparationTimeMs() { return preparationTimeMs; }
+    public void setPreparationTimeMs(Long preparationTimeMs) { this.preparationTimeMs = preparationTimeMs; }
     
-    public String getLastModifiedBy() { return lastModifiedBy; }
-    public void setLastModifiedBy(String lastModifiedBy) { this.lastModifiedBy = lastModifiedBy; }
+    public Long getExecutionTimeMs() { return executionTimeMs; }
+    public void setExecutionTimeMs(Long executionTimeMs) { this.executionTimeMs = executionTimeMs; }
     
-    public Integer getExecutionCount() { return executionCount; }
-    public void setExecutionCount(Integer executionCount) { this.executionCount = executionCount; }
+    public Long getValidationTimeMs() { return validationTimeMs; }
+    public void setValidationTimeMs(Long validationTimeMs) { this.validationTimeMs = validationTimeMs; }
     
-    public Integer getSuccessCount() { return successCount; }
-    public void setSuccessCount(Integer successCount) { this.successCount = successCount; }
+    public String getInputData() { return inputData; }
+    public void setInputData(String inputData) { this.inputData = inputData; }
     
-    public Integer getFailureCount() { return failureCount; }
-    public void setFailureCount(Integer failureCount) { this.failureCount = failureCount; }
+    public String getOutputData() { return outputData; }
+    public void setOutputData(String outputData) { this.outputData = outputData; }
     
-    public String getDocumentation() { return documentation; }
-    public void setDocumentation(String documentation) { this.documentation = documentation; }
+    public String getExpectedResult() { return expectedResult; }
+    public void setExpectedResult(String expectedResult) { this.expectedResult = expectedResult; }
+    
+    public String getActualResult() { return actualResult; }
+    public void setActualResult(String actualResult) { this.actualResult = actualResult; }
+    
+    public ComparisonResult getComparisonResult() { return comparisonResult; }
+    public void setComparisonResult(ComparisonResult comparisonResult) { this.comparisonResult = comparisonResult; }
+    
+    public String getErrorDetails() { return errorDetails; }
+    public void setErrorDetails(String errorDetails) { this.errorDetails = errorDetails; }
+    
+    public String getErrorCode() { return errorCode; }
+    public void setErrorCode(String errorCode) { this.errorCode = errorCode; }
+    
+    public String getErrorType() { return errorType; }
+    public void setErrorType(String errorType) { this.errorType = errorType; }
+    
+    public String getFailureReason() { return failureReason; }
+    public void setFailureReason(String failureReason) { this.failureReason = failureReason; }
+    
+    public String getExecutor() { return executor; }
+    public void setExecutor(String executor) { this.executor = executor; }
+    
+    public String getEnvironment() { return environment; }
+    public void setEnvironment(String environment) { this.environment = environment; }
+    
+    public List<String> getAssertions() { return assertions; }
+    public void setAssertions(List<String> assertions) { this.assertions = assertions; }
+    
+    public List<String> getFailedAssertions() { return failedAssertions; }
+    public void setFailedAssertions(List<String> failedAssertions) { this.failedAssertions = failedAssertions; }
+    
+    public List<String> getWarnings() { return warnings; }
+    public void setWarnings(List<String> warnings) { this.warnings = warnings; }
+    
+    public List<String> getGeneratedArtifacts() { return generatedArtifacts; }
+    public void setGeneratedArtifacts(List<String> generatedArtifacts) { this.generatedArtifacts = generatedArtifacts; }
+    
+    public List<String> getCapturedLogs() { return capturedLogs; }
+    public void setCapturedLogs(List<String> capturedLogs) { this.capturedLogs = capturedLogs; }
+    
+    public List<String> getNetworkRequests() { return networkRequests; }
+    public void setNetworkRequests(List<String> networkRequests) { this.networkRequests = networkRequests; }
+    
+    public List<String> getSecurityChecks() { return securityChecks; }
+    public void setSecurityChecks(List<String> securityChecks) { this.securityChecks = securityChecks; }
+    
+    public Map<String, String> getMetrics() { return metrics; }
+    public void setMetrics(Map<String, String> metrics) { this.metrics = metrics; }
+    
+    public Map<String, String> getPerformanceData() { return performanceData; }
+    public void setPerformanceData(Map<String, String> performanceData) { this.performanceData = performanceData; }
+    
+    public List<String> getDependencies() { return dependencies; }
+    public void setDependencies(List<String> dependencies) { this.dependencies = dependencies; }
+    
+    public Boolean getIsParallelExecution() { return isParallelExecution; }
+    public void setIsParallelExecution(Boolean isParallelExecution) { this.isParallelExecution = isParallelExecution; }
+    
+    public String getParallelExecutionId() { return parallelExecutionId; }
+    public void setParallelExecutionId(String parallelExecutionId) { this.parallelExecutionId = parallelExecutionId; }
+    
+    public Integer getParallelExecutionIndex() { return parallelExecutionIndex; }
+    public void setParallelExecutionIndex(Integer parallelExecutionIndex) { this.parallelExecutionIndex = parallelExecutionIndex; }
+    
+    public Boolean getIsCritical() { return isCritical; }
+    public void setIsCritical(Boolean isCritical) { this.isCritical = isCritical; }
+    
+    public Boolean getIsRetryable() { return isRetryable; }
+    public void setIsRetryable(Boolean isRetryable) { this.isRetryable = isRetryable; }
+    
+    public Integer getRetryCount() { return retryCount; }
+    public void setRetryCount(Integer retryCount) { this.retryCount = retryCount; }
+    
+    public Integer getMaxRetries() { return maxRetries; }
+    public void setMaxRetries(Integer maxRetries) { this.maxRetries = maxRetries; }
+    
+    public String getRetryReason() { return retryReason; }
+    public void setRetryReason(String retryReason) { this.retryReason = retryReason; }
+    
+    public String getTestDataSetUsed() { return testDataSetUsed; }
+    public void setTestDataSetUsed(String testDataSetUsed) { this.testDataSetUsed = testDataSetUsed; }
+    
+    public String getConfiguration() { return configuration; }
+    public void setConfiguration(String configuration) { this.configuration = configuration; }
+    
+    public String getResourceUsage() { return resourceUsage; }
+    public void setResourceUsage(String resourceUsage) { this.resourceUsage = resourceUsage; }
+    
+    public String getSystemInformation() { return systemInformation; }
+    public void setSystemInformation(String systemInformation) { this.systemInformation = systemInformation; }
+    
+    public String getLlmAnalysisResult() { return llmAnalysisResult; }
+    public void setLlmAnalysisResult(String llmAnalysisResult) { this.llmAnalysisResult = llmAnalysisResult; }
+    
+    public Boolean getRequiresManualReview() { return requiresManualReview; }
+    public void setRequiresManualReview(Boolean requiresManualReview) { this.requiresManualReview = requiresManualReview; }
+    
+    public Boolean getIsKnownIssue() { return isKnownIssue; }
+    public void setIsKnownIssue(Boolean isKnownIssue) { this.isKnownIssue = isKnownIssue; }
+    
+    public String getKnownIssueId() { return knownIssueId; }
+    public void setKnownIssueId(String knownIssueId) { this.knownIssueId = knownIssueId; }
     
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
     
-    // Helper methods
-    public double getSuccessRate() {
-        if (executionCount == 0) return 0.0;
-        return (double) successCount / executionCount * 100.0;
-    }
+    public String getRelatedStepId() { return relatedStepId; }
+    public void setRelatedStepId(String relatedStepId) { this.relatedStepId = relatedStepId; }
     
-    public boolean isSecurityTest() {
-        return testType != null && testType.toUpperCase().contains("SECURITY");
-    }
-    
-    public boolean isPerformanceTest() {
-        return testType != null && testType.toUpperCase().contains("PERFORMANCE");
-    }
-    
-    public boolean isFunctionalTest() {
-        return testType != null && testType.toUpperCase().contains("FUNCTIONAL");
-    }
-    
-    public void addTag(String tag) {
-        if (tag != null && !tags.contains(tag)) {
-            tags.add(tag);
-        }
-    }
-    
-    public void addRequiredCapability(String capability) {
-        if (capability != null && !requiredCapabilities.contains(capability)) {
-            requiredCapabilities.add(capability);
-        }
-    }
-    
-    public void addDependency(String dependency) {
-        if (dependency != null && !dependencies.contains(dependency)) {
-            dependencies.add(dependency);
-        }
-    }
-    
-    public void incrementExecutionCount() {
-        this.executionCount++;
-        this.updatedAt = LocalDateTime.now();
-    }
-    
-    public void recordSuccess() {
-        this.successCount++;
-        this.lastExecutedAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-    
-    public void recordFailure() {
-        this.failureCount++;
-        this.lastExecutedAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-    
-    public void markAsReviewed() {
-        this.status = TestStatus.REVIEWED;
-        this.updatedAt = LocalDateTime.now();
-    }
-    
-    public void markAsApproved() {
-        this.status = TestStatus.APPROVED;
-        this.updatedAt = LocalDateTime.now();
-    }
-    
-    public void markAsDeprecated() {
-        this.status = TestStatus.DEPRECATED;
-        this.updatedAt = LocalDateTime.now();
-    }
-    
-    public boolean isExecutable() {
-        return status == TestStatus.APPROVED || status == TestStatus.READY;
-    }
-    
-    public boolean isActive() {
-        return status != TestStatus.DEPRECATED && status != TestStatus.DRAFT;
-    }
+    public String getParentStepId() { return parentStepId; }
+    public void setParentStepId(String parentStepId) { this.parentStepId = parentStepId; }
     
     @Override
     public String toString() {
-        return "TestScenario{" +
-                "scenarioId='" + scenarioId + '\'' +
-                ", name='" + name + '\'' +
-                ", category=" + category +
-                ", severity=" + severity +
-                ", testType='" + testType + '\'' +
+        return "TestExecutionStep{" +
+                "stepId='" + stepId + '\'' +
+                ", stepName='" + stepName + '\'' +
+                ", stepType=" + stepType +
                 ", status=" + status +
+                ", severity=" + severity +
+                ", durationMs=" + durationMs +
                 '}';
     }
     
@@ -329,32 +603,12 @@ public class TestScenario {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TestScenario that = (TestScenario) o;
-        return Objects.equals(scenarioId, that.scenarioId);
+        TestExecutionStep that = (TestExecutionStep) o;
+        return Objects.equals(stepId, that.stepId);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(scenarioId);
-    }
-    
-    // Enums
-    public enum TestStatus {
-        DRAFT,
-        REVIEWED,
-        APPROVED,
-        READY,
-        IN_PROGRESS,
-        EXECUTED,
-        FAILED,
-        PASSED,
-        DEPRECATED
-    }
-    
-    public enum TestExecutionType {
-        SYNC,
-        ASYNC,
-        SCHEDULED,
-        CONTINUOUS
+        return Objects.hash(stepId);
     }
 }

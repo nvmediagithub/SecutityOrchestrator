@@ -7,7 +7,7 @@ import org.example.domain.dto.llm.*;
 import org.example.infrastructure.config.LLMConfig;
 import org.example.infrastructure.services.OpenRouterClient;
 import org.example.infrastructure.services.LocalLLMService;
-import org.example.domain.dto.ApiResponse;
+import org.example.domain.dto.test.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -71,11 +71,11 @@ public class LLMController {
             logger.info("Local provider configured: baseUrl={}", localSettings.getBaseUrl());
             
             logger.info("Successfully retrieved {} LLM providers", providers.size());
-            return ResponseEntity.ok(ApiResponse.success(providers, "providers-retrieved"));
+            return ResponseEntity.ok(ApiResponse.success("providers-retrieved", providers));
         } catch (Exception e) {
             logger.error("Failed to get providers", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("PROVIDERS_ERROR", "Failed to get providers: " + e.getMessage()), "error"));
+                .body(ApiResponse.error("Failed to get providers: " + e.getMessage(), "PROVIDERS_ERROR"));
         }
     }
     
@@ -109,14 +109,14 @@ public class LLMController {
                     break;
                 default:
                     return ResponseEntity.badRequest()
-                        .body(ApiResponse.error(new ApiResponse.ApiError("UNKNOWN_PROVIDER", "Unknown provider: " + providerName), "error"));
+                        .body(ApiResponse.error("Unknown provider: " + providerName, "UNKNOWN_PROVIDER"));
             }
             
-            return ResponseEntity.ok(ApiResponse.success("Provider updated successfully", "provider-updated"));
+            return ResponseEntity.ok(ApiResponse.success("provider-updated", "Provider updated successfully"));
         } catch (Exception e) {
             logger.error("Failed to update provider", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("PROVIDER_UPDATE_ERROR", "Failed to update provider: " + e.getMessage()), "error"));
+                .body(ApiResponse.error("Failed to update provider: " + e.getMessage(), "PROVIDER_UPDATE_ERROR"));
         }
     }
     
@@ -146,11 +146,11 @@ public class LLMController {
                 ));
             }
             
-            return ResponseEntity.ok(ApiResponse.success(models, "models-retrieved"));
+            return ResponseEntity.ok(ApiResponse.success("models-retrieved", models));
         } catch (Exception e) {
             logger.error("Failed to get models", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("MODELS_ERROR", "Failed to get models: " + e.getMessage()), "error"));
+                .body(ApiResponse.error("Failed to get models: " + e.getMessage(), "MODELS_ERROR"));
         }
     }
     
@@ -162,11 +162,11 @@ public class LLMController {
         try {
             // In a real implementation, you would persist this to a database
             logger.info("Model added: {}", modelConfig.getModelName());
-            return ResponseEntity.ok(ApiResponse.success("Model added successfully", "model-added"));
+            return ResponseEntity.ok(ApiResponse.success("model-added", "Model added successfully"));
         } catch (Exception e) {
             logger.error("Failed to add model", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("MODEL_ADD_ERROR", "Failed to add model: " + e.getMessage()), "error"));
+                .body(ApiResponse.error("Failed to add model: " + e.getMessage(), "MODEL_ADD_ERROR"));
         }
     }
     
@@ -179,11 +179,11 @@ public class LLMController {
             @RequestBody LLMModelConfig modelConfig) {
         try {
             logger.info("Model updated: {}", modelName);
-            return ResponseEntity.ok(ApiResponse.success("Model updated successfully", "model-updated"));
+            return ResponseEntity.ok(ApiResponse.success("model-updated", "Model updated successfully"));
         } catch (Exception e) {
             logger.error("Failed to update model", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("MODEL_UPDATE_ERROR", "Failed to update model: " + e.getMessage()), "error"));
+                .body(ApiResponse.error("Failed to update model: " + e.getMessage(), "MODEL_UPDATE_ERROR"));
         }
     }
     
@@ -194,11 +194,11 @@ public class LLMController {
     public ResponseEntity<ApiResponse<String>> deleteModel(@PathVariable String modelName) {
         try {
             logger.info("Model deleted: {}", modelName);
-            return ResponseEntity.ok(ApiResponse.success("Model deleted successfully", "model-deleted"));
+            return ResponseEntity.ok(ApiResponse.success("model-deleted", "Model deleted successfully"));
         } catch (Exception e) {
             logger.error("Failed to delete model", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("MODEL_DELETE_ERROR", "Failed to delete model: " + e.getMessage()), "error"));
+                .body(ApiResponse.error("Failed to delete model: " + e.getMessage(), "MODEL_DELETE_ERROR"));
         }
     }
     
@@ -239,11 +239,11 @@ public class LLMController {
                 LLMProvider.OPENROUTER, activeModel, providers, models
             );
             
-            return ResponseEntity.ok(ApiResponse.success(response, "config-retrieved"));
+            return ResponseEntity.ok(ApiResponse.success("config-retrieved", response));
         } catch (Exception e) {
             logger.error("Failed to get configuration", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("CONFIG_ERROR", "Failed to get configuration: " + e.getMessage()), "error"));
+                .body(ApiResponse.error("Failed to get configuration: " + e.getMessage(), "CONFIG_ERROR"));
         }
     }
     
@@ -255,11 +255,11 @@ public class LLMController {
         try {
             // Update active provider
             logger.info("Configuration updated for provider: {}", request.getProvider());
-            return ResponseEntity.ok(ApiResponse.success("Configuration updated successfully", "config-updated"));
+            return ResponseEntity.ok(ApiResponse.success("config-updated", "Configuration updated successfully"));
         } catch (Exception e) {
             logger.error("Failed to update configuration", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("CONFIG_UPDATE_ERROR", "Failed to update configuration: " + e.getMessage()), "error"));
+                .body(ApiResponse.error("Failed to update configuration: " + e.getMessage(), "CONFIG_UPDATE_ERROR"));
         }
     }
     
@@ -291,11 +291,11 @@ public class LLMController {
                 localStatus.isHealthy(), localStatus.isAvailable());
             
             logger.info("Successfully retrieved LLM service status");
-            return ResponseEntity.ok(ApiResponse.success(statuses, "status-retrieved"));
+            return ResponseEntity.ok(ApiResponse.success("status-retrieved", statuses));
         } catch (Exception e) {
             logger.error("Failed to get status", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("STATUS_ERROR", "Failed to get status: " + e.getMessage()), "error"));
+                .body(ApiResponse.error("Failed to get status: " + e.getMessage(), "STATUS_ERROR"));
         }
     }
     
@@ -309,7 +309,7 @@ public class LLMController {
         try {
             if (request.getModelName() == null || request.getModelName().isEmpty()) {
                 return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(new ApiResponse.ApiError("INVALID_REQUEST", "modelName is required"), "error"));
+                    .body(ApiResponse.error("modelName is required", "INVALID_REQUEST"));
             }
             
             String provider = request.getModelName().contains(":") ?
@@ -323,211 +323,11 @@ public class LLMController {
                 response = testOpenRouterModel(request);
             }
             
-            return ResponseEntity.ok(ApiResponse.success(response, "test-completed"));
+            return ResponseEntity.ok(ApiResponse.success("test-completed", response));
         } catch (Exception e) {
             logger.error("LLM test failed", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("TEST_ERROR", "LLM test failed: " + e.getMessage()), "error"));
-        }
-    }
-    
-    // ==================== OPENROUTER MODELS ====================
-    
-    /**
-     * List OpenRouter models
-     */
-    @GetMapping("/openrouter/models")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> listOpenRouterModels() {
-        try {
-            logger.info("Getting OpenRouter models list");
-            Map<String, Object> response = new HashMap<>();
-            
-            // Mock OpenRouter models for demo
-            List<Map<String, Object>> models = Arrays.asList(
-                createModelInfo("gpt-4", "GPT-4", "OpenAI", 8192, true),
-                createModelInfo("gpt-3.5-turbo", "GPT-3.5 Turbo", "OpenAI", 4096, true),
-                createModelInfo("claude-3-opus", "Claude 3 Opus", "Anthropic", 200000, true),
-                createModelInfo("claude-3-sonnet", "Claude 3 Sonnet", "Anthropic", 200000, true),
-                createModelInfo("llama-3.1-70b", "Llama 3.1 70B", "Meta", 131072, true)
-            );
-            
-            response.put("models", models);
-            response.put("total", models.size());
-            response.put("provider", "openrouter");
-            
-            return ResponseEntity.ok(ApiResponse.success(response, "openrouter-models-retrieved"));
-        } catch (Exception e) {
-            logger.error("Failed to list OpenRouter models", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("OPENROUTER_MODELS_ERROR", "Failed to list OpenRouter models: " + e.getMessage()), "error"));
-        }
-    }
-    
-    // ==================== LOCAL MODELS ====================
-    
-    /**
-     * List local models
-     */
-    @GetMapping("/local/models")
-    public ResponseEntity<ApiResponse<List<LocalModelInfo>>> listLocalModels() {
-        try {
-            CompletableFuture<List<LocalModelInfo>> future = localLLMService.listLocalModels();
-            List<LocalModelInfo> models = future.get();
-            return ResponseEntity.ok(ApiResponse.success(models, "local-models-retrieved"));
-        } catch (Exception e) {
-            logger.error("Failed to list local models", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("LOCAL_MODELS_ERROR", "Failed to list local models: " + e.getMessage()), "error"));
-        }
-    }
-    
-    /**
-     * Load a local model
-     */
-    @PostMapping("/local/models/load")
-    public ResponseEntity<ApiResponse<String>> loadLocalModel(@RequestBody Map<String, String> request) {
-        try {
-            String modelName = request.get("modelName");
-            if (modelName == null || modelName.isEmpty()) {
-                return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(new ApiResponse.ApiError("INVALID_REQUEST", "modelName is required"), "error"));
-            }
-            
-            CompletableFuture<Boolean> future = localLLMService.loadModel(modelName);
-            future.get();
-            
-            return ResponseEntity.ok(ApiResponse.success("Model loaded successfully", "model-loaded"));
-        } catch (Exception e) {
-            logger.error("Failed to load local model", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("MODEL_LOAD_ERROR", "Failed to load local model: " + e.getMessage()), "error"));
-        }
-    }
-    
-    /**
-     * Unload a local model
-     */
-    @PostMapping("/local/models/unload")
-    public ResponseEntity<ApiResponse<String>> unloadLocalModel(@RequestBody Map<String, String> request) {
-        try {
-            String modelName = request.get("modelName");
-            if (modelName == null || modelName.isEmpty()) {
-                return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(new ApiResponse.ApiError("INVALID_REQUEST", "modelName is required"), "error"));
-            }
-            
-            CompletableFuture<Boolean> future = localLLMService.unloadModel(modelName);
-            future.get();
-            
-            return ResponseEntity.ok(ApiResponse.success("Model unloaded successfully", "model-unloaded"));
-        } catch (Exception e) {
-            logger.error("Failed to unload local model", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("MODEL_UNLOAD_ERROR", "Failed to unload local model: " + e.getMessage()), "error"));
-        }
-    }
-    
-    // ==================== CHAT COMPLETION ====================
-    
-    /**
-     * Chat completion endpoint
-     */
-    @PostMapping("/chat")
-    public ResponseEntity<ApiResponse<OpenRouterClient.ChatCompletionResponse>> chatCompletion(
-            @RequestBody Map<String, Object> request) {
-        try {
-            String model = (String) request.get("model");
-            String prompt = (String) request.get("prompt");
-            int maxTokens = request.get("maxTokens") != null ? (Integer) request.get("maxTokens") : 2048;
-            double temperature = request.get("temperature") != null ? (Double) request.get("temperature") : 0.7;
-            
-            if (model == null || prompt == null) {
-                return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(new ApiResponse.ApiError("INVALID_REQUEST", "model and prompt are required"), "error"));
-            }
-            
-            CompletableFuture<OpenRouterClient.ChatCompletionResponse> future = 
-                openRouterClient.chatCompletion(model, prompt, maxTokens, temperature);
-            
-            OpenRouterClient.ChatCompletionResponse response = future.get();
-            return ResponseEntity.ok(ApiResponse.success(response, "chat-completed"));
-        } catch (Exception e) {
-            logger.error("Chat completion failed", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("CHAT_ERROR", "Chat completion failed: " + e.getMessage()), "error"));
-        }
-    }
-    
-    /**
-     * Local chat completion endpoint
-     */
-    @PostMapping("/local/chat")
-    public ResponseEntity<ApiResponse<LocalLLMService.ChatCompletionResponse>> localChatCompletion(
-            @RequestBody Map<String, Object> request) {
-        try {
-            String model = (String) request.get("model");
-            String prompt = (String) request.get("prompt");
-            int maxTokens = request.get("maxTokens") != null ? (Integer) request.get("maxTokens") : 2048;
-            double temperature = request.get("temperature") != null ? (Double) request.get("temperature") : 0.7;
-            
-            if (model == null || prompt == null) {
-                return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(new ApiResponse.ApiError("INVALID_REQUEST", "model and prompt are required"), "error"));
-            }
-            
-            CompletableFuture<LocalLLMService.ChatCompletionResponse> future = 
-                localLLMService.localChatCompletion(model, prompt, maxTokens, temperature);
-            
-            LocalLLMService.ChatCompletionResponse response = future.get();
-            return ResponseEntity.ok(ApiResponse.success(response, "local-chat-completed"));
-        } catch (Exception e) {
-            logger.error("Local chat completion failed", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("LOCAL_CHAT_ERROR", "Local chat completion failed: " + e.getMessage()), "error"));
-        }
-    }
-    
-    // ==================== METRICS ====================
-    
-    /**
-     * Get performance metrics
-     */
-    @GetMapping("/metrics")
-    public ResponseEntity<ApiResponse<Map<String, PerformanceMetrics>>> getMetrics() {
-        try {
-            Map<String, PerformanceMetrics> metrics = new HashMap<>();
-            
-            // Mock metrics for demonstration
-            PerformanceMetrics openRouterMetrics = new PerformanceMetrics(
-                LLMProvider.OPENROUTER,
-                150,
-                145,
-                5,
-                1250.0,
-                15000,
-                3.33, // error rate
-                96.67 // uptime
-            );
-            
-            PerformanceMetrics localMetrics = new PerformanceMetrics(
-                LLMProvider.LOCAL,
-                75,
-                74,
-                1,
-                850.0,
-                7500,
-                1.33, // error rate
-                98.67 // uptime
-            );
-            
-            metrics.put("openrouter", openRouterMetrics);
-            metrics.put("local", localMetrics);
-            
-            return ResponseEntity.ok(ApiResponse.success(metrics, "metrics-retrieved"));
-        } catch (Exception e) {
-            logger.error("Failed to get metrics", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(new ApiResponse.ApiError("METRICS_ERROR", "Failed to get metrics: " + e.getMessage()), "error"));
+                .body(ApiResponse.error("LLM test failed: " + e.getMessage(), "TEST_ERROR"));
         }
     }
     
@@ -540,7 +340,7 @@ public class LLMController {
     public ResponseEntity<ApiResponse<String>> healthCheck(HttpServletRequest request) {
         logger.info("CORS Debug - Health check from origin: {} for /api/llm/health", request.getHeader("Origin"));
         logger.info("LLM Controller health check endpoint called");
-        return ResponseEntity.ok(ApiResponse.success("LLM Controller is healthy", "health-check"));
+        return ResponseEntity.ok(ApiResponse.success("health-check", "LLM Controller is healthy"));
     }
     
     /**
@@ -559,7 +359,7 @@ public class LLMController {
         response.put("status", "ok");
         response.put("server", "SecurityOrchestrator LLM Controller");
         response.put("version", "1.0.0");
-        return ResponseEntity.ok(ApiResponse.success(response, "test-echo"));
+        return ResponseEntity.ok(ApiResponse.success("test-echo", response));
     }
     
     // ==================== HELPER METHODS ====================
@@ -676,18 +476,5 @@ public class LLMController {
                 false
             );
         }
-    }
-    
-    /**
-     * Helper method to create model information map
-     */
-    private Map<String, Object> createModelInfo(String id, String name, String provider, int contextWindow, boolean available) {
-        Map<String, Object> model = new HashMap<>();
-        model.put("id", id);
-        model.put("name", name);
-        model.put("provider", provider);
-        model.put("contextWindow", contextWindow);
-        model.put("available", available);
-        return model;
     }
 }

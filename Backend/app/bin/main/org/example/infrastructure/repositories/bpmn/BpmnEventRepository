@@ -1,0 +1,51 @@
+package org.example.infrastructure.repositories.bpmn;
+
+import org.example.domain.entities.bpmn.BpmnEvent;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * Repository for BpmnEvent entities
+ */
+@Repository
+public interface BpmnEventRepository extends JpaRepository<BpmnEvent, UUID> {
+
+    /**
+     * Find events by process
+     */
+    List<BpmnEvent> findByProcessId(UUID processId);
+
+    /**
+     * Find events by event type
+     */
+    List<BpmnEvent> findByEventType(BpmnEvent.EventType eventType);
+
+    /**
+     * Find events by event ID
+     */
+    Optional<BpmnEvent> findByEventId(String eventId);
+
+    /**
+     * Find start events
+     */
+    @Query("SELECT e FROM BpmnEvent e WHERE e.eventType = 'START_EVENT'")
+    List<BpmnEvent> findStartEvents();
+
+    /**
+     * Find end events
+     */
+    @Query("SELECT e FROM BpmnEvent e WHERE e.eventType = 'END_EVENT'")
+    List<BpmnEvent> findEndEvents();
+
+    /**
+     * Count events by process
+     */
+    @Query("SELECT COUNT(e) FROM BpmnEvent e WHERE e.process.id = :processId")
+    Long countByProcessId(@Param("processId") UUID processId);
+}

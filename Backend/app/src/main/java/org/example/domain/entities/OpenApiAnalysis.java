@@ -5,6 +5,7 @@ import org.example.domain.valueobjects.SpecificationId;
 import org.example.domain.entities.openapi.OpenApiSpecification;
 
 import jakarta.persistence.*;
+import java.util.List;
 import java.time.LocalDateTime;
 
 /**

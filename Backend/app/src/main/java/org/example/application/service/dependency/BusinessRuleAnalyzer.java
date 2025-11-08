@@ -9,12 +9,12 @@ import org.example.domain.entities.openapi.ApiEndpoint;
 import org.example.domain.entities.openapi.ApiSchema;
 import org.example.domain.entities.openapi.ApiParameter;
 import org.example.domain.entities.openapi.ApiSecurityScheme;
-import org.domain.entities.BpmnDiagram;
+import org.example.domain.entities.BpmnDiagram;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
- na
+
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -317,9 +317,9 @@ public class BusinessRuleAnalyzer {
     
     private void analyzeSchemaValidationRules(ApiSchema schema, List<BusinessRuleDependency> rules) {
         if (schema.getProperties() != null) {
-            for (Map.Entry<String, ApiSchema> entry : schema.getProperties().entrySet()) {
+            for (Map.Entry<String, String> entry : schema.getProperties().entrySet()) {
                 String fieldName = entry.getKey();
-                ApiSchema property = entry.getValue();
+                String property = entry.getValue();
                 
                 // Анализируем required fields
                 if (schema.getRequiredFields() != null && 

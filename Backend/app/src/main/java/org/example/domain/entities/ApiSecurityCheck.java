@@ -146,10 +146,6 @@ public class ApiSecurityCheck {
         this.checkDurationMs = durationMs;
     }
     
-    public void setConfidenceScore(Double score) {
-        this.confidenceScore = score;
-    }
-    
     public boolean isSecurityCompliant() {
         return isCompliant && "PASSED".equals(status);
     }

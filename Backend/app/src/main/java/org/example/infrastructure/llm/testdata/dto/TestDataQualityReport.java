@@ -4,64 +4,105 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Quality report for generated test data
+ * DTO for test data quality analysis
  */
 public class TestDataQualityReport {
     
     private String analysisId;
-    private int overallScore; // 0-100
-    private String qualityGrade; // A, B, C, D, F
-    private List<String> recommendations;
-    private List<String> issues;
-    private List<String> warnings;
-    private List<String> strengths;
-    private double completenessScore;
-    private double consistencyScore;
-    private double realismScore;
-    private double complianceScore;
     private LocalDateTime analyzedAt;
-    private String analyzerVersion;
+    private double overallScore; // 0-100
+    private List<String> issues;
+    private List<String> recommendations;
+    private QualityDimensions dimensions;
+    
+    public static class QualityDimensions {
+        private double completeness; // How complete the data is
+        private double accuracy;     // How accurate the data is
+        private double consistency;  // How consistent the data is
+        private double validity;     // How valid the data is
+        private double uniqueness;   // How unique the data is
+        private double timeliness;   // How timely/recent the data is
+        
+        // Getters and Setters
+        public double getCompleteness() { return completeness; }
+        public void setCompleteness(double completeness) { this.completeness = completeness; }
+        
+        public double getAccuracy() { return accuracy; }
+        public void setAccuracy(double accuracy) { this.accuracy = accuracy; }
+        
+        public double getConsistency() { return consistency; }
+        public void setConsistency(double consistency) { this.consistency = consistency; }
+        
+        public double getValidity() { return validity; }
+        public void setValidity(double validity) { this.validity = validity; }
+        
+        public double getUniqueness() { return uniqueness; }
+        public void setUniqueness(double uniqueness) { this.uniqueness = uniqueness; }
+        
+        public double getTimeliness() { return timeliness; }
+        public void setTimeliness(double timeliness) { this.timeliness = timeliness; }
+    }
     
     // Constructors
-    public TestDataQualityReport() {}
+    public TestDataQualityReport() {
+        this.dimensions = new QualityDimensions();
+    }
     
     // Getters and Setters
     public String getAnalysisId() { return analysisId; }
     public void setAnalysisId(String analysisId) { this.analysisId = analysisId; }
     
-    public int getOverallScore() { return overallScore; }
-    public void setOverallScore(int overallScore) { this.overallScore = overallScore; }
+    public LocalDateTime getAnalyzedAt() { return analyzedAt; }
+    public void setAnalyzedAt(LocalDateTime analyzedAt) { this.analyzedAt = analyzedAt; }
     
-    public String getQualityGrade() { return qualityGrade; }
-    public void setQualityGrade(String qualityGrade) { this.qualityGrade = qualityGrade; }
-    
-    public List<String> getRecommendations() { return recommendations; }
-    public void setRecommendations(List<String> recommendations) { this.recommendations = recommendations; }
+    public double getOverallScore() { return overallScore; }
+    public void setOverallScore(double overallScore) { this.overallScore = overallScore; }
     
     public List<String> getIssues() { return issues; }
     public void setIssues(List<String> issues) { this.issues = issues; }
     
-    public List<String> getWarnings() { return warnings; }
-    public void setWarnings(List<String> warnings) { this.warnings = warnings; }
+    public List<String> getRecommendations() { return recommendations; }
+    public void setRecommendations(List<String> recommendations) { this.recommendations = recommendations; }
     
-    public List<String> getStrengths() { return strengths; }
-    public void setStrengths(List<String> strengths) { this.strengths = strengths; }
+    public QualityDimensions getDimensions() { return dimensions; }
+    public void setDimensions(QualityDimensions dimensions) { this.dimensions = dimensions; }
     
-    public double getCompletenessScore() { return completenessScore; }
-    public void setCompletenessScore(double completenessScore) { this.completenessScore = completenessScore; }
+    // Helper methods
+    public boolean hasIssues() {
+        return issues != null && !issues.isEmpty();
+    }
     
-    public double getConsistencyScore() { return consistencyScore; }
-    public void setConsistencyScore(double consistencyScore) { this.consistencyScore = consistencyScore; }
+    public boolean hasRecommendations() {
+        return recommendations != null && !recommendations.isEmpty();
+    }
     
-    public double getRealismScore() { return realismScore; }
-    public void setRealismScore(double realismScore) { this.realismScore = realismScore; }
+    public boolean isHighQuality() {
+        return overallScore >= 80.0;
+    }
     
-    public double getComplianceScore() { return complianceScore; }
-    public void setComplianceScore(double complianceScore) { this.complianceScore = complianceScore; }
+    public boolean isAcceptableQuality() {
+        return overallScore >= 60.0;
+    }
     
-    public LocalDateTime getAnalyzedAt() { return analyzedAt; }
-    public void setAnalyzedAt(LocalDateTime analyzedAt) { this.analyzedAt = analyzedAt; }
+    public boolean isPoorQuality() {
+        return overallScore < 60.0;
+    }
     
-    public String getAnalyzerVersion() { return analyzerVersion; }
-    public void setAnalyzerVersion(String analyzerVersion) { this.analyzerVersion = analyzerVersion; }
+    public String getQualityGrade() {
+        if (overallScore >= 90) return "A";
+        if (overallScore >= 80) return "B";
+        if (overallScore >= 70) return "C";
+        if (overallScore >= 60) return "D";
+        return "F";
+    }
+    
+    @Override
+    public String toString() {
+        return "TestDataQualityReport{" +
+                "analysisId='" + analysisId + '\'' +
+                ", overallScore=" + overallScore +
+                ", qualityGrade='" + getQualityGrade() + '\'' +
+                ", issuesCount=" + (issues != null ? issues.size() : 0) +
+                '}';
+    }
 }

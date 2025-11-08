@@ -1,0 +1,300 @@
+# BPMN Parsing и Анализ Модуль - Документация
+
+## Обзор
+
+Модуль BPMN парсинга и анализа бизнес-процессов для SecurityOrchestrator представляет собой полнофункциональное решение для обработки BPMN 2.0 диаграмм, анализа их структуры и выявления потенциальных проблем.
+
+## Архитектура
+
+### Доменные Модели
+
+#### 1. BusinessProcess
+Основная сущность для хранения информации о бизнес-процессе:
+- Метаданные процесса (ID, название, описание)
+- Путь к файлу и статус парсинга
+- Связи с элементами процесса (задачи, шлюзы, события, последовательности)
+- Временные метки парсинга
+
+#### 2. BpmnTask
+Представляет элементы задач в BPMN:
+- Типы задач (UserTask, ServiceTask, ScriptTask, etc.)
+- Атрибуты назначения (assignee, candidateUsers, candidateGroups)
+- Информация о реализации и форме
+- Позиционирование в диаграмме
+
+#### 3. BpmnSequence
+Представляет последовательные потоки:
+- Связи между элементами (sourceRef, targetRef)
+- Условные выражения и default flows
+- Метаданные визуализации (waypoints, цвета)
+
+#### 4. BpmnGateway
+Представляет шлюзы и точки принятия решений:
+- Типы шлюзов (exclusive, parallel, inclusive, event-based)
+- Конфигурация default flow
+- Поддержка merge/split логики
+
+#### 5. BpmnEvent
+Представляет события в процессе:
+- Типы событий (start, end, intermediate, boundary)
+- Специфичные атрибуты (timer, message, error, escalation, signal)
+- Связи с compensation activities
+
+#### 6. ProcessAnalysis
+Хранит результаты анализа процесса:
+- Типы анализа (structural, business logic, security, performance, etc.)
+- Статус и время обработки
+- Выявленные проблемы и рекомендации
+- Метрики сложности и покрытия
+
+### Репозиторный Слой
+
+Созданы специализированные JPA репозитории:
+
+#### 1. BusinessProcessRepository
+- Поиск по статусу парсинга, process ID, имени файла
+- Статистика и аналитика процессов
+- Запросы для процессов с задачами
+
+#### 2. BpmnTaskRepository
+- Поиск по процессу, типу задачи, исполнителю
+- Анализ распределения типов задач
+- Задачи с реализацией и описанием
+
+#### 3. BpmnSequenceRepository
+- Поиск по источнику/назначению
+- Последовательности с условиями
+- Default последовательности
+
+#### 4. BpmnGatewayRepository
+- Поиск по типу шлюза и процессу
+- Merge шлюзы и шлюзы с default flow
+- Статистика шлюзов по процессам
+
+#### 5. BpmnEventRepository
+- Поиск по типу события и процессу
+- Start/end события
+- Счетчики событий по процессам
+
+#### 6. ProcessAnalysisRepository
+- Анализ по процессу, типу, статусу
+- Временные фильтры и статистика
+- Анализы с проблемами и высокой сложностью
+
+## Сервисы
+
+### 1. BpmnParsingService
+
+**Основные возможности:**
+- Парсинг BPMN 2.0 XML файлов
+- Поддержка namespace-aware парсинга
+- Обработка директорий с BPMN файлами
+- Парсинг из строкового содержимого
+- Валидация структуры BPMN во время парсинга
+
+**Методы:**
+```java
+CompletableFuture<List<BusinessProcess>> parseDirectory(String directoryPath)
+BusinessProcess parseFile(Path filePath)
+BusinessProcess parseContent(String bpmnContent, String sourceName)
+```
+
+**Алгоритм парсинга:**
+1. Загрузка и валидация XML
+2. Извлечение элементов процесса
+3. Парсинг задач, шлюзов, событий, последовательных потоков
+4. Обработка информации о диаграмме
+5. Связывание элементов и валидация
+6. Сохранение в базу данных
+
+### 2. BusinessProcessAnalysisService
+
+**Типы анализа:**
+
+#### 1. Structure Analysis
+- Проверка наличия start/end событий
+- Выявление dead ends (элементы без исходящих потоков)
+- Обнаружение disconnected элементов
+- Детекция петель в процессе
+- Расчет score сложности
+
+#### 2. Business Logic Analysis
+- Анализ зависимостей между задачами
+- Выявление возможностей параллельного выполнения
+- Обнаружение длинных цепочек задач
+- Анализ распределения типов задач
+
+#### 3. Security Analysis
+- Проверка контроля доступа для чувствительных задач
+- Анализ имен задач на наличие конфиденциальных данных
+- Проверка безопасности service tasks
+- Выявление потенциальных уязвимостей
+
+#### 4. Performance Analysis
+- Анализ сложности условной логики
+- Выявление возможностей параллелизации
+- Анализ размера процесса и сложности
+- Рекомендации по оптимизации
+
+#### 5. API Mapping Analysis
+- Анализ соответствия задач API эндпоинтам
+- Расчет покрытия API
+- Выявление unmapped задач
+
+#### 6. Test Scenario Analysis
+- Расчет количества тестовых сценариев
+- Выявление edge cases
+- Анализ зависимостей данных
+
+#### 7. Integrated Analysis
+- Комбинированный анализ всех типов
+- Общий score и рекомендации
+- Сводный отчет
+
+#### 8. Validation Analysis
+- Проверка валидности BPMN структуры
+- Валидация связей между элементами
+- Базовые проверки качества
+
+**Методы:**
+```java
+CompletableFuture<ProcessAnalysis> analyzeProcess(UUID processId, ProcessAnalysis.AnalysisType analysisType)
+```
+
+**Результаты анализа:**
+- Выявленные проблемы с детализацией
+- Рекомендации по улучшению
+- Метрики сложности и качества
+- Score эффективности
+- Время обработки
+- Количество найденных проблем
+
+## Интеграция с OpenAPI
+
+Модуль готов к интеграции с существующим OpenAPI parsing модулем:
+
+```java
+// Пример интеграции
+public void mapBpmnToApi(UUID processId, UUID openApiServiceId) {
+    BusinessProcess process = processRepository.findById(processId).orElseThrow();
+    List<BpmnTask> tasks = taskRepository.findByProcessId(processId);
+    
+    for (BpmnTask task : tasks) {
+        // Сопоставление задач с API endpoints
+        String apiEndpoint = extractApiEndpointFromTask(task);
+        if (apiEndpoint != null) {
+            // Связывание с OpenAPI service
+            createApiMapping(task, apiEndpoint, openApiServiceId);
+        }
+    }
+}
+```
+
+## Использование
+
+### 1. Парсинг BPMN директории
+
+```java
+@Autowired
+private BpmnParsingService parsingService;
+
+public void parseBpmnDirectory() {
+    CompletableFuture<List<BusinessProcess>> future = parsingService.parseDirectory("guide/bpmn");
+    List<BusinessProcess> processes = future.get(30, TimeUnit.SECONDS);
+    
+    for (BusinessProcess process : processes) {
+        System.out.println("Parsed process: " + process.getName());
+    }
+}
+```
+
+### 2. Анализ процесса
+
+```java
+@Autowired
+private BusinessProcessAnalysisService analysisService;
+
+public void analyzeProcess(UUID processId) {
+    CompletableFuture<ProcessAnalysis> future = analysisService.analyzeProcess(
+        processId, 
+        ProcessAnalysis.AnalysisType.INTEGRATED_ANALYSIS
+    );
+    
+    ProcessAnalysis analysis = future.get(5, TimeUnit.MINUTES);
+    
+    System.out.println("Analysis completed:");
+    System.out.println("Issues found: " + analysis.getIssuesFound());
+    System.out.println("Complexity score: " + analysis.getComplexityScore());
+    System.out.println("Recommendations: " + analysis.getRecommendations());
+}
+```
+
+### 3. Работа с репозиториями
+
+```java
+// Поиск процессов с проблемами
+List<BusinessProcess> failedProcesses = processRepository.findByParseStatus(
+    BusinessProcess.ParseStatus.FAILED
+);
+
+// Анализ последних результатов
+Optional<ProcessAnalysis> latestAnalysis = analysisRepository.findLatestByProcessId(processId);
+
+// Статистика по типам анализа
+List<Object[]> analysisStats = analysisRepository.countByAnalysisType();
+```
+
+## Метрики и Аналитика
+
+### Process Statistics
+- Общее количество процессов
+- Успешные/неуспешные парсинги
+- Среднее количество задач на процесс
+- Статистика по статусам
+
+### Analysis Metrics
+- Среднее время обработки по типам анализа
+- Распределение сложности процессов
+- Частота выявления проблем
+- Покрытие API mapping
+
+## Обработка Ошибок
+
+- Comprehensive error handling в parsing service
+- Graceful degradation при partial parsing
+- Detailed logging для troubleshooting
+- Validation feedback для исправления ошибок
+- Retry mechanisms для временных сбоев
+
+## Расширяемость
+
+### Plugin Architecture
+- Возможность добавления custom анализаторов
+- Расширяемые типы анализа
+- Custom validators
+- Интеграция с внешними системами
+
+### Performance Optimizations
+- Async processing для больших процессов
+- Caching аналитических результатов
+- Batch processing для множественных файлов
+- Database indexing для быстрых запросов
+
+## Готовность к Продакшену
+
+- Full Spring Boot integration
+- Comprehensive testing infrastructure
+- Production-ready error handling
+- Monitoring и health checks
+- Scalable architecture
+- Security best practices
+
+## Следующие Шаги
+
+1. **REST API Controllers** - создание REST endpoints для управления процессами
+2. **OpenAPI Integration** - полная интеграция с существующим OpenAPI модулем
+3. **Test Scenarios Generation** - автоматическая генерация тестовых сценариев
+4. **Web UI** - веб-интерфейс для управления процессами
+5. **LLM Integration** - интеграция с LLM для семантического анализа
+
+Модуль предоставляет прочную основу для следующих этапов разработки и готов к интеграции с существующей архитектурой SecurityOrchestrator.
