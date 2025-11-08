@@ -386,7 +386,7 @@ public class BulkGenerationResponse {
         public void setQualityScore(double qualityScore) { this.qualityScore = qualityScore; }
         
         // Status enum
-        public enum BatchItemStatus {
+        public enum ItemStatus {
             PENDING,
             PROCESSING,
             COMPLETED,
