@@ -22,7 +22,6 @@ dependencies {
     // Spring Boot Starters
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
@@ -66,7 +65,7 @@ dependencies {
     implementation("io.swagger.parser.v3:swagger-parser-v3:2.1.10")
     // LLM and AI dependencies
     implementation("com.github.tomakehurst:wiremock:2.27.2")
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.11.0")
     
     // BPMN processing (опциональные)
     // implementation("org.camunda.bpm:camunda-bpm-junit5:7.21.0")
@@ -101,7 +100,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "org.example.SecurityOrchestratorApplication"
+    mainClass = "org.example.MinimalLLMApplication"
 }
 
 tasks.named<Test>("test") {

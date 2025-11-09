@@ -70,7 +70,8 @@ public class OpenApiService {
     private LocalDateTime updatedAt;
     
     // Связи
-    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ElementCollection
+    @CollectionTable(name = "openapi_service_endpoints", joinColumns = @JoinColumn(name = "service_id"))
     private List<ApiEndpoint> endpoints = new ArrayList<>();
     
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

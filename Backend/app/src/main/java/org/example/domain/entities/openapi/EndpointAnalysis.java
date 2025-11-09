@@ -16,7 +16,7 @@ import java.util.UUID;
 /**
  * Сущность для хранения результатов анализа эндпоинтов
  */
-@Entity
+@Entity(name = "OpenApiEndpointAnalysis")
 @Table(name = "endpoint_analyses")
 @EntityListeners(AuditingEntityListener.class)
 public class EndpointAnalysis {

@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * Entity representing data masking rules for test data protection
  */
-@Entity
+@Entity(name = "DataMaskingRuleAdvanced")
 @Table(name = "data_masking_rules")
 public class DataMaskingRule {
     

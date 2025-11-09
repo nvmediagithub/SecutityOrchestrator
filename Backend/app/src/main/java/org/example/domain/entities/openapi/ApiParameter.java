@@ -22,14 +22,12 @@ public class ApiParameter {
     private boolean explode;
     private boolean allowReservedValue;
     private String schema;
-    private Map<String, Object> examples;
-    private Object example;
-    private Map<String, Object> content;
+    private String examples;
+    private String example;
+    private String content;
     private String originalRef;
     
     public ApiParameter() {
-        this.examples = new java.util.HashMap<>();
-        this.content = new java.util.HashMap<>();
     }
     
     public ApiParameter(String name, String in, boolean required) {
@@ -128,27 +126,27 @@ public class ApiParameter {
         this.schema = schema;
     }
     
-    public Map<String, Object> getExamples() {
+    public String getExamples() {
         return examples;
     }
     
-    public void setExamples(Map<String, Object> examples) {
+    public void setExamples(String examples) {
         this.examples = examples;
     }
     
-    public Object getExample() {
+    public String getExample() {
         return example;
     }
     
-    public void setExample(Object example) {
+    public void setExample(String example) {
         this.example = example;
     }
     
-    public Map<String, Object> getContent() {
+    public String getContent() {
         return content;
     }
     
-    public void setContent(Map<String, Object> content) {
+    public void setContent(String content) {
         this.content = content;
     }
     

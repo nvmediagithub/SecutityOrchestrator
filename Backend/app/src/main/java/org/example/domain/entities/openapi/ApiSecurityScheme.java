@@ -17,10 +17,9 @@ public class ApiSecurityScheme {
     private String authorizationUrl;
     private String tokenUrl;
     private String refreshUrl;
-    private Map<String, Object> scopes; // For OAuth2
+    private String scopes; // For OAuth2
     
     public ApiSecurityScheme() {
-        this.scopes = new HashMap<>();
     }
     
     public ApiSecurityScheme(String name, String type, String description) {
@@ -103,16 +102,12 @@ public class ApiSecurityScheme {
         this.refreshUrl = refreshUrl;
     }
     
-    public Map<String, Object> getScopes() {
+    public String getScopes() {
         return scopes;
     }
     
-    public void setScopes(Map<String, Object> scopes) {
+    public void setScopes(String scopes) {
         this.scopes = scopes;
-    }
-    
-    public void addScope(String name, String description) {
-        this.scopes.put(name, description);
     }
     
     @Override

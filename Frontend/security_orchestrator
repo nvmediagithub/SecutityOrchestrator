@@ -1,0 +1,376 @@
+import 'package:flutter/material.dart';
+import 'package:security_orchestrator_frontend/data/models/api_response.dart';
+
+class OwaspCategoriesWidget extends StatefulWidget {
+  final Function(List<String>) onCategoriesSelected;
+
+  const OwaspCategoriesWidget({
+    Key? key,
+    required this.onCategoriesSelected,
+  }) : super(key: key);
+
+  @override
+  State<OwaspCategoriesWidget> createState() => _OwaspCategoriesWidgetState();
+}
+
+class _OwaspCategoriesWidgetState extends State<OwaspCategoriesWidget> {
+  final Set<String> _selectedCategories = {};
+  bool _selectAll = false;
+
+  // OWASP API Security Top 10 categories
+  final Map<String, Map<String, String>> _owaspCategories = {
+    'API1': {
+      'name': 'Broken Object Level Authorization (BOLA)',
+      'description': 'Test for insecure direct object references and authorization bypasses',
+      'severity': 'Critical',
+      'icon': Icons.lock_open,
+    },
+    'API2': {
+      'name': 'Broken User Authentication (BUA)',
+      'description': 'Test authentication mechanisms and session management',
+      'severity': 'Critical',
+      'icon': Icons.account_circle,
+    },
+    'API3': {
+      'name': 'Broken Object Property Level Authorization (BOPLA)',
+      'description': 'Test for unauthorized access to object properties',
+      'severity': 'High',
+      'icon': Icons.visibility_off,
+    },
+    'API4': {
+      'name': 'Unrestricted Resource Consumption (URC)',
+      'description': 'Test for resource exhaustion and DoS vulnerabilities',
+      'severity': 'High',
+      'icon': Icons.battery_alert,
+    },
+    'API5': {
+      'name': 'Broken Function Level Authorization (BFLA)',
+      'description': 'Test for privilege escalation and function access control',
+      'severity': 'Critical',
+      'icon': Icons.admin_panel_settings,
+    },
+    'API6': {
+      'name': 'Unrestricted Access to Sensitive Business Flows (UASBF)',
+      'description': 'Test for business logic vulnerabilities and flow manipulation',
+      'severity': 'High',
+      'icon': Icons.flowchart,
+    },
+    'API7': {
+      'name': 'Server Side Request Forgery (SSRF)',
+      'description': 'Test for SSRF vulnerabilities and internal network access',
+      'severity': 'High',
+      'icon': Icons.link_off,
+    },
+    'API8': {
+      'name': 'Security Misconfiguration (SM)',
+      'description': 'Test for security misconfigurations and information disclosure',
+      'severity': 'Medium',
+      'icon': Icons.settings_suggest,
+    },
+    'API9': {
+      'name': 'Improper Inventory Management (IIM)',
+      'description': 'Test for undocumented APIs and version vulnerabilities',
+      'severity': 'Medium',
+      'icon': Icons.inventory,
+    },
+    'API10': {
+      'name': 'Unsafe Consumption of APIs (UCA)',
+      'description': 'Test for vulnerabilities in third-party API consumption',
+      'severity': 'High',
+      'icon': Icons.link,
+    },
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Select OWASP API Security categories to test:',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        
+        // Select all / Deselect all
+        Row(
+          children: [
+            Checkbox(
+              value: _selectAll,
+              onChanged: (value) {
+                setState(() {
+                  _selectAll = value ?? false;
+                  if (_selectAll) {
+                    _selectedCategories.addAll(_owaspCategories.keys);
+                  } else {
+                    _selectedCategories.clear();
+                  }
+                });
+                widget.onCategoriesSelected(_selectedCategories.toList());
+              },
+            ),
+            const Text('Select All / Deselect All'),
+            const Spacer(),
+            Text(
+              '${_selectedCategories.length}/${_owaspCategories.length} selected',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Categories grid
+        Expanded(
+          child: ListView.builder(
+            itemCount: _owaspCategories.length,
+            itemBuilder: (context, index) {
+              final categoryId = _owaspCategories.keys.elementAt(index);
+              final category = _owaspCategories[categoryId]!;
+              
+              return _buildCategoryCard(categoryId, category);
+            },
+          ),
+        ),
+        
+        // Summary
+        if (_selectedCategories.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildSummaryCard(),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCategoryCard(String categoryId, Map<String, String> category) {
+    final isSelected = _selectedCategories.contains(categoryId);
+    final severity = category['severity']!;
+    
+    return Card(
+      elevation: isSelected ? 4 : 2,
+      color: isSelected ? _getSeverityColor(severity).withOpacity(0.1) : null,
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            if (isSelected) {
+              _selectedCategories.remove(categoryId);
+            } else {
+              _selectedCategories.add(categoryId);
+            }
+            _updateSelectAllState();
+          });
+          widget.onCategoriesSelected(_selectedCategories.toList());
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Checkbox(
+                    value: isSelected,
+                    onChanged: (value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedCategories.add(categoryId);
+                        } else {
+                          _selectedCategories.remove(categoryId);
+                        }
+                        _updateSelectAllState();
+                      });
+                      widget.onCategoriesSelected(_selectedCategories.toList());
+                    },
+                  ),
+                  Icon(
+                    _getCategoryIcon(category['icon']!),
+                    color: isSelected ? _getSeverityColor(severity) : Colors.grey,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$categoryId: ${category['name']}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? _getSeverityColor(severity) : null,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          category['description']!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _buildSeverityBadge(severity),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSeverityBadge(String severity) {
+    Color color = _getSeverityColor(severity);
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        severity,
+        style: TextStyle(
+          fontSize: 10,
+          color: color,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard() {
+    final criticalCount = _selectedCategories.where((id) => 
+        _owaspCategories[id]!['severity'] == 'Critical').length;
+    final highCount = _selectedCategories.where((id) => 
+        _owaspCategories[id]!['severity'] == 'High').length;
+    final mediumCount = _selectedCategories.where((id) => 
+        _owaspCategories[id]!['severity'] == 'Medium').length;
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.security,
+                color: Theme.of(context).primaryColor,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Security Testing Summary',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildSummaryItem('Critical', criticalCount, Colors.red),
+              _buildSummaryItem('High', highCount, Colors.orange),
+              _buildSummaryItem('Medium', mediumCount, Colors.amber),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Selected categories will be used to generate comprehensive security test cases '
+            'based on OWASP API Security Top 10 guidelines.',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem(String severity, int count, Color color) {
+    return Column(
+      children: [
+        Text(
+          '$count',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        Text(
+          severity,
+          style: TextStyle(
+            fontSize: 12,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _updateSelectAllState() {
+    setState(() {
+      _selectAll = _selectedCategories.length == _owaspCategories.length;
+    });
+  }
+
+  Color _getSeverityColor(String severity) {
+    switch (severity.toLowerCase()) {
+      case 'critical':
+        return Colors.red;
+      case 'high':
+        return Colors.orange;
+      case 'medium':
+        return Colors.amber;
+      case 'low':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getCategoryIcon(String iconName) {
+    switch (iconName) {
+      case 'Icons.lock_open':
+        return Icons.lock_open;
+      case 'Icons.account_circle':
+        return Icons.account_circle;
+      case 'Icons.visibility_off':
+        return Icons.visibility_off;
+      case 'Icons.battery_alert':
+        return Icons.battery_alert;
+      case 'Icons.admin_panel_settings':
+        return Icons.admin_panel_settings;
+      case 'Icons.flowchart':
+        return Icons.flowchart;
+      case 'Icons.link_off':
+        return Icons.link_off;
+      case 'Icons.settings_suggest':
+        return Icons.settings_suggest;
+      case 'Icons.inventory':
+        return Icons.inventory;
+      case 'Icons.link':
+        return Icons.link;
+      default:
+        return Icons.security;
+    }
+  }
+}

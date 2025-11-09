@@ -1,5 +1,6 @@
 package org.example.domain.entities.openapi;
 
+import jakarta.persistence.Embeddable;
 import org.example.domain.valueobjects.HttpMethod;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 /**
  * Представитель API эндпоинта с его характеристиками
  */
+@Embeddable
 public class ApiEndpoint {
     
     private String path;
@@ -18,10 +20,10 @@ public class ApiEndpoint {
     private List<String> tags;
     private String operationId;
     private List<ApiParameter> parameters;
-    private Map<String, Object> requestBody;
-    private Map<String, Object> responses;
+    private String requestBody;
+    private String responses;
     private List<String> security;
-    private Map<String, Object> extensions;
+    private String extensions;
     private boolean deprecated;
     private List<String> servers;
     
@@ -30,7 +32,6 @@ public class ApiEndpoint {
         this.tags = new ArrayList<>();
         this.security = new ArrayList<>();
         this.servers = new ArrayList<>();
-        this.extensions = new java.util.HashMap<>();
     }
     
     public ApiEndpoint(String path, HttpMethod method) {
@@ -104,19 +105,19 @@ public class ApiEndpoint {
         this.parameters = parameters;
     }
     
-    public Map<String, Object> getRequestBody() {
+    public String getRequestBody() {
         return requestBody;
     }
     
-    public void setRequestBody(Map<String, Object> requestBody) {
+    public void setRequestBody(String requestBody) {
         this.requestBody = requestBody;
     }
     
-    public Map<String, Object> getResponses() {
+    public String getResponses() {
         return responses;
     }
     
-    public void setResponses(Map<String, Object> responses) {
+    public void setResponses(String responses) {
         this.responses = responses;
     }
     
@@ -128,11 +129,11 @@ public class ApiEndpoint {
         this.security = security;
     }
     
-    public Map<String, Object> getExtensions() {
+    public String getExtensions() {
         return extensions;
     }
     
-    public void setExtensions(Map<String, Object> extensions) {
+    public void setExtensions(String extensions) {
         this.extensions = extensions;
     }
     

@@ -108,6 +108,11 @@ public class TestScenario {
     private LocalDateTime updatedAt;
     private LocalDateTime lastExecuted;
     
+    // Обратная связь с Test
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "test_id")
+    private Test test;
+    
     @Column(length = 4000)
     private String notes;
     

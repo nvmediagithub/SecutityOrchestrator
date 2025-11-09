@@ -2,6 +2,8 @@ package org.example.domain.dto.context;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.example.domain.entities.ContextMetrics;
+import org.example.domain.dto.context.BpmnContext;
 
 /**
  * Объединенный контекст для генерации данных

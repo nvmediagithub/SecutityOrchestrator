@@ -206,7 +206,8 @@ public class IssueClassifier {
         int severityMultiplier = switch (severity) {
             case CRITICAL, HIGH -> 0;
             case MEDIUM -> 1;
-            case LOW, INFO -> 2;
+            case LOW -> 2;
+            default -> 2; // For any other severity levels
         };
         
         return basePriority * 10 + severityMultiplier;

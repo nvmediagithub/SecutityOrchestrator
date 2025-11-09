@@ -1,6 +1,6 @@
 package org.example.infrastructure.repository;
 
-import org.example.domain.entities.DataMaskingRule;
+import org.example.domain.model.datamanagement.DataMaskingRule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
