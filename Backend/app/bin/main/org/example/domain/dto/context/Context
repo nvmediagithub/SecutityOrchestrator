@@ -1,0 +1,40 @@
+package org.example.domain.dto.context;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Map;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ContextAnalysisMetrics {
+    
+    private double complexityScore;
+    
+    private int taskCount;
+    
+    private int gatewayCount;
+    
+    private int eventCount;
+    
+    private int endpointCount;
+    
+    private Map<String, Integer> dataFlowMapping;
+    
+    private double executionTime;
+    
+    private double throughput;
+    
+    private double resourceUtilization;
+    
+    private double businessValue;
+    
+    private int contextualDependencies;
+    
+    public ContextAnalysisMetrics(double complexityScore, int taskCount) {
+        this.complexityScore = complexityScore;
+        this.taskCount = taskCount;
+    }
+}

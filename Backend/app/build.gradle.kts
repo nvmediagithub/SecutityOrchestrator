@@ -27,6 +27,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
+    // Lombok - essential for code generation
+    compileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
+    testCompileOnly("org.projectlombok:lombok:1.18.30")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
+
     // Database
     runtimeOnly("com.h2database:h2")
 
@@ -65,10 +71,6 @@ dependencies {
     // BPMN processing (опциональные)
     // implementation("org.camunda.bpm:camunda-bpm-junit5:7.21.0")
     // implementation("org.camunda.bpm:camunda-bpm-model-xml:7.21.0")
-    
-    // LLM and AI dependencies
-    implementation("com.github.tomakehurst:wiremock:2.27.2")
-    implementation("com.google.code.gson:gson:2.10.1")
     
     // YAML and JSON processing
     implementation("org.yaml:snakeyaml:2.2")

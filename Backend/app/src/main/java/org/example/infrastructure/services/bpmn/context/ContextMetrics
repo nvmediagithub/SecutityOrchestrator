@@ -1,0 +1,99 @@
+package org.example.infrastructure.services.bpmn.context;
+
+/**
+ * Context metrics for BPMN analysis
+ */
+public class ContextMetrics {
+    private int totalElements;
+    private int totalTasks;
+    private int totalGateways;
+    private int totalEvents;
+    private int totalSequenceFlows;
+    private double complexityScore;
+    private double maintainabilityIndex;
+    private double testabilityIndex;
+    private int riskFactors;
+    private int performanceIndicators;
+
+    public ContextMetrics() {}
+
+    public int getTotalElements() {
+        return totalElements;
+    }
+
+    public void setTotalElements(int totalElements) {
+        this.totalElements = totalElements;
+    }
+
+    public int getTotalTasks() {
+        return totalTasks;
+    }
+
+    public void setTotalTasks(int totalTasks) {
+        this.totalTasks = totalTasks;
+    }
+
+    public int getTotalGateways() {
+        return totalGateways;
+    }
+
+    public void setTotalGateways(int totalGateways) {
+        this.totalGateways = totalGateways;
+    }
+
+    public int getTotalEvents() {
+        return totalEvents;
+    }
+
+    public void setTotalEvents(int totalEvents) {
+        this.totalEvents = totalEvents;
+    }
+
+    public int getTotalSequenceFlows() {
+        return totalSequenceFlows;
+    }
+
+    public void setTotalSequenceFlows(int totalSequenceFlows) {
+        this.totalSequenceFlows = totalSequenceFlows;
+    }
+
+    public double getComplexityScore() {
+        return complexityScore;
+    }
+
+    public void setComplexityScore(double complexityScore) {
+        this.complexityScore = complexityScore;
+    }
+
+    public double getMaintainabilityIndex() {
+        return maintainabilityIndex;
+    }
+
+    public void setMaintainabilityIndex(double maintainabilityIndex) {
+        this.maintainabilityIndex = maintainabilityIndex;
+    }
+
+    public double getTestabilityIndex() {
+        return testabilityIndex;
+    }
+
+    public void setTestabilityIndex(double testabilityIndex) {
+        this.testabilityIndex = testabilityIndex;
+    }
+
+    public int getRiskFactors() {
+        return riskFactors;
+    }
+
+    public void setRiskFactors(int riskFactors) {
+        this.riskFactors = riskFactors;
+    }
+
+    public int getPerformanceIndicators() {
+        return performanceIndicators;
+    }
+
+    public void setPerformanceIndicators(int performanceIndicators) {
+        this.performanceIndicators = performanceIndicators;
+    }
+}

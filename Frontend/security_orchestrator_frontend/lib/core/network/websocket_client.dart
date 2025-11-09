@@ -32,9 +32,8 @@ class WebSocketClient {
     String? customUrl,
     WebSocketType type = WebSocketType.general,
     this.reconnectDelay = const Duration(seconds: 5),
-  }) : _socketType = type {
-    url = customUrl ?? _getDefaultUrl(type);
-  }
+  }) : url = customUrl ?? _getDefaultUrl(type),
+       _socketType = type;
 
   bool get isConnected => _isConnected;
 

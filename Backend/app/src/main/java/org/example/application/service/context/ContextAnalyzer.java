@@ -1,6 +1,7 @@
 package org.example.application.service.context;
 
 import org.example.domain.dto.context.*;
+import org.example.domain.entities.ContextMetrics;
 import org.example.domain.model.testdata.ContextAwareData;
 import org.example.domain.model.testdata.DataFlowChain;
 import org.example.infrastructure.services.bpmn.BpmnAnalysisService;

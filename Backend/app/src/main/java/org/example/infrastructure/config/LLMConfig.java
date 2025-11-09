@@ -27,6 +27,14 @@ public class LLMConfig {
     private int localTimeout = 300; // 5 minutes for model loading
     private int maxLocalModels = 3;
     
+    // ONNX Runtime settings
+    private String onnxModelPath = "/home/user/.security-orchestrator/models";
+    private int onnxMaxMemoryMB = 4096; // 4GB max memory for ONNX models
+    private int onnxMaxModels = 2; // Maximum number of loaded ONNX models
+    private boolean onnxEnableGPU = false; // Enable GPU acceleration if available
+    private int onnxNumThreads = 4; // Number of threads for CPU inference
+    private boolean onnxEnableQuantization = true; // Enable model quantization
+    
     // Performance settings
     private int maxRetries = 3;
     private int connectionPoolSize = 10;
@@ -94,6 +102,25 @@ public class LLMConfig {
     
     public int getMaxLocalModels() { return maxLocalModels; }
     public void setMaxLocalModels(int maxLocalModels) { this.maxLocalModels = maxLocalModels; }
+    
+    // ONNX configuration getters and setters
+    public String getOnnxModelPath() { return onnxModelPath; }
+    public void setOnnxModelPath(String onnxModelPath) { this.onnxModelPath = onnxModelPath; }
+    
+    public int getOnnxMaxMemoryMB() { return onnxMaxMemoryMB; }
+    public void setOnnxMaxMemoryMB(int onnxMaxMemoryMB) { this.onnxMaxMemoryMB = onnxMaxMemoryMB; }
+    
+    public int getOnnxMaxModels() { return onnxMaxModels; }
+    public void setOnnxMaxModels(int onnxMaxModels) { this.onnxMaxModels = onnxMaxModels; }
+    
+    public boolean isOnnxEnableGPU() { return onnxEnableGPU; }
+    public void setOnnxEnableGPU(boolean onnxEnableGPU) { this.onnxEnableGPU = onnxEnableGPU; }
+    
+    public int getOnnxNumThreads() { return onnxNumThreads; }
+    public void setOnnxNumThreads(int onnxNumThreads) { this.onnxNumThreads = onnxNumThreads; }
+    
+    public boolean isOnnxEnableQuantization() { return onnxEnableQuantization; }
+    public void setOnnxEnableQuantization(boolean onnxEnableQuantization) { this.onnxEnableQuantization = onnxEnableQuantization; }
     
     public int getMaxRetries() { return maxRetries; }
     public void setMaxRetries(int maxRetries) { this.maxRetries = maxRetries; }
