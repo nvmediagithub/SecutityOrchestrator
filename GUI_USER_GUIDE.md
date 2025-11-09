@@ -1,0 +1,643 @@
+# SecurityOrchestrator GUI User Guide
+
+## 🎯 Overview
+
+SecurityOrchestrator is a comprehensive web-based platform for end-to-end security testing of business processes and APIs. This guide will help you navigate and effectively use all features of the web interface.
+
+**System Access:**
+- Web Interface: `http://localhost:3000`
+- Backend API: `http://localhost:8080`
+- Health Check: `http://localhost:8080/api/health`
+
+---
+
+## 🚀 Getting Started
+
+### 1. System Requirements
+
+**Minimum Requirements:**
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- Java 21+ installed for backend
+- Flutter Web for frontend
+- 8GB RAM recommended
+
+**Access the System:**
+1. Open your web browser
+2. Navigate to `http://localhost:3000`
+3. The main dashboard will load automatically
+
+### 2. First Steps
+
+Upon accessing the system, you'll see the **Home Screen** with:
+- Search functionality for processes
+- Filter options (All, Active, Inactive, Archived)
+- Quick access to create new processes or workflows
+- LLM Dashboard access
+
+---
+
+## 📊 Main Dashboard Features
+
+### Home Screen Navigation
+
+**Core Actions Available:**
+- **Refresh**: Update the process list
+- **Search**: Find specific processes by name
+- **Filter by Status**: Sort processes by their current state
+- **Create New**: Add new processes or workflows
+
+**Process Management:**
+- View all available BPMN processes
+- Monitor process status in real-time
+- Access process details and execution history
+- Archive or activate processes as needed
+
+---
+
+## 🤖 LLM Dashboard
+
+### Overview
+The LLM Dashboard provides comprehensive management of Large Language Models for AI-powered security analysis and test generation.
+
+**Access:** Click the "LLM Dashboard" button from the main navigation or home screen.
+
+### System Overview Card
+
+**Key Information Displayed:**
+- Active LLM Provider (OpenRouter or Local)
+- Currently selected model
+- Number of available models
+- Number of configured providers
+
+### Provider Configuration
+
+#### OpenRouter Configuration (Cloud-based LLMs)
+
+1. **API Key Setup:**
+   - Enter your OpenRouter API key (starts with `sk-or-`)
+   - System validates key format automatically
+   - Secure storage of credentials
+
+2. **Base URL Configuration:**
+   - Default: `https://openrouter.ai/api/v1`
+   - Custom endpoint support for enterprise setups
+
+3. **Provider Status:**
+   - Green indicator: Provider configured and operational
+   - Orange indicator: Provider not configured
+   - Real-time status updates
+
+**Configuration Steps:**
+```
+1. Navigate to Provider Configuration section
+2. Expand "OpenRouter Configuration"
+3. Enter your API key in the secure field
+4. Verify base URL (or use default)
+5. Click "Configure OpenRouter" button
+6. Wait for confirmation message
+```
+
+#### Local LLM Configuration
+
+- **Computer Icon**: Indicates local model provider
+- **Direct Integration**: Works with locally installed models
+- **Privacy-First**: No data leaves your system
+
+### Model Selection
+
+**Available Models Display:**
+- Dropdown menu with all configured models
+- Tooltip information showing:
+  - Context window size
+  - Maximum tokens
+  - Temperature settings
+  - Provider information
+
+**Model Management:**
+- Switch between different models
+- View model configuration details
+- Performance monitoring per model
+
+### Status Monitoring
+
+**Real-time Provider Status:**
+- **Green**: Healthy and available
+- **Orange**: Unhealthy but available
+- **Red**: Unavailable or error state
+
+**Status Information Includes:**
+- Response time measurements
+- Last check timestamp
+- Error messages (if any)
+- Provider health indicators
+
+### Test Interface
+
+**Direct LLM Testing:**
+1. Enter test prompt in the text area
+2. Click "Test LLM" button
+3. View response in the results panel
+4. Copy responses for documentation
+
+**Use Cases:**
+- Validate model responses
+- Test prompt engineering
+- Verify model capabilities
+- Quality assurance
+
+---
+
+## 🔧 API Testing Dashboard
+
+### Overview
+Comprehensive API security testing platform combining OpenAPI analysis, BPMN workflow integration, and OWASP security standards.
+
+**Access:** Available through the main navigation or home screen actions.
+
+### Testing Workflow
+
+#### Step 1: OpenAPI Specification Analysis
+
+**Input Methods:**
+- **URL Input**: Direct OpenAPI/Swagger URL
+- **File Upload**: Upload .yaml or .json files
+- **Example URLs**: Pre-configured sample specifications
+
+**Analysis Features:**
+- Automatic endpoint extraction
+- Schema validation
+- Security scheme detection
+- Authentication method analysis
+- Response structure analysis
+
+**Process:**
+```
+1. Expand "OpenAPI Specification" section
+2. Enter URL or upload file
+3. Click "Analyze OpenAPI"
+4. Wait for completion confirmation
+5. Review analysis results
+```
+
+#### Step 2: BPMN Process Integration
+
+**Available Processes:**
+- 20 pre-configured business processes
+- Financial services workflows
+- Payment processing systems
+- Customer onboarding processes
+- And more...
+
+**Integration Features:**
+- Workflow step extraction
+- Data flow analysis
+- Business logic understanding
+- Process validation
+- Performance monitoring
+
+**Process Selection:**
+```
+1. Expand "BPMN Process Integration" section
+2. Browse available processes
+3. Select relevant process for your API
+4. Review process details
+5. Confirm integration
+```
+
+#### Step 3: OWASP API Security Categories
+
+**OWASP API Security Top 10 Coverage:**
+
+1. **API1: Broken Object Level Authorization (BOLA)**
+   - Object-level access control testing
+   - IDOR vulnerability detection
+   - User data isolation verification
+
+2. **API2: Broken User Authentication (BUA)**
+   - Authentication flow testing
+   - Session management validation
+   - Credential handling assessment
+
+3. **API3: Broken Object Property Level Authorization (BOPLA)**
+   - Field-level access control
+   - Property authorization testing
+   - Data exposure prevention
+
+4. **API4: Unrestricted Resource Consumption (URC)**
+   - Rate limiting verification
+   - Resource exhaustion testing
+   - API quota management
+
+5. **API5: Broken Function Level Authorization (BFLA)**
+   - Function-level access control
+   - Privilege escalation testing
+   - Role-based access verification
+
+6. **API6: Unrestricted Access to Sensitive Business Flows (UASBF)**
+   - Business process security
+   - Workflow integrity testing
+   - Critical path protection
+
+7. **API7: Server Side Request Forgery (SSRF)**
+   - Internal service exploitation
+   - Network boundary testing
+   - Request manipulation detection
+
+8. **API8: Security Misconfiguration (SM)**
+   - Configuration security audit
+   - Default setting analysis
+   - Security headers verification
+
+9. **API9: Improper Inventory Management (IIM)**
+   - API discovery and cataloging
+   - Version management testing
+   - Legacy endpoint detection
+
+10. **API10: Unsafe Consumption of APIs (UCA)**
+    - Third-party API security
+    - Trust boundary testing
+    - External dependency analysis
+
+**Selection Process:**
+```
+1. Expand "OWASP API Security Categories" section
+2. Review all 10 OWASP categories
+3. Select relevant categories for your use case
+4. Configure category-specific parameters
+5. Review security testing scope
+```
+
+#### Step 4: Test Configuration
+
+**Configuration Parameters:**
+- Test execution timeout
+- Concurrent request limits
+- Authentication credentials
+- Custom test data sets
+- Reporting format preferences
+
+**Advanced Options:**
+- Custom payload generation
+- Boundary value testing
+- Negative test scenarios
+- Performance benchmarking
+- Integration testing modes
+
+---
+
+## 📈 Real-time Monitoring
+
+### Monitoring Dashboard
+
+**Access:** Navigate to Monitoring section from main menu.
+
+### System Health Monitoring
+
+**Metrics Tracked:**
+- **CPU Usage**: Real-time processor utilization
+- **Memory Usage**: RAM consumption monitoring
+- **Disk Usage**: Storage utilization tracking
+- **Database Connection**: Connection status and performance
+- **API Response Times**: Average response time monitoring
+- **Active Models**: Currently loaded LLM models
+
+**Health Status Indicators:**
+- 🟢 **Healthy**: All systems operating normally
+- 🟡 **Warning**: Some metrics approaching thresholds
+- 🔴 **Critical**: Immediate attention required
+- ⚠️ **Degraded**: Performance issues detected
+
+### Real-time Charts
+
+**Interactive Visualizations:**
+- Line charts for performance trends
+- Time-series data for historical analysis
+- Responsive charts for mobile viewing
+- Zoom and filter capabilities
+- Export functionality for reports
+
+**Chart Types:**
+- System resource usage
+- API performance metrics
+- LLM response times
+- Error rate trends
+- User activity patterns
+
+### Alert System
+
+**Alert Types:**
+- **System Alerts**: Resource usage warnings
+- **Performance Alerts**: Response time degradation
+- **Security Alerts**: Anomaly detection
+- **Business Alerts**: Process completion monitoring
+
+**Alert Management:**
+- Real-time notification system
+- Alert history and trending
+- Custom threshold configuration
+- Escalation rule setup
+
+---
+
+## 🔍 Results and Reporting
+
+### Test Results Dashboard
+
+**Result Categories:**
+- **Security Findings**: Detected vulnerabilities
+- **Performance Metrics**: Response time analysis
+- **Compliance Reports**: OWASP standard coverage
+- **Business Process Analysis**: Workflow validation
+
+### Report Generation
+
+**Available Formats:**
+- **PDF**: Executive summary reports
+- **JSON**: Machine-readable data
+- **HTML**: Interactive web reports
+- **CSV**: Spreadsheet-compatible data
+
+**Report Contents:**
+- Executive summary
+- Technical findings
+- Risk assessments
+- Remediation recommendations
+- Compliance status
+- Performance benchmarks
+
+### Vulnerability Analysis
+
+**Severity Levels:**
+- **Critical**: Immediate action required
+- **High**: High priority remediation
+- **Medium**: Standard remediation timeline
+- **Low**: Improvement opportunities
+- **Informational**: Best practice suggestions
+
+**Detailed Analysis:**
+- Vulnerability description
+- Impact assessment
+- Exploitation scenarios
+- Remediation steps
+- Reference materials
+
+---
+
+## 🔧 Configuration and Settings
+
+### System Configuration
+
+**Global Settings:**
+- Default timeout values
+- Retry configuration
+- Logging levels
+- Security policies
+
+### User Preferences
+
+**Interface Customization:**
+- Theme selection
+- Layout preferences
+- Notification settings
+- Dashboard widgets
+
+### API Integration Settings
+
+**Connection Management:**
+- Target API endpoints
+- Authentication methods
+- Rate limiting preferences
+- Proxy configurations
+
+---
+
+## 🛠️ Troubleshooting
+
+### Common Issues and Solutions
+
+#### 1. "Connection Refused" Errors
+
+**Problem**: Cannot connect to backend services
+
+**Solutions:**
+- Verify backend is running on port 8080
+- Check firewall settings
+- Confirm Java process is active
+- Restart services if needed
+
+**Verification Steps:**
+```bash
+# Check if backend is running
+curl http://localhost:8080/api/health
+
+# Check process status
+ps aux | grep java
+```
+
+#### 2. LLM Provider Configuration Issues
+
+**Problem**: OpenRouter API key not working
+
+**Solutions:**
+- Verify API key format (starts with "sk-or-")
+- Check API key permissions
+- Confirm network connectivity
+- Validate base URL configuration
+
+**Diagnostic Steps:**
+1. Navigate to LLM Dashboard
+2. Check provider status indicators
+3. Test with simple prompts
+4. Review error messages in real-time
+
+#### 3. OpenAPI Analysis Failures
+
+**Problem**: Cannot parse or analyze OpenAPI specifications
+
+**Solutions:**
+- Validate OpenAPI specification format
+- Check URL accessibility
+- Verify file format (.yaml or .json)
+- Ensure proper schema structure
+
+**Validation Checklist:**
+- OpenAPI version compatibility
+- Required fields present
+- URL accessibility
+- Authentication requirements
+
+#### 4. BPMN Process Integration Issues
+
+**Problem**: BPMN process not loading or integrating
+
+**Solutions:**
+- Verify BPMN 2.0 format compliance
+- Check process file integrity
+- Confirm process contains required elements
+- Review process execution requirements
+
+**Format Requirements:**
+- Valid BPMN 2.0 XML structure
+- Process ID and name
+- Executable process flag
+- Proper element relationships
+
+### Performance Optimization
+
+#### 1. System Performance
+
+**Optimization Tips:**
+- Monitor resource usage regularly
+- Adjust concurrent request limits
+- Optimize database connections
+- Use local models for privacy
+
+#### 2. API Testing Performance
+
+**Best Practices:**
+- Configure appropriate timeouts
+- Use connection pooling
+- Implement request caching
+- Monitor rate limiting
+
+#### 3. LLM Model Selection
+
+**Model Optimization:**
+- Choose models appropriate for task complexity
+- Monitor response times
+- Balance accuracy vs. speed
+- Consider local vs. cloud models
+
+### Error Messages and Meanings
+
+**Common Error Codes:**
+- **400 Bad Request**: Invalid input parameters
+- **401 Unauthorized**: Authentication required
+- **403 Forbidden**: Insufficient permissions
+- **404 Not Found**: Resource not available
+- **500 Internal Server Error**: System error
+- **503 Service Unavailable**: Service temporarily down
+
+**Error Message Patterns:**
+- "Connection refused": Service not running
+- "Timeout exceeded": Request taking too long
+- "Invalid API key": Authentication failure
+- "File format error": Unsupported file type
+- "Network error": Connectivity issues
+
+---
+
+## 🔐 Security Considerations
+
+### Data Privacy
+
+**Local-First Architecture:**
+- All processing happens locally
+- No data sent to external services (except configured LLM providers)
+- Secure storage of sensitive information
+- Audit trail for all actions
+
+### Access Control
+
+**Authentication Requirements:**
+- API key management for external services
+- Role-based access control
+- Session management
+- Secure credential storage
+
+### Compliance
+
+**Security Standards:**
+- OWASP API Security Top 10 compliance
+- Industry-standard encryption
+- Secure communication protocols
+- Regular security updates
+
+---
+
+## 📚 Advanced Features
+
+### Custom Test Development
+
+**Test Case Creation:**
+- Custom OWASP test scenarios
+- Business-specific security tests
+- Integration with existing test suites
+- Automated test generation
+
+### Integration Capabilities
+
+**External Tool Integration:**
+- CI/CD pipeline integration
+- Bug tracking system integration
+- Reporting tool integration
+- Monitoring system integration
+
+### API Extensions
+
+**Custom Endpoints:**
+- RESTful API extensions
+- Webhook support
+- Real-time event notifications
+- Custom authentication methods
+
+---
+
+## 📞 Support and Resources
+
+### Documentation
+
+**Available Resources:**
+- Technical documentation in `/docs` folder
+- API reference documentation
+- Video tutorials and guides
+- Best practices guides
+
+### Community Support
+
+**Getting Help:**
+- GitHub Issues for bug reports
+- Community discussions
+- Feature request tracking
+- Documentation contributions
+
+### Professional Services
+
+**Enterprise Support:**
+- Custom implementation services
+- Training and certification
+- Consulting services
+- Custom feature development
+
+---
+
+## 🚀 Best Practices
+
+### Effective Usage
+
+1. **Start with Simple Tests**: Begin with basic security scans
+2. **Use Real Data**: Test with realistic business scenarios
+3. **Monitor Performance**: Regularly check system health
+4. **Document Results**: Maintain comprehensive test records
+5. **Regular Updates**: Keep systems and models current
+
+### Security Testing Strategy
+
+1. **Comprehensive Coverage**: Use all OWASP categories
+2. **Regular Testing**: Implement continuous security testing
+3. **Risk-Based Approach**: Prioritize critical business processes
+4. **Team Collaboration**: Share results across security teams
+5. **Continuous Improvement**: Learn from each test cycle
+
+### Performance Optimization
+
+1. **Resource Management**: Monitor and optimize system resources
+2. **Model Selection**: Choose appropriate models for each task
+3. **Batch Processing**: Use batch operations for efficiency
+4. **Caching**: Implement caching for repeated operations
+5. **Scaling**: Plan for increased load and usage
+
+---
+
+**SecurityOrchestrator GUI User Guide v1.0**
+*For questions or support, please refer to the technical documentation or community resources.*

@@ -12,7 +12,7 @@ class ExecutionSessionDto {
   final String openApiUrl;
   final List<String> bpmnFiles;
   final List<String> owaspCategories;
-  final ExecutionProgress progress;
+  final ExecutionProgressDto progress;
   final List<StepExecutionDto> steps;
   final List<String> logs;
   final Map<String, dynamic> configuration;

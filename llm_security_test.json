@@ -1,0 +1,5 @@
+{
+  "model": "codellama:7b-instruct-q4_0",
+  "prompt": "Analyze this code for security vulnerabilities:\n\nString query = \"SELECT * FROM users WHERE id = \" + userInput + \";\";\nStatement stmt = connection.createStatement();\nResultSet rs = stmt.executeQuery(query);\n\nWhat security issues do you see and how to fix them? Provide specific OWASP recommendations.",
+  "stream": false
+}

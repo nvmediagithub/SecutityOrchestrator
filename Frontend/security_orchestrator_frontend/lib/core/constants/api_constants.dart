@@ -1,7 +1,14 @@
 class ApiConstants {
-  static const String baseUrl = 'http://localhost:8080';
+  // SecurityOrchestrator LLM Service (порт 8090)
+  static const String llmBaseUrl = 'http://localhost:8090';
+  static const String healthEndpoint = '/api/health';
+  static const String llmStatusEndpoint = '/api/llm/status';
+  static const String llmTestEndpoint = '/api/llm/test';
+  static const String ollamaStatusEndpoint = '/api/llm/ollama/status';
+  static const String llmCompleteEndpoint = '/api/llm/complete';
   
-  // Core endpoints
+  // Legacy endpoints (порт 8080) - для совместимости
+  static const String baseUrl = 'http://localhost:8080';
   static const String processesEndpoint = '/api/processes';
   static const String specificationsEndpoint = '/api/specifications';
   static const String workflowsEndpoint = '/api/workflows';

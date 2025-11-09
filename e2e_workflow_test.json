@@ -1,0 +1,120 @@
+{
+  "test_scenario": "Enterprise Security Testing Workflow",
+  "description": "Complete end-to-end testing scenario demonstrating all SecurityOrchestrator components working together",
+  "workflow_steps": [
+    {
+      "step": 1,
+      "component": "API Testing GUI System",
+      "action": "Upload OpenAPI specification",
+      "validation": "Verify OpenAPI parsing and endpoint analysis"
+    },
+    {
+      "step": 2,
+      "component": "LLM Security Analysis",
+      "action": "Analyze API endpoints for security vulnerabilities using CodeLlama 7B",
+      "validation": "Verify OWASP security test generation"
+    },
+    {
+      "step": 3,
+      "component": "BPMN Integration",
+      "action": "Process business workflow for security analysis",
+      "validation": "Verify business process security analysis"
+    },
+    {
+      "step": 4,
+      "component": "Real-time Monitoring",
+      "action": "Monitor system performance during testing",
+      "validation": "Verify WebSocket real-time updates"
+    },
+    {
+      "step": 5,
+      "component": "Performance Tracking",
+      "action": "Track LLM response times and success rates",
+      "validation": "Verify performance metrics collection"
+    },
+    {
+      "step": 6,
+      "component": "Report Generation",
+      "action": "Generate comprehensive security report",
+      "validation": "Verify report includes all analysis results"
+    }
+  ],
+  "test_data": {
+    "api_spec": {
+      "openapi": "3.0.0",
+      "info": {
+        "title": "Banking API",
+        "version": "1.0.0",
+        "description": "Secure banking service API"
+      },
+      "paths": {
+        "/api/v1/accounts/{id}/balance": {
+          "get": {
+            "summary": "Get account balance",
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Balance retrieved successfully"
+              },
+              "401": {
+                "description": "Unauthorized access"
+              }
+            }
+          }
+        },
+        "/api/v1/transfers": {
+          "post": {
+            "summary": "Transfer funds",
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "fromAccount": {"type": "string"},
+                      "toAccount": {"type": "string"},
+                      "amount": {"type": "number"},
+                      "description": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "Transfer completed"
+              },
+              "400": {
+                "description": "Invalid transfer request"
+              }
+            }
+          }
+        }
+      }
+    },
+    "bpmn_process": "loan-approval-process.bpmn",
+    "security_context": {
+      "compliance_standards": ["GDPR", "PCI-DSS", "SOX"],
+      "risk_tolerance": "medium",
+      "data_classification": "confidential"
+    }
+  },
+  "expected_results": {
+    "vulnerability_count": "Expected: 5-10 identified vulnerabilities",
+    "security_score": "Expected: 75-85% security score",
+    "llm_analysis_time": "Expected: <30 seconds response time",
+    "bpmn_analysis_complete": "Expected: All process elements analyzed",
+    "real_time_updates": "Expected: Continuous WebSocket updates",
+    "performance_metrics": "Expected: Response time <2s, Success rate >95%"
+  }
+}
