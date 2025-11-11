@@ -10,8 +10,9 @@ final monitoringRepositoryProvider = Provider<MonitoringRepository>((ref) {
 });
 
 class MonitoringRepository {
-  static const String baseUrl = 'http://localhost:8080/api/monitoring';
-  static const String wsUrl = 'ws://localhost:8080/ws';
+  // Updated to use OWASP backend port 8091
+  static const String baseUrl = 'http://localhost:8091/api/monitoring';
+  static const String wsUrl = 'ws://localhost:8091/ws';
   
   WebSocketChannel? _channel;
   bool _isConnected = false;

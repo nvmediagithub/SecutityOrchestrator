@@ -156,8 +156,115 @@ class VulnerabilityReportDto {
   Map<String, dynamic> toJson() => _$VulnerabilityReportDtoToJson(this);
 }
 
-// OWASP Top 10 categories
-enum OwaspCategory {
+// New DTOs for OWASP Security Tester
+@JsonSerializable()
+class OwaspTestingStatus {
+  final String status;
+  final int currentStep;
+  final int progress;
+  final String message;
+  final int startTime;
+  final int? endTime;
+  final int? duration;
+
+  OwaspTestingStatus({
+    required this.status,
+    required this.currentStep,
+    required this.progress,
+    required this.message,
+    required this.startTime,
+    this.endTime,
+    this.duration,
+  });
+
+  factory OwaspTestingStatus.fromJson(Map<String, dynamic> json) =>
+      _$OwaspTestingStatusFromJson(json);
+
+  Map<String, dynamic> toJson() => _$OwaspTestingStatusToJson(this);
+}
+
+@JsonSerializable()
+class OwaspTestResults {
+  final OwaspTestSummary summary;
+  final List<OwaspCategory> owaspTop10;
+  final List<OwaspVulnerability> vulnerabilities;
+
+  OwaspTestResults({
+    required this.summary,
+    required this.owaspTop10,
+    required this.vulnerabilities,
+  });
+
+  factory OwaspTestResults.fromJson(Map<String, dynamic> json) =>
+      _$OwaspTestResultsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$OwaspTestResultsToJson(this);
+}
+
+@JsonSerializable()
+class OwaspTestSummary {
+  final int totalTests;
+  final int vulnerabilitiesFound;
+  final double vulnerabilityRate;
+  final String overallRiskLevel;
+
+  OwaspTestSummary({
+    required this.totalTests,
+    required this.vulnerabilitiesFound,
+    required this.vulnerabilityRate,
+    required this.overallRiskLevel,
+  });
+
+  factory OwaspTestSummary.fromJson(Map<String, dynamic> json) =>
+      _$OwaspTestSummaryFromJson(json);
+
+  Map<String, dynamic> toJson() => _$OwaspTestSummaryToJson(this);
+}
+
+@JsonSerializable()
+class OwaspCategory {
+  final String category;
+  final String description;
+  final int testCount;
+  final int vulnerabilitiesFound;
+
+  OwaspCategory({
+    required this.category,
+    required this.description,
+    required this.testCount,
+    required this.vulnerabilitiesFound,
+  });
+
+  factory OwaspCategory.fromJson(Map<String, dynamic> json) =>
+      _$OwaspCategoryFromJson(json);
+
+  Map<String, dynamic> toJson() => _$OwaspCategoryToJson(this);
+}
+
+@JsonSerializable()
+class OwaspVulnerability {
+  final String title;
+  final String description;
+  final String severity;
+  final String owaspCategory;
+  final String endpoint;
+
+  OwaspVulnerability({
+    required this.title,
+    required this.description,
+    required this.severity,
+    required this.owaspCategory,
+    required this.endpoint,
+  });
+
+  factory OwaspVulnerability.fromJson(Map<String, dynamic> json) =>
+      _$OwaspVulnerabilityFromJson(json);
+
+  Map<String, dynamic> toJson() => _$OwaspVulnerabilityToJson(this);
+}
+
+// OWASP Top 10 categories enum
+enum OwaspCategoryType {
   @JsonValue('A01')
   a01_injection,
   @JsonValue('A02')

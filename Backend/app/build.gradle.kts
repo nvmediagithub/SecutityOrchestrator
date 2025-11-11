@@ -1,14 +1,15 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.2.0"
-    id("io.spring.dependency-management") version "1.1.4"
+    id("org.springframework.boot") version "3.3.5"
+    id("io.spring.dependency-management") version "1.1.6"
 }
 
 group = "org.example"
 version = "0.0.0-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 repositories {
@@ -20,11 +21,15 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("org.json:json:20231013")
     implementation("org.projectlombok:lombok")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+    
+    // HTTP Client for external API calls
+    implementation("org.apache.httpcomponents:httpclient:4.5.14")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")

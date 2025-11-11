@@ -1,0 +1,1984 @@
+{
+  "analysis_timestamp": "2025-11-09T21:14:43.119743",
+  "total_files_analyzed": 20,
+  "individual_analyses": [
+    {
+      "file_path": "guide\\bpmn\\01_bonus_payment.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.106834",
+      "bpmn_structure": {
+        "process_id": "Process_01_bonus_payment",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_01",
+            "name": "Клиент выбирает услугу и решает оплатить бонусами",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_01",
+            "name": "Платёж успешно завершён",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_01_1",
+            "name": "",
+            "source_ref": "StartEvent_01",
+            "target_ref": "Task_01_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_01_2",
+            "name": "",
+            "source_ref": "Task_01_Auth",
+            "target_ref": "Task_01_GetAccs",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_01_3",
+            "name": "",
+            "source_ref": "Task_01_GetAccs",
+            "target_ref": "Task_01_GetBal",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_01_4",
+            "name": "",
+            "source_ref": "Task_01_GetBal",
+            "target_ref": "Task_01_InitPay",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_01_5",
+            "name": "",
+            "source_ref": "Task_01_InitPay",
+            "target_ref": "Task_01_CheckPay",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_01_6",
+            "name": "",
+            "source_ref": "Task_01_CheckPay",
+            "target_ref": "EndEvent_01",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_01_bonus_payment",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\02_credit_application.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.107550",
+      "bpmn_structure": {
+        "process_id": "Process_02_credit_application",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_02",
+            "name": "Клиент заполняет анкету на сайте партнёра",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_02",
+            "name": "Заявка подана",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_02_1",
+            "name": "",
+            "source_ref": "StartEvent_02",
+            "target_ref": "Task_02_CreateLead",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_02_2",
+            "name": "",
+            "source_ref": "Task_02_CreateLead",
+            "target_ref": "Task_02_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_02_3",
+            "name": "",
+            "source_ref": "Task_02_Auth",
+            "target_ref": "Task_02_GetProd",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_02_4",
+            "name": "",
+            "source_ref": "Task_02_GetProd",
+            "target_ref": "Task_02_Apply",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_02_5",
+            "name": "",
+            "source_ref": "Task_02_Apply",
+            "target_ref": "Task_02_CheckApp",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_02_6",
+            "name": "",
+            "source_ref": "Task_02_CheckApp",
+            "target_ref": "EndEvent_02",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_02_credit_application",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\03_gibdd_fine.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.108171",
+      "bpmn_structure": {
+        "process_id": "Process_03_gibdd_fine",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_03",
+            "name": "Клиент вводит номер СТС",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_03",
+            "name": "Платёж за штраф выполнен",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_03_1",
+            "name": "",
+            "source_ref": "StartEvent_03",
+            "target_ref": "Task_03_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_03_2",
+            "name": "",
+            "source_ref": "Task_03_Auth",
+            "target_ref": "Task_03_ExtSearch",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_03_3",
+            "name": "",
+            "source_ref": "Task_03_ExtSearch",
+            "target_ref": "Task_03_GetFines",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_03_4",
+            "name": "",
+            "source_ref": "Task_03_GetFines",
+            "target_ref": "Task_03_GetAccs",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_03_5",
+            "name": "",
+            "source_ref": "Task_03_GetAccs",
+            "target_ref": "Task_03_InitPay",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_03_6",
+            "name": "",
+            "source_ref": "Task_03_InitPay",
+            "target_ref": "EndEvent_03",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_03_gibdd_fine",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\04_mobile_payment.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.109013",
+      "bpmn_structure": {
+        "process_id": "Process_04_mobile_payment",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_04",
+            "name": "Клиент вводит номер и сумму",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_04",
+            "name": "Платёж за связь выполнен",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_04_1",
+            "name": "",
+            "source_ref": "StartEvent_04",
+            "target_ref": "Task_04_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_04_2",
+            "name": "",
+            "source_ref": "Task_04_Auth",
+            "target_ref": "Task_04_ExtProv",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_04_3",
+            "name": "",
+            "source_ref": "Task_04_ExtProv",
+            "target_ref": "Task_04_GetDetails",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_04_4",
+            "name": "",
+            "source_ref": "Task_04_GetDetails",
+            "target_ref": "Task_04_GetAccs",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_04_5",
+            "name": "",
+            "source_ref": "Task_04_GetAccs",
+            "target_ref": "Task_04_InitPay",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_04_6",
+            "name": "",
+            "source_ref": "Task_04_InitPay",
+            "target_ref": "EndEvent_04",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_04_mobile_payment",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\05_prepaid_card.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.109707",
+      "bpmn_structure": {
+        "process_id": "Process_05_prepaid_card",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_05",
+            "name": "Клиент оформляет карту через партнёра",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_05",
+            "name": "Карта открыта",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_05_1",
+            "name": "",
+            "source_ref": "StartEvent_05",
+            "target_ref": "Task_05_CreateLead",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_05_2",
+            "name": "",
+            "source_ref": "Task_05_CreateLead",
+            "target_ref": "Task_05_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_05_3",
+            "name": "",
+            "source_ref": "Task_05_Auth",
+            "target_ref": "Task_05_GetProd",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_05_4",
+            "name": "",
+            "source_ref": "Task_05_GetProd",
+            "target_ref": "Task_05_GetProdDet",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_05_5",
+            "name": "",
+            "source_ref": "Task_05_GetProdDet",
+            "target_ref": "Task_05_Apply",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_05_6",
+            "name": "",
+            "source_ref": "Task_05_Apply",
+            "target_ref": "Task_05_CreateAgree",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_05_7",
+            "name": "",
+            "source_ref": "Task_05_CreateAgree",
+            "target_ref": "EndEvent_05",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_05_prepaid_card",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\06_close_card.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.110306",
+      "bpmn_structure": {
+        "process_id": "Process_06_close_card",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_06",
+            "name": "Клиент решает закрыть карту с нулевым балансом",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_06",
+            "name": "Счёт карты закрыт",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_06_1",
+            "name": "",
+            "source_ref": "StartEvent_06",
+            "target_ref": "Task_06_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_06_2",
+            "name": "",
+            "source_ref": "Task_06_Auth",
+            "target_ref": "Task_06_GetAccs",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_06_3",
+            "name": "",
+            "source_ref": "Task_06_GetAccs",
+            "target_ref": "Task_06_CheckBal",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_06_4",
+            "name": "",
+            "source_ref": "Task_06_CheckBal",
+            "target_ref": "Task_06_CloseAcc",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_06_5",
+            "name": "",
+            "source_ref": "Task_06_CloseAcc",
+            "target_ref": "EndEvent_06",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_06_close_card",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\07_change_pin.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.110890",
+      "bpmn_structure": {
+        "process_id": "Process_07_change_pin",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_07",
+            "name": "Клиент запрашивает смену PIN-кода",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_07",
+            "name": "Запрос на смену PIN инициирован",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_07_1",
+            "name": "",
+            "source_ref": "StartEvent_07",
+            "target_ref": "Task_07_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_07_2",
+            "name": "",
+            "source_ref": "Task_07_Auth",
+            "target_ref": "Task_07_GetAccs",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_07_3",
+            "name": "",
+            "source_ref": "Task_07_GetAccs",
+            "target_ref": "Task_07_SelectCard",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_07_4",
+            "name": "",
+            "source_ref": "Task_07_SelectCard",
+            "target_ref": "Task_07_InternalChange",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_07_5",
+            "name": "",
+            "source_ref": "Task_07_InternalChange",
+            "target_ref": "EndEvent_07",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_07_change_pin",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\08_card_details.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.111796",
+      "bpmn_structure": {
+        "process_id": "Process_08_card_details",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_08",
+            "name": "Клиент хочет получить реквизиты карты",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_08",
+            "name": "Реквизиты счёта отображены",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_08_1",
+            "name": "",
+            "source_ref": "StartEvent_08",
+            "target_ref": "Task_08_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_08_2",
+            "name": "",
+            "source_ref": "Task_08_Auth",
+            "target_ref": "Task_08_GetAccs",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_08_3",
+            "name": "",
+            "source_ref": "Task_08_GetAccs",
+            "target_ref": "Task_08_GetDet",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_08_4",
+            "name": "",
+            "source_ref": "Task_08_GetDet",
+            "target_ref": "EndEvent_08",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_08_card_details",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\09_create_lead.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.112715",
+      "bpmn_structure": {
+        "process_id": "Process_09_create_lead",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_09",
+            "name": "Потенциальный B2B-клиент оставляет заявку",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_09",
+            "name": "Лид создан",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_09_1",
+            "name": "",
+            "source_ref": "StartEvent_09",
+            "target_ref": "Task_09_CreateLead",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_09_2",
+            "name": "",
+            "source_ref": "Task_09_CreateLead",
+            "target_ref": "EndEvent_09",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_09_create_lead",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\10_check_lead.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.113785",
+      "bpmn_structure": {
+        "process_id": "Process_10_check_lead",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [
+          {
+            "gateway_id": "Gateway_10_Result",
+            "name": "Результат проверки?",
+            "gateway_type": "GatewayType.EXCLUSIVE",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [
+              null,
+              null
+            ]
+          }
+        ],
+        "events": [
+          {
+            "event_id": "StartEvent_10",
+            "name": "Клиент указывает ИНН",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_10a",
+            "name": "Оформление продолжается",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_10b",
+            "name": "Оформление отклонено",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_10_1",
+            "name": "",
+            "source_ref": "StartEvent_10",
+            "target_ref": "Task_10_ExtCheck",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_10_2",
+            "name": "",
+            "source_ref": "Task_10_ExtCheck",
+            "target_ref": "Task_10_Decision",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_10_3",
+            "name": "",
+            "source_ref": "Task_10_Decision",
+            "target_ref": "Gateway_10_Result",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_10_4",
+            "name": "OK",
+            "source_ref": "Gateway_10_Result",
+            "target_ref": "Task_10_Continue",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_10_5",
+            "name": "Failed",
+            "source_ref": "Gateway_10_Result",
+            "target_ref": "Task_10_Decline",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_10_6",
+            "name": "",
+            "source_ref": "Task_10_Continue",
+            "target_ref": "EndEvent_10a",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_10_7",
+            "name": "",
+            "source_ref": "Task_10_Decline",
+            "target_ref": "EndEvent_10b",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_10_check_lead",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\11_vrp_setup.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.114464",
+      "bpmn_structure": {
+        "process_id": "Process_11_vrp_setup",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_11",
+            "name": "Клиент хочет настроить VRP",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_11",
+            "name": "VRP согласие создано, платёж инициирован",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_11_1",
+            "name": "",
+            "source_ref": "StartEvent_11",
+            "target_ref": "Task_11_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_11_2",
+            "name": "",
+            "source_ref": "Task_11_Auth",
+            "target_ref": "Task_11_GetAccs",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_11_3",
+            "name": "",
+            "source_ref": "Task_11_GetAccs",
+            "target_ref": "Task_11_CreateConsent",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_11_4",
+            "name": "",
+            "source_ref": "Task_11_CreateConsent",
+            "target_ref": "Task_11_InitPay",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_11_5",
+            "name": "",
+            "source_ref": "Task_11_InitPay",
+            "target_ref": "EndEvent_11",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_11_vrp_setup",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\12_list_products.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.115082",
+      "bpmn_structure": {
+        "process_id": "Process_12_list_products",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_12",
+            "name": "Клиент заходит в раздел продуктов",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_12",
+            "name": "Список продуктов отображён",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_12_1",
+            "name": "",
+            "source_ref": "StartEvent_12",
+            "target_ref": "Task_12_GetProd",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_12_2",
+            "name": "",
+            "source_ref": "Task_12_GetProd",
+            "target_ref": "EndEvent_12",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_12_list_products",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\13_product_details.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.115608",
+      "bpmn_structure": {
+        "process_id": "Process_13_product_details",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_13",
+            "name": "Клиент кликает на продукт",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_13",
+            "name": "Детали продукта отображены",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_13_1",
+            "name": "",
+            "source_ref": "StartEvent_13",
+            "target_ref": "Task_13_GetProdDet",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_13_2",
+            "name": "",
+            "source_ref": "Task_13_GetProdDet",
+            "target_ref": "EndEvent_13",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_13_product_details",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\14_product_application.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.116169",
+      "bpmn_structure": {
+        "process_id": "Process_14_product_application",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_14",
+            "name": "Клиент решает подать заявку",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_14",
+            "name": "Заявка подана",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_14_1",
+            "name": "",
+            "source_ref": "StartEvent_14",
+            "target_ref": "Task_14_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_14_2",
+            "name": "",
+            "source_ref": "Task_14_Auth",
+            "target_ref": "Task_14_GetProd",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_14_3",
+            "name": "",
+            "source_ref": "Task_14_GetProd",
+            "target_ref": "Task_14_Apply",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_14_4",
+            "name": "",
+            "source_ref": "Task_14_Apply",
+            "target_ref": "EndEvent_14",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_14_product_application",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\15_tokenize_card.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.116782",
+      "bpmn_structure": {
+        "process_id": "Process_15_tokenize_card",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_15",
+            "name": "Клиент хочет добавить карту в Apple/Google Pay",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_15",
+            "name": "Токен добавлен в кошелёк",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_15_1",
+            "name": "",
+            "source_ref": "StartEvent_15",
+            "target_ref": "Task_15_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_15_2",
+            "name": "",
+            "source_ref": "Task_15_Auth",
+            "target_ref": "Task_15_GetAccs",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_15_3",
+            "name": "",
+            "source_ref": "Task_15_GetAccs",
+            "target_ref": "Task_15_SelectCard",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_15_4",
+            "name": "",
+            "source_ref": "Task_15_SelectCard",
+            "target_ref": "Task_15_InternalTokenize",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_15_5",
+            "name": "",
+            "source_ref": "Task_15_InternalTokenize",
+            "target_ref": "EndEvent_15",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_15_tokenize_card",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\16_block_card.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.117334",
+      "bpmn_structure": {
+        "process_id": "Process_16_block_card",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_16",
+            "name": "Клиент теряет карту",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_16",
+            "name": "Счёт карты закрыт (заблокирован)",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_16_1",
+            "name": "",
+            "source_ref": "StartEvent_16",
+            "target_ref": "Task_16_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_16_2",
+            "name": "",
+            "source_ref": "Task_16_Auth",
+            "target_ref": "Task_16_GetAccs",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_16_3",
+            "name": "",
+            "source_ref": "Task_16_GetAccs",
+            "target_ref": "Task_16_CloseAcc",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_16_4",
+            "name": "",
+            "source_ref": "Task_16_CloseAcc",
+            "target_ref": "EndEvent_16",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_16_block_card",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\17_search_provider.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.117859",
+      "bpmn_structure": {
+        "process_id": "Process_17_search_provider",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_17",
+            "name": "Клиент вводит ИНН поставщика",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_17",
+            "name": "Реквизиты получены",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_17_1",
+            "name": "",
+            "source_ref": "StartEvent_17",
+            "target_ref": "Task_17_ExtSearch",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_17_2",
+            "name": "",
+            "source_ref": "Task_17_ExtSearch",
+            "target_ref": "Task_17_GetDetails",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_17_3",
+            "name": "",
+            "source_ref": "Task_17_GetDetails",
+            "target_ref": "EndEvent_17",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_17_search_provider",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\18_utility_payment.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.118512",
+      "bpmn_structure": {
+        "process_id": "Process_18_utility_payment",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_18",
+            "name": "Клиент вводит реквизиты ЖКХ",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_18",
+            "name": "Платёж за ЖКХ выполнен",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_18_1",
+            "name": "",
+            "source_ref": "StartEvent_18",
+            "target_ref": "Task_18_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_18_2",
+            "name": "",
+            "source_ref": "Task_18_Auth",
+            "target_ref": "Task_18_ExtIdentify",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_18_3",
+            "name": "",
+            "source_ref": "Task_18_ExtIdentify",
+            "target_ref": "Task_18_GetDetails",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_18_4",
+            "name": "",
+            "source_ref": "Task_18_GetDetails",
+            "target_ref": "Task_18_GetAccs",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_18_5",
+            "name": "",
+            "source_ref": "Task_18_GetAccs",
+            "target_ref": "Task_18_InitPay",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_18_6",
+            "name": "",
+            "source_ref": "Task_18_InitPay",
+            "target_ref": "EndEvent_18",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_18_utility_payment",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\19_repeat_payment.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.119095",
+      "bpmn_structure": {
+        "process_id": "Process_19_repeat_payment",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_19",
+            "name": "Клиент нажимает 'Повторить платёж'",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_19",
+            "name": "Повторный платёж выполнен",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_19_1",
+            "name": "",
+            "source_ref": "StartEvent_19",
+            "target_ref": "Task_19_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_19_2",
+            "name": "",
+            "source_ref": "Task_19_Auth",
+            "target_ref": "Task_19_GetTrans",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_19_3",
+            "name": "",
+            "source_ref": "Task_19_GetTrans",
+            "target_ref": "Task_19_SelectLast",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_19_4",
+            "name": "",
+            "source_ref": "Task_19_SelectLast",
+            "target_ref": "Task_19_InitPay",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_19_5",
+            "name": "",
+            "source_ref": "Task_19_InitPay",
+            "target_ref": "EndEvent_19",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_19_repeat_payment",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    },
+    {
+      "file_path": "guide\\bpmn\\20_get_cvv.bpmn",
+      "analysis_timestamp": "2025-11-09T21:14:43.119664",
+      "bpmn_structure": {
+        "process_id": "Process_20_get_cvv",
+        "process_name": "",
+        "tasks": [],
+        "gateways": [],
+        "events": [
+          {
+            "event_id": "StartEvent_20",
+            "name": "Клиент хочет получить CVV виртуальной карты",
+            "event_type": "EventType.START_EVENT",
+            "position": {},
+            "incoming_flows": [],
+            "outgoing_flows": [
+              null
+            ],
+            "event_definitions": null
+          },
+          {
+            "event_id": "EndEvent_20",
+            "name": "CVV предоставлен безопасно",
+            "event_type": "EventType.END_EVENT",
+            "position": {},
+            "incoming_flows": [
+              null
+            ],
+            "outgoing_flows": [],
+            "event_definitions": null
+          }
+        ],
+        "sequence_flows": [
+          {
+            "flow_id": "Flow_20_1",
+            "name": "",
+            "source_ref": "StartEvent_20",
+            "target_ref": "Task_20_Auth",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_20_2",
+            "name": "",
+            "source_ref": "Task_20_Auth",
+            "target_ref": "Task_20_GetAccs",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_20_3",
+            "name": "",
+            "source_ref": "Task_20_GetAccs",
+            "target_ref": "Task_20_SelectCard",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_20_4",
+            "name": "",
+            "source_ref": "Task_20_SelectCard",
+            "target_ref": "Task_20_InternalGet",
+            "condition_expression": ""
+          },
+          {
+            "flow_id": "Flow_20_5",
+            "name": "",
+            "source_ref": "Task_20_InternalGet",
+            "target_ref": "EndEvent_20",
+            "condition_expression": ""
+          }
+        ],
+        "data_objects": [],
+        "message_flows": [],
+        " swim_lanes": []
+      },
+      "api_endpoints": [],
+      "business_analysis": {
+        "process_id": "Process_20_get_cvv",
+        "workflow_pattern": "custom_workflow",
+        "critical_operations": [],
+        "authentication_flows": [],
+        "authorization_checkpoints": [],
+        "data_validation_points": [],
+        "error_handling_scenarios": [],
+        "performance_bottlenecks": []
+      },
+      "security_tests": [],
+      "security_assessment_points": [],
+      "summary": {
+        "total_tasks": 0,
+        "total_api_endpoints": 0,
+        "security_risk_distribution": {},
+        "owasp_categories_coverage": {},
+        "critical_operations_count": 0,
+        "total_security_tests_generated": 0,
+        "authentication_required_endpoints": 0,
+        "high_sensitivity_data_endpoints": 0,
+        "workflow_pattern_identified": "custom_workflow",
+        "compliance_requirements": []
+      }
+    }
+  ],
+  "summary_report": {
+    "total_api_endpoints_found": 0,
+    "total_security_tests_generated": 0,
+    "total_critical_endpoints": 0,
+    "overall_owasp_coverage": {},
+    "files_processed": 20,
+    "recommendations": []
+  }
+}

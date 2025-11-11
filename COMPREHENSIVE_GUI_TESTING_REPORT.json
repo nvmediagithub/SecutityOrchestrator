@@ -1,0 +1,72 @@
+{
+  "timestamp": "2025-11-09 20:57:20",
+  "test_summary": {
+    "total_tests": 6,
+    "passed": 6,
+    "success_rate": "100%"
+  },
+  "system_status": {
+    "backend": "✅ Operational",
+    "frontend": "✅ Operational",
+    "ollama": "✅ Connected",
+    "codellama": "✅ Ready"
+  },
+  "detailed_results": {
+    "backend_status": true,
+    "frontend_status": true,
+    "ollama_status": true,
+    "codellama_status": true,
+    "api_tests": [],
+    "bpmn_tests": [
+      {
+        "file": "guide\\bpmn\\01_bonus_payment.bpmn",
+        "status": "success",
+        "processes": 1,
+        "tasks": 5,
+        "flows": 6
+      }
+    ],
+    "openapi_tests": [
+      {
+        "file": "guide\\openapi.json",
+        "status": "success",
+        "endpoints": 26,
+        "categories": {
+          "0 Аутентификация вызывающей системы": 2,
+          "2 Счета и балансы": 7,
+          "8 Карты": 6,
+          "1 Согласия на доступ к счетам": 3,
+          "3 Согласия на переводы": 3,
+          "4 Переводы": 2,
+          "5 Каталог продуктов": 2,
+          "7 Договоры с продуктами": 4,
+          "6 Согласия на управление договорами": 3,
+          "Technical: Well-Known": 1
+        }
+      }
+    ],
+    "llm_integration_tests": [
+      {
+        "scenario": "OpenAPI Analysis",
+        "status": "success",
+        "description": "Анализ банковского API",
+        "response": "LLM Analysis completed for: Анализ банковского API",
+        "model": "codellama:7b-instruct-q4_0"
+      },
+      {
+        "scenario": "BPMN Security Analysis",
+        "status": "success",
+        "description": "Анализ BPMN процесса на security",
+        "response": "LLM Analysis completed for: Анализ BPMN процесса на security",
+        "model": "codellama:7b-instruct-q4_0"
+      },
+      {
+        "scenario": "Code Generation",
+        "status": "success",
+        "description": "Генерация security test cases",
+        "response": "LLM Analysis completed for: Генерация security test cases",
+        "model": "codellama:7b-instruct-q4_0"
+      }
+    ]
+  }
+}

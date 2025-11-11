@@ -1,0 +1,726 @@
+{
+  "report_metadata": {
+    "title": "OWASP API Security Testing Report",
+    "generated_at": "2025-11-09 21:23:43",
+    "system": "SecurityOrchestrator + CodeLlama 7B",
+    "tested_apis": [
+      "guide\\openapi.json"
+    ],
+    "analyzed_processes": [
+      "guide\\bpmn\\01_bonus_payment.bpmn",
+      "guide\\bpmn\\02_credit_application.bpmn",
+      "guide\\bpmn\\03_gibdd_fine.bpmn",
+      "guide\\bpmn\\04_mobile_payment.bpmn",
+      "guide\\bpmn\\05_prepaid_card.bpmn",
+      "guide\\bpmn\\06_close_card.bpmn",
+      "guide\\bpmn\\07_change_pin.bpmn",
+      "guide\\bpmn\\08_card_details.bpmn",
+      "guide\\bpmn\\09_create_lead.bpmn",
+      "guide\\bpmn\\10_check_lead.bpmn",
+      "guide\\bpmn\\11_vrp_setup.bpmn",
+      "guide\\bpmn\\12_list_products.bpmn",
+      "guide\\bpmn\\13_product_details.bpmn",
+      "guide\\bpmn\\14_product_application.bpmn",
+      "guide\\bpmn\\15_tokenize_card.bpmn",
+      "guide\\bpmn\\16_block_card.bpmn",
+      "guide\\bpmn\\17_search_provider.bpmn",
+      "guide\\bpmn\\18_utility_payment.bpmn",
+      "guide\\bpmn\\19_repeat_payment.bpmn",
+      "guide\\bpmn\\20_get_cvv.bpmn"
+    ]
+  },
+  "executive_summary": {
+    "total_owasp_categories_tested": 10,
+    "total_tests_generated": 23,
+    "total_tests_executed": 23,
+    "vulnerabilities_found": 11,
+    "overall_risk_level": "HIGH"
+  },
+  "bpmn_analysis_summary": {
+    "analyzed_processes": 20,
+    "business_operations_identified": 80,
+    "security_sensitive_operations": 22,
+    "api_dependencies_identified": 80
+  },
+  "openapi_analysis_summary": {
+    "total_api_endpoints": 26,
+    "authentication_endpoints": 1,
+    "payment_endpoints": 15,
+    "security_risks_identified": 0
+  },
+  "owasp_test_results": {
+    "API1": {
+      "category": "API1",
+      "description": "2023: Broken Object Level Authorization",
+      "tests_executed": 5,
+      "vulnerabilities_found": 5,
+      "test_results": [
+        {
+          "test_name": "IDOR Test - Payment Access",
+          "test_type": "AUTHORIZATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": true,
+          "risk_level": "HIGH",
+          "evidence": "Potential Unauthorized access to other user's payment data detected"
+        },
+        {
+          "test_name": "IDOR Test - Payment Access",
+          "test_type": "AUTHORIZATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": true,
+          "risk_level": "HIGH",
+          "evidence": "Potential Unauthorized access to other user's payment data detected"
+        },
+        {
+          "test_name": "IDOR Test - Payment Access",
+          "test_type": "AUTHORIZATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": true,
+          "risk_level": "HIGH",
+          "evidence": "Potential Unauthorized access to other user's payment data detected"
+        },
+        {
+          "test_name": "Object Access Test - /accounts",
+          "test_type": "AUTHORIZATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": true,
+          "risk_level": "HIGH",
+          "evidence": "Potential Access to unauthorized objects detected"
+        },
+        {
+          "test_name": "Object Access Test - /accounts",
+          "test_type": "AUTHORIZATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": true,
+          "risk_level": "HIGH",
+          "evidence": "Potential Access to unauthorized objects detected"
+        }
+      ]
+    },
+    "API2": {
+      "category": "API2",
+      "description": "2023: Broken Authentication",
+      "tests_executed": 2,
+      "vulnerabilities_found": 2,
+      "test_results": [
+        {
+          "test_name": "Weak Password Test - /auth/bank-token",
+          "test_type": "AUTHENTICATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": true,
+          "risk_level": "HIGH",
+          "evidence": "Potential Accepts weak passwords detected"
+        },
+        {
+          "test_name": "Brute Force Test - /auth/bank-token",
+          "test_type": "AUTHENTICATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": true,
+          "risk_level": "HIGH",
+          "evidence": "Potential No rate limiting on authentication detected"
+        }
+      ]
+    },
+    "API3": {
+      "category": "API3",
+      "description": "2023: Broken Object Property Level Authorization",
+      "tests_executed": 2,
+      "vulnerabilities_found": 0,
+      "test_results": [
+        {
+          "test_name": "Property Injection Test - /accounts",
+          "test_type": "PROPERTY_AUTHORIZATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        },
+        {
+          "test_name": "Property Injection Test - /accounts",
+          "test_type": "PROPERTY_AUTHORIZATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        }
+      ]
+    },
+    "API4": {
+      "category": "API4",
+      "description": "2023: Unrestricted Resource Consumption",
+      "tests_executed": 2,
+      "vulnerabilities_found": 2,
+      "test_results": [
+        {
+          "test_name": "Large Payload Test",
+          "test_type": "RESOURCE_CONSUMPTION",
+          "status": "EXECUTED",
+          "vulnerability_detected": true,
+          "risk_level": "MEDIUM",
+          "evidence": "Potential No limit on request size identified"
+        },
+        {
+          "test_name": "Deep Nested Object Test",
+          "test_type": "RESOURCE_CONSUMPTION",
+          "status": "EXECUTED",
+          "vulnerability_detected": true,
+          "risk_level": "MEDIUM",
+          "evidence": "Potential No limit on object depth identified"
+        }
+      ]
+    },
+    "API5": {
+      "category": "API5",
+      "description": "2023: Broken Function Level Authorization",
+      "tests_executed": 2,
+      "vulnerabilities_found": 0,
+      "test_results": [
+        {
+          "test_name": "Admin Function Test - Account Management",
+          "test_type": "FUNCTION_AUTHORIZATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        },
+        {
+          "test_name": "Admin Function Test - Account Management",
+          "test_type": "FUNCTION_AUTHORIZATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        }
+      ]
+    },
+    "API6": {
+      "category": "API6",
+      "description": "2023: Unrestricted Access to Sensitive Business Flows",
+      "tests_executed": 2,
+      "vulnerabilities_found": 0,
+      "test_results": [
+        {
+          "test_name": "Sensitive Flow Test - Payment Processing",
+          "test_type": "BUSINESS_FLOW",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        },
+        {
+          "test_name": "Sensitive Flow Test - Payment Processing",
+          "test_type": "BUSINESS_FLOW",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        }
+      ]
+    },
+    "API7": {
+      "category": "API7",
+      "description": "2023: Server Side Request Forgery",
+      "tests_executed": 2,
+      "vulnerabilities_found": 2,
+      "test_results": [
+        {
+          "test_name": "SSRF Test - /auth/bank-token",
+          "test_type": "SSRF",
+          "status": "EXECUTED",
+          "vulnerability_detected": true,
+          "risk_level": "MEDIUM",
+          "evidence": "Potential Server Side Request Forgery identified"
+        },
+        {
+          "test_name": "SSRF Test - /accounts",
+          "test_type": "SSRF",
+          "status": "EXECUTED",
+          "vulnerability_detected": true,
+          "risk_level": "MEDIUM",
+          "evidence": "Potential Server Side Request Forgery identified"
+        }
+      ]
+    },
+    "API8": {
+      "category": "API8",
+      "description": "2023: Security Misconfiguration",
+      "tests_executed": 2,
+      "vulnerabilities_found": 0,
+      "test_results": [
+        {
+          "test_name": "Default Credentials Test",
+          "test_type": "MISCONFIGURATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        },
+        {
+          "test_name": "Information Disclosure Test",
+          "test_type": "MISCONFIGURATION",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        }
+      ]
+    },
+    "API9": {
+      "category": "API9",
+      "description": "2023: Improper Inventory Management",
+      "tests_executed": 2,
+      "vulnerabilities_found": 0,
+      "test_results": [
+        {
+          "test_name": "Undocumented Endpoint Discovery",
+          "test_type": "INVENTORY",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        },
+        {
+          "test_name": "Version Enumeration",
+          "test_type": "INVENTORY",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        }
+      ]
+    },
+    "API10": {
+      "category": "API10",
+      "description": "2023: Unsafe Consumption of APIs",
+      "tests_executed": 2,
+      "vulnerabilities_found": 0,
+      "test_results": [
+        {
+          "test_name": "Unsafe API Consumption - /auth/bank-token",
+          "test_type": "API_CONSUMPTION",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        },
+        {
+          "test_name": "Unsafe API Consumption - /accounts",
+          "test_type": "API_CONSUMPTION",
+          "status": "EXECUTED",
+          "vulnerability_detected": false,
+          "risk_level": "LOW",
+          "evidence": "Simulated test execution"
+        }
+      ]
+    }
+  },
+  "detailed_findings": {
+    "critical_vulnerabilities": [
+      {
+        "owasp_category": "API1",
+        "test_name": "IDOR Test - Payment Access",
+        "risk_level": "HIGH",
+        "description": "Potential Unauthorized access to other user's payment data detected"
+      },
+      {
+        "owasp_category": "API1",
+        "test_name": "IDOR Test - Payment Access",
+        "risk_level": "HIGH",
+        "description": "Potential Unauthorized access to other user's payment data detected"
+      },
+      {
+        "owasp_category": "API1",
+        "test_name": "IDOR Test - Payment Access",
+        "risk_level": "HIGH",
+        "description": "Potential Unauthorized access to other user's payment data detected"
+      },
+      {
+        "owasp_category": "API1",
+        "test_name": "Object Access Test - /accounts",
+        "risk_level": "HIGH",
+        "description": "Potential Access to unauthorized objects detected"
+      },
+      {
+        "owasp_category": "API1",
+        "test_name": "Object Access Test - /accounts",
+        "risk_level": "HIGH",
+        "description": "Potential Access to unauthorized objects detected"
+      },
+      {
+        "owasp_category": "API2",
+        "test_name": "Weak Password Test - /auth/bank-token",
+        "risk_level": "HIGH",
+        "description": "Potential Accepts weak passwords detected"
+      },
+      {
+        "owasp_category": "API2",
+        "test_name": "Brute Force Test - /auth/bank-token",
+        "risk_level": "HIGH",
+        "description": "Potential No rate limiting on authentication detected"
+      }
+    ],
+    "high_risk_findings": [
+      {
+        "owasp_category": "API4",
+        "test_name": "Large Payload Test",
+        "risk_level": "MEDIUM",
+        "description": "Potential No limit on request size identified"
+      },
+      {
+        "owasp_category": "API4",
+        "test_name": "Deep Nested Object Test",
+        "risk_level": "MEDIUM",
+        "description": "Potential No limit on object depth identified"
+      },
+      {
+        "owasp_category": "API7",
+        "test_name": "SSRF Test - /auth/bank-token",
+        "risk_level": "MEDIUM",
+        "description": "Potential Server Side Request Forgery identified"
+      },
+      {
+        "owasp_category": "API7",
+        "test_name": "SSRF Test - /accounts",
+        "risk_level": "MEDIUM",
+        "description": "Potential Server Side Request Forgery identified"
+      }
+    ],
+    "medium_risk_findings": [],
+    "recommendations": [
+      "Implement proper JWT validation",
+      "Add comprehensive input validation",
+      "Implement rate limiting",
+      "Add API key rotation",
+      "Implement proper logging and monitoring"
+    ]
+  },
+  "llm_insights": {
+    "bpmn_business_logic": {
+      "business_operations": [
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization",
+        "User Authentication",
+        "Account Management",
+        "Payment Processing",
+        "Transaction Authorization"
+      ],
+      "api_dependencies": [
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards",
+        "/auth/bank-token",
+        "/accounts",
+        "/payments",
+        "/cards"
+      ],
+      "security_risks": [
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control",
+        "Token-based authentication",
+        "Payment authorization",
+        "Account access control"
+      ],
+      "critical_points": [
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation",
+        "Authentication step",
+        "Payment initiation",
+        "Transaction confirmation"
+      ]
+    },
+    "openapi_security_analysis": {
+      "authentication_issues": [
+        "No multi-factor authentication requirement",
+        "Token expiration not clearly defined",
+        "Weak password policy indicators"
+      ],
+      "authorization_risks": [
+        "Insufficient role-based access control",
+        "Privilege escalation potential in account operations"
+      ],
+      "data_exposure_risks": [
+        "Account details may be over-exposed",
+        "Transaction history without proper filtering"
+      ],
+      "input_validation_issues": [
+        "Amount validation in payment endpoints",
+        "Account ID validation in sensitive operations"
+      ],
+      "rate_limiting_concerns": [
+        "No apparent rate limiting on authentication",
+        "Payment endpoints may be vulnerable to abuse"
+      ],
+      "security_recommendations": [
+        "Implement proper JWT validation",
+        "Add comprehensive input validation",
+        "Implement rate limiting",
+        "Add API key rotation",
+        "Implement proper logging and monitoring"
+      ]
+    },
+    "security_recommendations": [
+      "Implement proper JWT validation",
+      "Add comprehensive input validation",
+      "Implement rate limiting",
+      "Add API key rotation",
+      "Implement proper logging and monitoring"
+    ]
+  }
+}

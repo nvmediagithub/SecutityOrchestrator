@@ -130,32 +130,40 @@ class _ProcessCreationScreenState extends ConsumerState<ProcessCreationScreen> {
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 16),
-            FileUploadWidget(
-              label: 'BPMN File',
-              allowedExtensions: ['bpmn', 'xml'],
-              onFileSelected: (file) {
+            Container(
+              width: double.infinity,
+              height: 120,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.grey.shade300,
+                  width: 2,
+                  style: BorderStyle.solid,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.grey.shade50,
+              ),
+              child: const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.cloud_upload_outlined, size: 48, color: Colors.grey),
+                    SizedBox(height: 8),
+                    Text('BPMN File Upload (Coming Soon)', textAlign: TextAlign.center),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              title: const Text('Auto-generate process elements'),
+              subtitle: const Text('Automatically extract tasks, gateways, and events from BPMN'),
+              value: _autoGenerateFromBpmn,
+              onChanged: (value) {
                 setState(() {
-                  _bpmnFile = file;
-                });
-              },
-              onFileRemoved: () {
-                setState(() {
-                  _bpmnFile = null;
+                  _autoGenerateFromBpmn = value;
                 });
               },
             ),
-            const SizedBox(height: 16),
-            if (_bpmnFile != null)
-              SwitchListTile(
-                title: const Text('Auto-generate process elements'),
-                subtitle: const Text('Automatically extract tasks, gateways, and events from BPMN'),
-                value: _autoGenerateFromBpmn,
-                onChanged: (value) {
-                  setState(() {
-                    _autoGenerateFromBpmn = value;
-                  });
-                },
-              ),
           ],
         ),
       ),
@@ -182,20 +190,28 @@ class _ProcessCreationScreenState extends ConsumerState<ProcessCreationScreen> {
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 16),
-            MultiFileUploadWidget(
-              label: 'OpenAPI Files',
-              allowedExtensions: ['json', 'yaml', 'yml'],
-              maxFiles: 10,
-              onFilesSelected: (files) {
-                setState(() {
-                  _openapiFiles = files;
-                });
-              },
-              onFilesCleared: () {
-                setState(() {
-                  _openapiFiles.clear();
-                });
-              },
+            Container(
+              width: double.infinity,
+              height: 120,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.grey.shade300,
+                  width: 2,
+                  style: BorderStyle.solid,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.grey.shade50,
+              ),
+              child: const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.cloud_upload_outlined, size: 48, color: Colors.grey),
+                    SizedBox(height: 8),
+                    Text('OpenAPI Files Upload (Coming Soon)', textAlign: TextAlign.center),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

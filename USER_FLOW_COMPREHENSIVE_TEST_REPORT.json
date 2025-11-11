@@ -1,0 +1,159 @@
+{
+  "test_summary": {
+    "total": 10,
+    "passed": 6,
+    "failed": 4,
+    "warnings": 0
+  },
+  "detailed_results": {
+    "Backend Health Check": {
+      "status": "PASS",
+      "message": "Backend API is healthy (Status: 200)",
+      "details": {
+        "response": "✅ SecurityOrchestrator LLM Service is running on port 8090!"
+      },
+      "timestamp": "2025-11-09T22:49:23.999383"
+    },
+    "Frontend Availability": {
+      "status": "PASS",
+      "message": "Frontend server is serving Flutter content (Status: 200)",
+      "details": {
+        "content_type": "text/html; charset=UTF-8"
+      },
+      "timestamp": "2025-11-09T22:49:24.003385"
+    },
+    "USER Flow API Endpoints": {
+      "status": "FAIL",
+      "message": "No USER flow API endpoints available (0/6)",
+      "details": {
+        "endpoint_results": [
+          {
+            "endpoint": "/api/analyze",
+            "method": "POST",
+            "status_code": 404,
+            "available": false
+          },
+          {
+            "endpoint": "/api/upload",
+            "method": "POST",
+            "status_code": 404,
+            "available": false
+          },
+          {
+            "endpoint": "/api/report/test-id",
+            "method": "GET",
+            "status_code": 404,
+            "available": false
+          },
+          {
+            "endpoint": "/api/result/test-id",
+            "method": "GET",
+            "status_code": 404,
+            "available": false
+          },
+          {
+            "endpoint": "/api/history",
+            "method": "GET",
+            "status_code": 404,
+            "available": false
+          },
+          {
+            "endpoint": "/api/export/test-id",
+            "method": "POST",
+            "status_code": 404,
+            "available": false
+          }
+        ]
+      },
+      "timestamp": "2025-11-09T22:49:24.017067"
+    },
+    "LLM Integration Status": {
+      "status": "PASS",
+      "message": "LLM service is ready: ready",
+      "details": {
+        "llm_status": {
+          "service": "SecurityOrchestrator LLM",
+          "status": "ready",
+          "port": 8090,
+          "integration": "Ollama + OpenRouter",
+          "ready": true,
+          "version": "1.0.0-final",
+          "completion": "100%"
+        }
+      },
+      "timestamp": "2025-11-09T22:49:24.019370"
+    },
+    "LLM Integration Completion": {
+      "status": "PASS",
+      "message": "LLM completion test successful: ready",
+      "details": {
+        "completion_result": {
+          "completion": "100%",
+          "status": "ready",
+          "message": "SecurityOrchestrator LLM integration is 100% complete!",
+          "ready": true,
+          "service": "SecurityOrchestrator LLM Service",
+          "achievement": "Successfully completed remaining 8% for 100% readiness"
+        }
+      },
+      "timestamp": "2025-11-09T22:49:24.039581"
+    },
+    "WebSocket Endpoint": {
+      "status": "FAIL",
+      "message": "WebSocket status: Not available (HTTP 404)",
+      "details": {},
+      "timestamp": "2025-11-09T22:49:24.042981"
+    },
+    "Flutter Build Capability": {
+      "status": "FAIL",
+      "message": "Flutter test error: [WinError 2] Не удается найти указанный файл",
+      "details": {},
+      "timestamp": "2025-11-09T22:49:24.062472"
+    },
+    "File Upload Functionality": {
+      "status": "FAIL",
+      "message": "File upload failed: HTTP 404",
+      "details": {
+        "file_name": "security_specification.pdf",
+        "response": "<h1>404 Not Found</h1>No context found for request"
+      },
+      "timestamp": "2025-11-09T22:49:24.101179"
+    },
+    "Responsive UI Components": {
+      "status": "PASS",
+      "message": "All USER flow UI screens available (3/3)",
+      "details": {
+        "available_screens": [
+          "lib/presentation/screens/user_flow_main_screen.dart",
+          "lib/presentation/screens/user_flow_results_screen.dart",
+          "lib/presentation/screens/user_flow_history_screen.dart"
+        ]
+      },
+      "timestamp": "2025-11-09T22:49:24.101831"
+    },
+    "Performance Metrics": {
+      "status": "PASS",
+      "message": "Performance within acceptable limits (Backend: 0.01s, Frontend: 0.00s)",
+      "details": {
+        "backend_response_time": "0.01s",
+        "frontend_response_time": "0.00s",
+        "total_test_time": "0.02s"
+      },
+      "timestamp": "2025-11-09T22:49:24.120491"
+    }
+  },
+  "recommendations": [
+    {
+      "priority": "CRITICAL",
+      "category": "Backend API",
+      "issue": "USER flow API endpoints not implemented",
+      "recommendation": "Implement missing API endpoints: /api/analyze, /api/upload, /api/report, /api/result, /api/history, /api/export"
+    },
+    {
+      "priority": "HIGH",
+      "category": "Real-time Features",
+      "issue": "WebSocket endpoint not available",
+      "recommendation": "Implement WebSocket support for real-time analysis updates"
+    }
+  ]
+}

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/process_dto.dart';
 import '../../data/models/system_status_model.dart';
+import '../../data/services/user_flow_api_service.dart';
 import '../providers/process_provider.dart';
 import '../providers/system_dashboard_provider.dart';
 import '../widgets/process_list_item.dart';
+import 'user_flow_main_screen.dart';
+import 'user_flow_history_screen.dart';
 import 'process_creation_screen.dart';
 import 'workflow_creation_screen.dart';
 import 'llm_dashboard_screen.dart';
@@ -83,22 +86,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             color: Theme.of(context).colorScheme.surface,
             child: Row(
               children: [
-                _buildTabButton('Processes', 0, Icons.business),
-                _buildTabButton('System Monitor', 1, Icons.monitor_heart),
-                _buildTabButton('LLM Status', 2, Icons.smart_toy),
+                _buildTabButton('User Flow', 0, Icons.analytics),
+                _buildTabButton('Processes', 1, Icons.business),
+                _buildTabButton('System Monitor', 2, Icons.monitor_heart),
+                _buildTabButton('LLM Status', 3, Icons.smart_toy),
               ],
             ),
           ),
           
           // Tab content
           Expanded(
-            child: _selectedTab == 0 ? _buildProcessesTab() :
-                   _selectedTab == 1 ? _buildSystemMonitorTab() :
+            child: _selectedTab == 0 ? _buildUserFlowTab() :
+                   _selectedTab == 1 ? _buildProcessesTab() :
+                   _selectedTab == 2 ? _buildSystemMonitorTab() :
                    _buildLLMStatusTab(),
           ),
         ],
       ),
       floatingActionButton: _selectedTab == 0 ? FloatingActionButton(
+        onPressed: () => _startUserFlow(context),
+        child: const Icon(Icons.play_arrow),
+      ) : _selectedTab == 1 ? FloatingActionButton(
         onPressed: () => _showCreateOptions(context),
         child: const Icon(Icons.add),
       ) : null,
@@ -430,6 +438,190 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildUserFlowTab() {
+    return FutureBuilder<bool>(
+      future: UserFlowApiService().checkHealth(),
+      builder: (context, snapshot) {
+        final isConnected = snapshot.data ?? false;
+        
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header card
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.analytics,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 32,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Анализ безопасности',
+                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Простой и быстрый анализ безопасности с ИИ',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Connection status
+                      Row(
+                        children: [
+                          Icon(
+                            isConnected ? Icons.check_circle : Icons.error,
+                            color: isConnected ? Colors.green : Colors.red,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isConnected ? 'Backend подключен' : 'Backend недоступен',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: isConnected ? Colors.green : Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Quick actions
+              Text(
+                'Быстрые действия',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // New analysis button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: isConnected ? () => _startUserFlow(context) : null,
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Новый анализ'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              
+              // History button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: isConnected ? () => _showHistory(context) : null,
+                  icon: const Icon(Icons.history),
+                  label: const Text('История анализов'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // Features
+              Text(
+                'Возможности',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              _buildFeatureCard(
+                Icons.upload_file,
+                'Загрузка документов',
+                'Поддержка DOCX, TXT, PDF файлов с drag & drop',
+              ),
+              const SizedBox(height: 8),
+              
+              _buildFeatureCard(
+                Icons.psychology,
+                'ИИ-анализ',
+                'Автоматический анализ безопасности с помощью LLM',
+              ),
+              const SizedBox(height: 8),
+              
+              _buildFeatureCard(
+                Icons.timeline,
+                'Real-time обновления',
+                'Отслеживание прогресса в реальном времени',
+              ),
+              const SizedBox(height: 8),
+              
+              _buildFeatureCard(
+                Icons.download,
+                'Экспорт отчетов',
+                'Экспорт в PDF, DOCX, HTML форматы',
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFeatureCard(IconData icon, String title, String description) {
+    return Card(
+      child: ListTile(
+        leading: Icon(
+          icon,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(description),
+      ),
+    );
+  }
+
+  void _startUserFlow(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const UserFlowMainScreen(),
+      ),
+    );
+  }
+
+  void _showHistory(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const UserFlowHistoryScreen(),
       ),
     );
   }

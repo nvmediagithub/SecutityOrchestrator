@@ -16,18 +16,23 @@ class ApiConstants {
   static const String aiEndpoint = '/api/ai';
   static const String llmEndpoint = '/api/llm';
   
-  // Testing system endpoints
+  // Testing system endpoints (OWASP Testing на порту 8091)
+  static const String owaspBaseUrl = 'http://localhost:8091';
   static const String testingEndpoint = '/api/testing';
   static const String executionEndpoint = '/api/execution';
   static const String vulnerabilityEndpoint = '/api/vulnerabilities';
   static const String owaspEndpoint = '/api/owasp';
+  static const String owaspStartEndpoint = '/api/owasp/start';
+  static const String owaspStatusEndpoint = '/api/owasp/status';
+  static const String owaspResultsEndpoint = '/api/owasp/results';
+  static const String owaspProgressEndpoint = '/api/owasp/progress';
   static const String logsEndpoint = '/api/logs';
   static const String openApiEndpoint = '/api/openapi';
   static const String bpmnEndpoint = '/api/bpmn';
   static const String reportsEndpoint = '/api/reports';
   
-  // WebSocket endpoints
-  static const String websocketEndpoint = 'ws://localhost:8080/ws/executions';
-  static const String logsWebsocketEndpoint = 'ws://localhost:8080/ws/logs';
-  static const String vulnerabilityWebsocketEndpoint = 'ws://localhost:8080/ws/vulnerabilities';
+  // WebSocket endpoints (обновлены для OWASP на порту 8091)
+  static const String websocketEndpoint = 'ws://localhost:8091/ws/executions';
+  static const String logsWebsocketEndpoint = 'ws://localhost:8091/ws/logs';
+  static const String vulnerabilityWebsocketEndpoint = 'ws://localhost:8091/ws/vulnerabilities';
 }

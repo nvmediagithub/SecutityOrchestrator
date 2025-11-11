@@ -323,6 +323,79 @@ class TestingService {
     }
   }
 
+  // OWASP API Security Testing (порт 8091) - Simplified versions
+  Future<Map<String, dynamic>> getOwaspStatus() async {
+    try {
+      final response = await _dio.get('${ApiConstants.owaspBaseUrl}${ApiConstants.owaspStatusEndpoint}');
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'error': 'Failed to get OWASP status: ${e.message}',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getOwaspResults() async {
+    try {
+      final response = await _dio.get('${ApiConstants.owaspBaseUrl}${ApiConstants.owaspResultsEndpoint}');
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'data': response.data,
+        };
+      } else if (response.statusCode == 202) {
+        return {
+          'success': false,
+          'message': 'Testing still in progress',
+          'data': null,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Failed to get OWASP results: ${response.statusCode}',
+        };
+      }
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'message': 'Error getting OWASP results: $e',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> startOwaspTesting() async {
+    try {
+      final response = await _dio.post('${ApiConstants.owaspBaseUrl}${ApiConstants.owaspStartEndpoint}');
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': true};
+      } else {
+        return {
+          'success': false,
+          'message': 'Failed to start OWASP testing: ${response.statusCode}',
+        };
+      }
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'message': 'Error starting OWASP testing: $e',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getOwaspProgress() async {
+    try {
+      final response = await _dio.get('${ApiConstants.owaspBaseUrl}${ApiConstants.owaspProgressEndpoint}');
+      final data = response.data as Map<String, dynamic>;
+      return {'success': true, 'data': data};
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'message': 'Error getting OWASP progress: $e',
+      };
+    }
+  }
+
   Future<Map<String, bool>> checkModuleConnectivity() async {
     try {
       final response = await _dio.get('${ApiConstants.testingEndpoint}/connectivity');

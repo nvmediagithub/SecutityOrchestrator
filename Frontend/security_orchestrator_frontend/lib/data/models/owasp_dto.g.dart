@@ -158,3 +158,95 @@ Map<String, dynamic> _$VulnerabilityReportDtoToJson(
   'references': instance.references,
   'status': instance.status,
 };
+
+OwaspTestingStatus _$OwaspTestingStatusFromJson(Map<String, dynamic> json) =>
+    OwaspTestingStatus(
+      status: json['status'] as String,
+      currentStep: (json['currentStep'] as num).toInt(),
+      progress: (json['progress'] as num).toInt(),
+      message: json['message'] as String,
+      startTime: (json['startTime'] as num).toInt(),
+      endTime: (json['endTime'] as num?)?.toInt(),
+      duration: (json['duration'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$OwaspTestingStatusToJson(OwaspTestingStatus instance) =>
+    <String, dynamic>{
+      'status': instance.status,
+      'currentStep': instance.currentStep,
+      'progress': instance.progress,
+      'message': instance.message,
+      'startTime': instance.startTime,
+      'endTime': instance.endTime,
+      'duration': instance.duration,
+    };
+
+OwaspTestResults _$OwaspTestResultsFromJson(Map<String, dynamic> json) =>
+    OwaspTestResults(
+      summary: OwaspTestSummary.fromJson(
+        json['summary'] as Map<String, dynamic>,
+      ),
+      owaspTop10: (json['owaspTop10'] as List<dynamic>)
+          .map((e) => OwaspCategory.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      vulnerabilities: (json['vulnerabilities'] as List<dynamic>)
+          .map((e) => OwaspVulnerability.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$OwaspTestResultsToJson(OwaspTestResults instance) =>
+    <String, dynamic>{
+      'summary': instance.summary,
+      'owaspTop10': instance.owaspTop10,
+      'vulnerabilities': instance.vulnerabilities,
+    };
+
+OwaspTestSummary _$OwaspTestSummaryFromJson(Map<String, dynamic> json) =>
+    OwaspTestSummary(
+      totalTests: (json['totalTests'] as num).toInt(),
+      vulnerabilitiesFound: (json['vulnerabilitiesFound'] as num).toInt(),
+      vulnerabilityRate: (json['vulnerabilityRate'] as num).toDouble(),
+      overallRiskLevel: json['overallRiskLevel'] as String,
+    );
+
+Map<String, dynamic> _$OwaspTestSummaryToJson(OwaspTestSummary instance) =>
+    <String, dynamic>{
+      'totalTests': instance.totalTests,
+      'vulnerabilitiesFound': instance.vulnerabilitiesFound,
+      'vulnerabilityRate': instance.vulnerabilityRate,
+      'overallRiskLevel': instance.overallRiskLevel,
+    };
+
+OwaspCategory _$OwaspCategoryFromJson(Map<String, dynamic> json) =>
+    OwaspCategory(
+      category: json['category'] as String,
+      description: json['description'] as String,
+      testCount: (json['testCount'] as num).toInt(),
+      vulnerabilitiesFound: (json['vulnerabilitiesFound'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$OwaspCategoryToJson(OwaspCategory instance) =>
+    <String, dynamic>{
+      'category': instance.category,
+      'description': instance.description,
+      'testCount': instance.testCount,
+      'vulnerabilitiesFound': instance.vulnerabilitiesFound,
+    };
+
+OwaspVulnerability _$OwaspVulnerabilityFromJson(Map<String, dynamic> json) =>
+    OwaspVulnerability(
+      title: json['title'] as String,
+      description: json['description'] as String,
+      severity: json['severity'] as String,
+      owaspCategory: json['owaspCategory'] as String,
+      endpoint: json['endpoint'] as String,
+    );
+
+Map<String, dynamic> _$OwaspVulnerabilityToJson(OwaspVulnerability instance) =>
+    <String, dynamic>{
+      'title': instance.title,
+      'description': instance.description,
+      'severity': instance.severity,
+      'owaspCategory': instance.owaspCategory,
+      'endpoint': instance.endpoint,
+    };
