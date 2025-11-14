@@ -11,4 +11,17 @@ plugins {
 }
 
 rootProject.name = "Backend"
+
+// Feature modules
+include("shared")
+include("features:llm-providers")
+include("features:analysis-pipeline")
+include("features:llm")
+include("features:bpmn")
+include("features:openapi")
+include("features:testdata")
+include("features:orchestration")
+include("features:monitoring")
+
+// Application module (depends on all features)
 include("app")

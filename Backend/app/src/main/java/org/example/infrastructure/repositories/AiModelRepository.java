@@ -1,7 +1,7 @@
 package org.example.infrastructure.repositories;
 
-import org.example.domain.entities.AiModel;
-import org.example.domain.valueobjects.ModelStatus;
+import org.example.features.llm.domain.entities.AiModel;
+import org.example.features.llm.domain.valueobjects.ModelStatus;
 import org.example.domain.valueobjects.ModelType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,7 +15,7 @@ import java.util.Optional;
  * Repository for AiModel entities
  */
 @Repository
-public interface AiModelRepository extends JpaRepository<AiModel, org.example.domain.valueobjects.ModelId> {
+public interface AiModelRepository extends JpaRepository<AiModel, org.example.features.llm.domain.valueobjects.ModelId> {
 
     /**
      * Find models by status

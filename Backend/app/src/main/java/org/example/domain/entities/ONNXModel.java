@@ -1,7 +1,7 @@
 package org.example.domain.entities;
 
-import org.example.domain.valueobjects.ModelId;
-import org.example.domain.valueobjects.ModelStatus;
+import org.example.shared.core.valueobjects.ModelId;
+import org.example.shared.core.valueobjects.ModelStatus;
 
 import java.time.LocalDateTime;
 import java.util.Map;

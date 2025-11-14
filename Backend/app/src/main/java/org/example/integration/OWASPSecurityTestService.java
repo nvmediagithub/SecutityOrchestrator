@@ -100,9 +100,9 @@ public class OWASPSecurityTestService {
             test.setActualResult(passed ? "Test passed successfully" : "Vulnerability detected");
             
             if (passed) {
-                ((Integer) results.put("passed", ((Integer) results.get("passed")) + 1));
+                results.put("passed", ((Integer) results.get("passed")) + 1);
             } else {
-                ((Integer) results.put("failed", ((Integer) results.get("failed")) + 1));
+                results.put("failed", ((Integer) results.get("failed")) + 1);
                 ((List<String>) results.get("vulnerabilities")).add(test.getName());
             }
         }

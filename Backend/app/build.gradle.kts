@@ -17,6 +17,16 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":shared"))
+    implementation(project(":features:llm-providers"))
+    implementation(project(":features:analysis-pipeline"))
+    implementation(project(":features:llm"))
+    implementation(project(":features:bpmn"))
+    implementation(project(":features:openapi"))
+    implementation(project(":features:testdata"))
+    implementation(project(":features:orchestration"))
+    implementation(project(":features:monitoring"))
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -26,18 +36,18 @@ dependencies {
     implementation("org.json:json:20231013")
     implementation("org.projectlombok:lombok")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
-    
+
     // HTTP Client for external API calls
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    
+
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito:mockito-core")
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
-    
+
     // Development tools
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 }

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
+
 import 'shared/theme/app_theme.dart';
 import 'presentation/screens/home_screen.dart';
-import 'presentation/screens/user_flow_main_screen.dart';
-import 'presentation/screens/user_flow_results_screen.dart';
-import 'presentation/screens/user_flow_history_screen.dart';
-import 'presentation/screens/llm_dashboard_screen.dart';
-import 'presentation/screens/owasp_api_security_tester.dart';
 
 void main() {
+  // Initialize file picker for cross-platform file handling
+  FilePicker.platform;
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -24,10 +24,8 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       home: const HomeScreen(),
       routes: {
-        '/user-flow': (context) => const UserFlowMainScreen(),
-        '/user-flow-history': (context) => const UserFlowHistoryScreen(),
-        '/llm-dashboard': (context) => const LlmDashboardScreen(),
-        '/owasp-security': (context) => const OwaspApiSecurityTester(),
+        // Feature-first routing will be added here
+        // Example: '/user-flow': (context) => const UserFlowMainScreen(),
       },
       debugShowCheckedModeBanner: false,
     );
