@@ -16,10 +16,15 @@ repositories {
 
 dependencies {
     implementation(project(":shared"))
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("com.fasterxml.jackson.core:jackson-databind")
-    implementation("org.projectlombok:lombok")
+    compileOnly(libs.spring.boot.starter)
+    compileOnly(libs.spring.boot.starter.validation)
+    compileOnly(libs.spring.boot.starter.data.jpa)
+    compileOnly(libs.jackson.databind)
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // Camunda BPMN engine for parsing and validation
+    implementation("org.camunda.bpm:camunda-engine:7.21.0")
+
+    testImplementation(libs.spring.boot.starter.test)
 }

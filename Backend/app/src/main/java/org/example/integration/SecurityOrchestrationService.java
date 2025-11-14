@@ -3,7 +3,7 @@ package org.example.integration;
 import org.example.domain.entities.SecurityAnalysisResult;
 import org.example.domain.entities.SecurityTest;
 import org.example.domain.entities.BpmnProcessStep;
-import org.example.infrastructure.services.LLMSecurityAnalysisService;
+import org.example.features.llm.application.LLMSecurityAnalysisService;
 import org.example.infrastructure.websocket.SecurityWebSocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

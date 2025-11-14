@@ -37,6 +37,10 @@ dependencies {
     implementation("org.projectlombok:lombok")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
 
+    // Add logging dependencies
+    implementation("org.slf4j:slf4j-api")
+    implementation("ch.qos.logback:logback-classic")
+
     // HTTP Client for external API calls
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

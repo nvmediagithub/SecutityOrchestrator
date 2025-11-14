@@ -8,7 +8,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 // Infrastructure providers
 final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
   final connectivity = Connectivity();
-  const backendUrl = 'http://localhost:8001'; // Health monitoring service URL
+  const backendUrl = 'http://localhost:8080'; // Backend service URL
   return ConnectivityServiceImpl(connectivity, backendUrl);
 });
 

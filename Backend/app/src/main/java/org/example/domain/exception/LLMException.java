@@ -20,7 +20,8 @@ public class LLMException extends Exception {
         MODEL_LOADING_ERROR,
         CONFIGURATION_ERROR,
         INTERNAL_ERROR,
-        NETWORK_ERROR
+        NETWORK_ERROR,
+        UNKNOWN
     }
 
     private final String errorCode;

@@ -49,9 +49,8 @@ class ConnectivityServiceImpl implements ConnectivityService {
   @override
   Future<ConnectionStatus> checkBackendConnectivity() async {
     try {
-      // Try to connect to health-monitoring service first (port 8001)
-      final healthServiceUrl = _backendUrl.replaceAll(RegExp(r':\d+/?$'), ':8001');
-      final response = await http.get(Uri.parse('$healthServiceUrl/health')).timeout(
+      // Connect to backend service (port 8080)
+      final response = await http.get(Uri.parse('$_backendUrl/api/health')).timeout(
             const Duration(seconds: 10),
           );
 
@@ -61,20 +60,7 @@ class ConnectivityServiceImpl implements ConnectivityService {
         return ConnectionStatus.error;
       }
     } catch (e) {
-      // Fallback to original backend URL if health service is not available
-      try {
-        final response = await http.get(Uri.parse('$_backendUrl/health')).timeout(
-              const Duration(seconds: 5),
-            );
-
-        if (response.statusCode == 200) {
-          return ConnectionStatus.connected;
-        } else {
-          return ConnectionStatus.error;
-        }
-      } catch (fallbackError) {
-        return ConnectionStatus.error;
-      }
+      return ConnectionStatus.error;
     }
   }
 

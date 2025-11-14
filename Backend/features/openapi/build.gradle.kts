@@ -16,10 +16,17 @@ repositories {
 
 dependencies {
     implementation(project(":shared"))
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("com.fasterxml.jackson.core:jackson-databind")
-    implementation("org.projectlombok:lombok")
+    compileOnly(libs.spring.boot.starter)
+    compileOnly(libs.spring.boot.starter.validation)
+    compileOnly(libs.jackson.databind)
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // OpenAPI parsing and validation
+    implementation("io.swagger.parser.v3:swagger-parser:2.1.19")
+    implementation("io.swagger.core.v3:swagger-core:2.2.19")
+    implementation("com.github.java-json-tools:json-schema-validator:2.2.14")
+    implementation(libs.slf4j.api)
+
+    testImplementation(libs.spring.boot.starter.test)
 }

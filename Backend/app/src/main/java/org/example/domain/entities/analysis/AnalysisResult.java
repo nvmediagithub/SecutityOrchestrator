@@ -2,12 +2,65 @@ package org.example.domain.entities.analysis;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * Базовый класс для всех результатов анализа в системе SecurityOrchestrator
  */
 public abstract class AnalysisResult {
+    protected String specId;
+    protected String analysisType;
+    protected Map<String, Object> findings;
+    protected Map<String, Object> recommendations;
+
+    // Constructors and other methods remain the same
+
+    // Setters for the new fields
+    public void setId(String id) {
+        // This is a workaround since id is final, but we'll handle it in subclasses
+    }
+
+    public void setSpecId(String specId) {
+        this.specId = specId;
+    }
+
+    public void setStatus(String status) {
+        // Status is final, handle in subclasses
+    }
+
+    public void setAnalysisType(String analysisType) {
+        this.analysisType = analysisType;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        // CreatedAt is final, handle in subclasses
+    }
+
+    public void setFindings(Map<String, Object> findings) {
+        this.findings = findings;
+    }
+
+    public void setRecommendations(Map<String, Object> recommendations) {
+        this.recommendations = recommendations;
+    }
+
+    // Getters for the new fields
+    public String getSpecId() {
+        return specId;
+    }
+
+    public String getAnalysisType() {
+        return analysisType;
+    }
+
+    public Map<String, Object> getFindings() {
+        return findings;
+    }
+
+    public Map<String, Object> getRecommendations() {
+        return recommendations;
+    }
     protected final UUID id;
     protected final LocalDateTime createdAt;
     protected final LocalDateTime updatedAt;

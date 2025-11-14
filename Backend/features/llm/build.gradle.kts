@@ -23,5 +23,8 @@ dependencies {
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
+    // Add slf4j-api for logging
+    implementation(libs.slf4j.api)
+
     testImplementation(libs.spring.boot.starter.test)
 }

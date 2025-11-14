@@ -15,7 +15,7 @@ public class OpenRouterException extends LLMException {
     }
     
     public OpenRouterException(String message, Throwable cause) {
-        super("OPENROUTER_ERROR", message, cause, "OpenRouter", ErrorCategory.UNKNOWN, false);
+        super("OPENROUTER_ERROR", message, "OpenRouter", ErrorCategory.UNKNOWN, false);
         this.httpStatus = 0;
         this.apiResponse = null;
     }
@@ -34,10 +34,10 @@ public class OpenRouterException extends LLMException {
         this.apiResponse = apiResponse;
     }
     
-    public OpenRouterException(String errorCode, String message, Throwable cause, String provider, 
-                              LLMException.ErrorCategory category, boolean retryable, 
+    public OpenRouterException(String errorCode, String message, Throwable cause, String provider,
+                              LLMException.ErrorCategory category, boolean retryable,
                               int httpStatus, String apiResponse) {
-        super(errorCode, message, cause, provider, category, retryable);
+        super(errorCode, message, provider, category, retryable);
         this.httpStatus = httpStatus;
         this.apiResponse = apiResponse;
     }

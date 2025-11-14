@@ -15,6 +15,7 @@ okhttp = "4.12.0"
 mockito = "5.14.2"
 testcontainers = "1.20.4"
 postgresql = "16.4"
+slf4j = "2.0.13"
 
 [libraries]
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
@@ -36,6 +37,7 @@ okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
 testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "postgresql" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
