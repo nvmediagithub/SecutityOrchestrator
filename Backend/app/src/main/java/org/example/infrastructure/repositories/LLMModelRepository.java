@@ -1,7 +1,7 @@
 package org.example.infrastructure.repositories;
 
 import org.example.domain.entities.LLMModel;
-import org.example.domain.entities.LLMProvider;
+import org.example.llm.domain.LLMProvider;
 import org.example.domain.valueobjects.ModelStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

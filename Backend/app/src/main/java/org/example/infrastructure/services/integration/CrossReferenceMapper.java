@@ -5,7 +5,7 @@ import org.example.domain.dto.integration.CrossReferenceMappingResult;
 import org.example.domain.dto.integration.OpenApiDataAnalysisResult;
 import org.example.domain.dto.integration.BpmnContextExtractionResult;
 import org.example.infrastructure.services.OpenRouterClient;
-import org.example.infrastructure.services.LocalLLMService;
+import org.example.llm.infrastructure.LocalLLMService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

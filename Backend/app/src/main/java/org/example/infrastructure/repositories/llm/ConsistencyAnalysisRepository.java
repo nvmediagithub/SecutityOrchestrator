@@ -1,6 +1,6 @@
 package org.example.infrastructure.repositories.llm;
 
-import org.example.domain.entities.llm.ConsistencyAnalysis;
+import org.example.llm.domain.entities.ConsistencyAnalysis;
 import org.example.domain.valueobjects.AnalysisId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

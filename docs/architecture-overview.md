@@ -2,7 +2,7 @@
 
 ## Overview
 
-The SecurityOrchestrator is a comprehensive testing platform that orchestrates BPMN workflows and OpenAPI specifications for end-to-end security testing. The system follows clean architecture principles with a feature-first organization, ensuring modularity, testability, and maintainability.
+The SecurityOrchestrator is a comprehensive testing platform that orchestrates BPMN workflows and OpenAPI specifications for end-to-end security testing. The backend now uses a **feature-first modular architecture**: the primary organization unit is a business feature (BPMN analysis, OpenAPI analysis, LLM integration, test data generation, etc.), and inside each feature we still apply clean architecture principles (domain, application, infrastructure, presentation).
 
 ## High-Level Architecture
 
@@ -13,10 +13,9 @@ graph TB
         STATE[State Management]
     end
 
-    subgraph "Java Backend (Clean Architecture)"
-        API[REST API Layer]
-        FEATURES[Feature Modules]
-        CORE[Core Domain Services]
+    subgraph "Java Backend (Feature-First Modules)"
+        FEATURES[Feature Modules (BPMN, OpenAPI, LLM, TestData, Monitoring)]
+        CORE[Shared Core / Cross-Cutting]
     end
 
     subgraph "External Systems"
@@ -27,16 +26,27 @@ graph TB
     UI --> API
     API --> FEATURES
     FEATURES --> CORE
-    CORE --> TARGETS
-    CORE --> MODELS
+    FEATURES --> TARGETS
+    FEATURES --> MODELS
 
     style FEATURES fill:#e1f5fe
     style CORE fill:#f3e5f5
 ```
 
-## Clean Architecture Layers
+## Feature Modules and Inner Layers
 
-### Domain Layer
+Instead of a global “layer-first” package layout (`domain`, `application`, `infrastructure` at the top level), the backend is organised around **feature modules**. Each major capability has its own module:
+
+- `bpmn` – BPMN parsing, analysis, and reporting
+- `openapi` – OpenAPI parsing, security analysis, and reporting
+- `llm` – local/remote LLM configuration, orchestration, and analysis
+- `testdata` – AI‑powered test data generation and validation
+- `orchestration` – end‑to‑end workflow orchestration and execution
+- `monitoring` – metrics, health, and runtime monitoring
+
+Inside each feature module we still separate code into domain, application, infrastructure, and presentation layers. This keeps dependencies clear while making it easy to work “per feature”.
+
+### Domain Layer (inside a feature)
 - **Entities**: Core business objects (BPMN Process, API Specification, Test Case)
 - **Value Objects**: Immutable data structures (TestResult, ValidationRule)
 - **Domain Services**: Business logic without external dependencies
@@ -252,7 +262,7 @@ sequenceDiagram
 
 ### Backend (Java 21+)
 - **Framework**: Spring Boot 3.x
-- **Architecture**: Clean Architecture (Hexagonal)
+- **Architecture**: Feature-first modules with clean architecture inside each feature
 - **Build Tool**: Gradle
 - **Testing**: JUnit 5, Mockito, TestContainers
 - **Documentation**: OpenAPI/Swagger

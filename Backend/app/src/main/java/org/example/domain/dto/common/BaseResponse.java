@@ -1,6 +1,6 @@
 package org.example.domain.dto.common;
 
-import org.example.domain.entities.LLMProvider;
+import org.example.llm.domain.LLMProvider;
 
 import java.time.LocalDateTime;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package org.example.infrastructure.services.llm;
+package org.example.llm.infrastructure;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

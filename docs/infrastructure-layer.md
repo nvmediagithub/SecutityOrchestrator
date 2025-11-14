@@ -1,6 +1,8 @@
-# Infrastructure Layer Design
+# Infrastructure Layer Design (Inside Features)
 
 ## Adapters and External Integrations
+
+In the feature-first layout, infrastructure components are grouped under the feature they belong to (for example, `org.example.bpmn.infrastructure`, `org.example.openapi.infrastructure`, `org.example.llm.infrastructure`). The samples below show typical adapters and integrations inside such feature modules.
 
 ### BPMN Processing Infrastructure
 

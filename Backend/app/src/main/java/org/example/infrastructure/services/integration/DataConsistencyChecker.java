@@ -2,7 +2,7 @@ package org.example.infrastructure.services.integration;
 
 import org.example.domain.model.consistency.*;
 import org.example.infrastructure.services.OpenRouterClient;
-import org.example.infrastructure.services.LocalLLMService;
+import org.example.llm.infrastructure.LocalLLMService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,6 +4,18 @@
 
 The SecurityOrchestrator follows a feature-first modular architecture where each business capability is organized as an independent module. Each module follows clean architecture principles with clear separation between domain, application, and infrastructure layers.
 
+At the Java package level the feature modules are located under `app/src/main/java/org/example`:
+
+- `org.example.bpmn` – BPMN parsing, analysis, and reporting
+- `org.example.openapi` – OpenAPI parsing, security analysis, and reporting
+- `org.example.llm` – LLM configuration, orchestration, and analysis
+- `org.example.testdata` – AI-powered test data generation and validation
+- `org.example.orchestration` – end-to-end workflow orchestration
+- `org.example.monitoring` – runtime monitoring and metrics
+- `org.example.shared` – cross-cutting concerns (configuration, common utilities, security)
+
+New backend code should be placed under the appropriate feature package rather than in global layer-first packages.
+
 ```
 src/main/java/com/securityorchestrator/
 ├── core/                          # Shared core components

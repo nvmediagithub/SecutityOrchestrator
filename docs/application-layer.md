@@ -1,6 +1,8 @@
-# Application Layer Design
+# Application Layer Design (Inside Features)
 
 ## Use Cases and Application Services
+
+In the feature-first architecture the application layer lives **inside each feature module** (for example, `org.example.bpmn.application`, `org.example.openapi.application`, `org.example.llm.application`). The examples below illustrate application use cases for different features.
 
 ### BPMN Processing Feature
 
