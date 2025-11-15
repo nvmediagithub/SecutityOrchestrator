@@ -20,6 +20,7 @@ dependencies {
     compileOnly(libs.spring.boot.starter.validation)
     compileOnly(libs.jackson.databind)
     compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 
     testImplementation(libs.spring.boot.starter.test)
 }

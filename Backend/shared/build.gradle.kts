@@ -16,7 +16,9 @@ repositories {
 
 dependencies {
     compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
     compileOnly(libs.jackson.databind)
+    compileOnly(libs.spring.boot.starter.validation)
 
     // Testing
     testImplementation(libs.spring.boot.starter.test)

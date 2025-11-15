@@ -17,9 +17,11 @@ repositories {
 dependencies {
     implementation(project(":shared"))
     compileOnly(libs.spring.boot.starter)
+    compileOnly(libs.spring.boot.starter.web)
     compileOnly(libs.spring.boot.starter.validation)
     compileOnly(libs.jackson.databind)
     compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 
     testImplementation(libs.spring.boot.starter.test)
 }
