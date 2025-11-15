@@ -14,7 +14,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
     HibernateJpaAutoConfiguration.class,
     org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration.class
 })
-@ComponentScan(basePackages = {"org.example.infrastructure.config"})
+@ComponentScan(basePackages = {
+    "org.example.infrastructure.config",
+    "org.example.infrastructure.controller"
+})
 public class SecurityOrchestratorApplication {
 
     public static void main(String[] args) {

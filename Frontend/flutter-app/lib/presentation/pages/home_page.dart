@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/connection_status_card.dart';
 
 class HomePage extends ConsumerWidget {
@@ -19,20 +19,13 @@ class HomePage extends ConsumerWidget {
             SizedBox(height: 24),
             Text(
               'Security Orchestrator Dashboard',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 8),
             Text(
               'Monitor and manage your security infrastructure',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.black54),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 32),
