@@ -16,6 +16,7 @@ class ConnectivityServiceImpl implements ConnectivityService {
       StreamController<ConnectionStatus>.broadcast();
 
   ConnectivityServiceImpl(this._connectivity, this._backendUrl) {
+    print('ConnectivityServiceImpl initialized with $_backendUrl');
     _initializeConnectivity();
   }
 

@@ -8,12 +8,25 @@ public enum DataType {
     INTEGER,
     LONG,
     DOUBLE,
+    DECIMAL,
     BOOLEAN,
     DATE,
     DATETIME,
     UUID,
     EMAIL,
     PHONE,
+    URL,
     ADDRESS,
-    CUSTOM
+    CUSTOM;
+
+    public static DataType fromString(String value) {
+        if (value == null) {
+            return STRING;
+        }
+        try {
+            return DataType.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return STRING; // default fallback
+        }
+    }
 }

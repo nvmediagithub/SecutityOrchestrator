@@ -11,12 +11,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication(exclude = {
     DataSourceAutoConfiguration.class,
-    HibernateJpaAutoConfiguration.class,
-    org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration.class
+    HibernateJpaAutoConfiguration.class
 })
 @ComponentScan(basePackages = {
-    "org.example.infrastructure.config",
-    "org.example.infrastructure.controller"
+    "org.example.infrastructure.controller",
+    "org.example.features"
 })
 public class SecurityOrchestratorApplication {
 

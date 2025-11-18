@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.features.bpmn.domain.entities.BpmnDiagram;
 import org.example.features.bpmn.domain.repositories.BpmnDiagramRepository;
 import org.example.shared.core.valueobjects.ModelId;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -49,7 +48,7 @@ public class JpaBpmnDiagramRepository implements BpmnDiagramRepository {
 
     @Override
     public List<BpmnDiagram> findByNameContaining(String name) {
-        return jpaRepository.findByNameContainingIgnoreCase(name).stream()
+        return jpaRepository.findByDiagramNameContainingIgnoreCase(name).stream()
             .map(this::convertToDomain)
             .collect(Collectors.toList());
     }
@@ -121,13 +120,4 @@ public class JpaBpmnDiagramRepository implements BpmnDiagramRepository {
             .build();
     }
 
-    // Spring Data JPA interface
-    public interface SpringDataJpaBpmnDiagramRepository extends JpaRepository<BpmnDiagramEntity, String> {
-        Optional<BpmnDiagramEntity> findByDiagramId(String diagramId);
-        List<BpmnDiagramEntity> findByIsActiveTrue();
-        List<BpmnDiagramEntity> findByNameContainingIgnoreCase(String name);
-        List<BpmnDiagramEntity> findByDescriptionContainingIgnoreCase(String description);
-        List<BpmnDiagramEntity> findAllByOrderByCreatedAtDesc();
-        long countActiveDiagrams();
-    }
 }

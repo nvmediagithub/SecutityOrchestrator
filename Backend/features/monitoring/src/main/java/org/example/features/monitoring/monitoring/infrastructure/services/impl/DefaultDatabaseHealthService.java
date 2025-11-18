@@ -2,13 +2,12 @@ package org.example.features.monitoring.monitoring.infrastructure.services.impl;
 
 import org.example.features.monitoring.monitoring.infrastructure.services.DatabaseHealthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -17,69 +16,82 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class DefaultDatabaseHealthService implements DatabaseHealthService {
 
-    private final DataSource dataSource;
-    private final JdbcTemplate jdbcTemplate;
+    private final List<DataSource> dataSources;
 
     @Autowired
-    public DefaultDatabaseHealthService(DataSource dataSource, JdbcTemplate jdbcTemplate) {
-        this.dataSource = dataSource;
-        this.jdbcTemplate = jdbcTemplate;
+    public DefaultDatabaseHealthService(List<DataSource> dataSources) {
+        this.dataSources = dataSources;
     }
 
     @Override
     public CompletableFuture<Boolean> isDatabaseHealthy() {
         return CompletableFuture.supplyAsync(() -> {
-            try (Connection connection = dataSource.getConnection()) {
-                return connection.isValid(5); // 5 second timeout
-            } catch (SQLException e) {
-                return false;
-            }
+            // Check all datasources - all must be healthy
+            return dataSources.stream().allMatch(this::checkDataSourceHealth);
         });
+    }
+
+    private boolean checkDataSourceHealth(DataSource dataSource) {
+        try (Connection connection = dataSource.getConnection()) {
+            return connection.isValid(5); // 5 second timeout
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
     public CompletableFuture<Integer> getActiveConnections() {
         return CompletableFuture.supplyAsync(() -> {
-            try (Connection connection = dataSource.getConnection()) {
-                DatabaseMetaData metaData = connection.getMetaData();
-                // Simplified - would need connection pool specific logic for accurate count
-                return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM information_schema.processlist", Integer.class);
-            } catch (Exception e) {
-                return 0;
-            }
+            // Sum active connections across all datasources
+            return dataSources.stream()
+                    .mapToInt(ds -> {
+                        try (Connection connection = ds.getConnection()) {
+                            // Simplified - would need connection pool specific logic
+                            return 1; // Placeholder
+                        } catch (Exception e) {
+                            return 0;
+                        }
+                    })
+                    .sum();
         });
     }
 
     @Override
     public CompletableFuture<String> getConnectionPoolStats() {
         return CompletableFuture.supplyAsync(() -> {
-            // Note: This would need implementation based on specific connection pool (HikariCP, etc.)
-            return "{\"active\": 5, \"idle\": 10, \"total\": 15}";
-        });
-    }
-
-    @Override
-    public CompletableFuture<Boolean> testDatabaseConnectivity() {
-        return CompletableFuture.supplyAsync(() -> {
             try {
-                jdbcTemplate.execute("SELECT 1");
-                return true;
+                // Simplified implementation - in real scenario would use HikariCP metrics
+                int activeConnections = getActiveConnections().join();
+                return String.format("{\"active\": %d, \"idle\": %d}", activeConnections, 10);
             } catch (Exception e) {
-                return false;
+                return "{}";
             }
         });
     }
 
     @Override
+    public CompletableFuture<Boolean> testDatabaseConnectivity() {
+        return isDatabaseHealthy();
+    }
+
+    @Override
     public CompletableFuture<String> getDatabasePerformanceMetrics() {
         return CompletableFuture.supplyAsync(() -> {
-            // Note: Implementation would depend on database type and monitoring setup
-            return "{\"query_time\": 0.05, \"connections\": 5, \"slow_queries\": 0}";
+            // Simplified - would need actual query performance monitoring
+            return "{\"avg_query_time\": 0.05}";
         });
     }
 
     @Override
     public CompletableFuture<Boolean> isDatabaseUnderHighLoad() {
-        return getActiveConnections().thenApply(connections -> connections > 50); // Threshold of 50 connections
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                int activeConnections = getActiveConnections().join();
+                // Consider under high load if more than 80% of connections are active
+                return activeConnections > 8; // Assuming max 10 connections
+            } catch (Exception e) {
+                return false;
+            }
+        });
     }
 }

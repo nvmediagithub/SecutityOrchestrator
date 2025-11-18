@@ -2,13 +2,20 @@ package org.example.shared.domain.entities;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 
 /**
  * Domain entity for TestSession
  * Represents a test execution session in the system
  */
+@Entity
 public class TestSession {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String sessionId;
     private String name;

@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'connection_status_card.dart';
+import 'system_health_card.dart';
+import 'metrics_list.dart';
+import 'alerts_list.dart';
+import 'processes_overview_card.dart';
+import '../../analysis-processes/presentation/create_process_dialog.dart';
+import '../../analysis-processes/domain/create_analysis_process_usecase.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -30,6 +36,10 @@ class HomePage extends ConsumerWidget {
             ),
             SizedBox(height: 32),
             ConnectionStatusCard(),
+            SystemHealthCard(),
+            MetricsList(),
+            AlertsList(),
+            ProcessesOverviewCard(),
           ],
         ),
       ),

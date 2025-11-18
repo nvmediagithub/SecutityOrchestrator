@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'features/monitoring/presentation/home_page.dart';
 import 'features/monitoring/di/connectivity_provider.dart';
+import 'features/analysis-processes/presentation/analysis_processes_page.dart';
 
 final _router = GoRouter(
   initialLocation: '/',
@@ -10,6 +11,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/',
       builder: (context, state) => const HomePage(),
+    ),
+    GoRoute(
+      path: '/processes',
+      builder: (context, state) => const AnalysisProcessesPage(),
     ),
   ],
 );
@@ -19,6 +24,7 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print('MyApp build called');
     return MaterialApp.router(
       title: 'Security Orchestrator',
       theme: ThemeData(

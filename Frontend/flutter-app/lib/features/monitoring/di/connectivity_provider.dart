@@ -36,6 +36,7 @@ final connectivityNotifierProvider =
 class ConnectivityNotifier extends Notifier<AsyncValue<ConnectionStatus>> {
   @override
   AsyncValue<ConnectionStatus> build() {
+    print('ConnectivityNotifier build called');
     checkConnectivity();
     return const AsyncValue.loading();
   }

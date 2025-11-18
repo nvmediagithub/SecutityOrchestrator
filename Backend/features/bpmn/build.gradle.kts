@@ -19,12 +19,16 @@ dependencies {
     implementation(libs.spring.boot.starter)
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.data.jpa)
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation(libs.jackson.databind)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
     // Camunda BPMN engine for parsing and validation
     implementation("org.camunda.bpm:camunda-engine:7.21.0")
+
+    // In-memory database for BPMN feature
+    runtimeOnly("com.h2database:h2")
 
     testImplementation(libs.spring.boot.starter.test)
 }

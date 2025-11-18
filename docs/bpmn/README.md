@@ -35,6 +35,64 @@ The **BPMN Analysis System** is a core component of SecurityOrchestrator that en
 - RESTful API for programmatic access
 - Comprehensive reporting and visualization
 
+## Architecture Overview
+
+The BPMN feature follows a clean architecture pattern with three distinct layers:
+
+### Domain Layer
+- **Entities**: [`BpmnDiagram.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/domain/entities/BpmnDiagram.java), [`BpmnElementId.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/domain/valueobjects/BpmnElementId.java), [`BpmnProcessId.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/domain/valueobjects/BpmnProcessId.java)
+- **Services**: [`ProcessAnalyzer.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/domain/services/ProcessAnalyzer.java), [`ProcessExecutor.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/domain/services/ProcessExecutor.java), [`ProcessParser.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/domain/services/ProcessParser.java)
+- **Repositories**: [`BpmnDiagramRepository.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/domain/repositories/BpmnDiagramRepository.java)
+
+### Application Layer
+- **Use Cases**: [`AnalyzeBpmnProcessUseCase.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/application/usecases/AnalyzeBpmnProcessUseCase.java), [`ValidateBpmnDiagramUseCase.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/application/usecases/ValidateBpmnDiagramUseCase.java), [`GenerateBpmnReportUseCase.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/application/usecases/GenerateBpmnReportUseCase.java)
+
+### Infrastructure Layer
+- **Configuration**: [`BpmnConfiguration.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/infrastructure/config/BpmnConfiguration.java) - Spring configuration with dependency injection
+- **Adapters**: [`CamundaParserAdapter.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/infrastructure/adapters/CamundaParserAdapter.java) - Camunda BPMN parser integration
+- **Repositories**: [`JpaBpmnDiagramRepository.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/infrastructure/repositories/JpaBpmnDiagramRepository.java), [`SpringDataJpaBpmnDiagramRepository.java`](Backend/features/bpmn/src/main/java/org/example/features/bpmn/infrastructure/repositories/SpringDataJpaBpmnDiagramRepository.java)
+
+### Configuration Details
+
+#### Dependency Injection Setup
+The feature uses Spring's `@Configuration` with `@Qualifier` annotations to manage multiple EntityManagerFactory instances:
+
+```java
+@Configuration
+@EnableJpaRepositories(
+    basePackages = "org.example.features.bpmn.infrastructure.repositories",
+    entityManagerFactoryRef = "bpmnEntityManagerFactory"
+)
+public class BpmnConfiguration {
+    @Bean
+    public LocalContainerEntityManagerFactoryBean bpmnEntityManagerFactory(@Qualifier("bpmnDataSource") DataSource bpmnDataSource) {
+        // EntityManagerFactory configuration with H2 in-memory database
+    }
+
+    @Bean
+    public PlatformTransactionManager bpmnTransactionManager(@Qualifier("bpmnEntityManagerFactory") LocalContainerEntityManagerFactoryBean bpmnEntityManagerFactory) {
+        // Transaction manager configuration
+    }
+}
+```
+
+#### Database Configuration
+- **Database**: H2 in-memory (`jdbc:h2:mem:bpmn_db`)
+- **JPA**: Hibernate with `create-drop` DDL auto-generation
+- **Isolation**: Separate EntityManagerFactory for BPMN entities
+
+## Recent Updates
+
+### Dependency Injection Fixes
+- **Issue**: Multiple EntityManagerFactory beans causing ambiguity
+- **Solution**: Added `@Qualifier` annotations to distinguish between BPMN and TestData EntityManagerFactory instances
+- **Impact**: Resolved Spring context initialization errors and ensured proper bean wiring
+
+### Duplicate Consolidation
+- **Issue**: Redundant repository implementations across features
+- **Solution**: Consolidated common repository patterns and removed duplicate code
+- **Impact**: Improved maintainability and reduced code duplication
+
 ## Quick Start Guide
 
 ### Prerequisites
