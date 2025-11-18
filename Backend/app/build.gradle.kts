@@ -45,6 +45,9 @@ dependencies {
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
+    // H2 Database for development
+    runtimeOnly("com.h2database:h2")
+
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito:mockito-core")

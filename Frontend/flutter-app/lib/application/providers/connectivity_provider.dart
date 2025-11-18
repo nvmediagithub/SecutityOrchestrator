@@ -1,4 +1,4 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/usecases/check_connectivity_usecase.dart';
 import '../../domain/entities/connection_status.dart';
 import '../../infrastructure/services/connectivity_service.dart';
@@ -8,7 +8,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 // Infrastructure providers
 final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
   final connectivity = Connectivity();
-  const backendUrl = 'http://localhost:8080'; // Backend service URL
+  const backendUrl = 'http://localhost:8090'; // Backend service URL (updated to 8090)
   return ConnectivityServiceImpl(connectivity, backendUrl);
 });
 
@@ -29,22 +29,22 @@ final connectivityStatusProvider = StreamProvider<ConnectionStatus>((ref) {
   return useCase.execute();
 });
 
-final connectivityNotifierProvider = StateNotifierProvider<ConnectivityNotifier, AsyncValue<ConnectionStatus>>((ref) {
-  final useCase = ref.watch(checkConnectivityUseCaseProvider);
-  return ConnectivityNotifier(useCase);
-});
+// Notifier for manual connectivity checks
+final connectivityNotifierProvider =
+    NotifierProvider<ConnectivityNotifier, AsyncValue<ConnectionStatus>>(ConnectivityNotifier.new);
 
-class ConnectivityNotifier extends StateNotifier<AsyncValue<ConnectionStatus>> {
-  final CheckConnectivityUseCase _useCase;
-
-  ConnectivityNotifier(this._useCase) : super(const AsyncValue.loading()) {
+class ConnectivityNotifier extends Notifier<AsyncValue<ConnectionStatus>> {
+  @override
+  AsyncValue<ConnectionStatus> build() {
     checkConnectivity();
+    return const AsyncValue.loading();
   }
 
   Future<void> checkConnectivity() async {
     state = const AsyncValue.loading();
     try {
-      final status = await _useCase.execute();
+      final useCase = ref.read(checkConnectivityUseCaseProvider);
+      final status = await useCase.execute();
       state = AsyncValue.data(status);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
