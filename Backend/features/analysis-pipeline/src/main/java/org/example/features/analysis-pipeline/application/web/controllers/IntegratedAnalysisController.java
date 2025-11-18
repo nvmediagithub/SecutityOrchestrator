@@ -1,4 +1,4 @@
-package org.example.features.analysis-pipeline.application.web.controllers;
+package org.example.features.analysis.pipeline.application.web.controllers;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;

@@ -1,6 +1,6 @@
 package org.example.features.testdata.application.web.controllers;
 
-import org.example.domain.dto.ApiResponse;
+import org.example.shared.common.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

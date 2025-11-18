@@ -1,9 +1,9 @@
 package org.example.features.testdata.application.web.controllers;
 
-import org.example.domain.dto.test.ApiResponse;
+import org.example.shared.common.ApiResponse;
+import org.example.shared.domain.entities.TestSession;
 import org.example.domain.dto.test.TestSessionCreateRequest;
-import org.example.domain.entities.TestSession;
-import org.example.infrastructure.services.SessionService;
+import org.example.shared.infrastructure.services.SessionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

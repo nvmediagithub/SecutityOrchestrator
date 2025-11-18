@@ -17,9 +17,9 @@ repositories {
 dependencies {
     implementation(project(":shared"))
     implementation(project(":features:llm-providers"))
-    compileOnly(libs.spring.boot.starter)
-    compileOnly(libs.spring.boot.starter.validation)
-    compileOnly(libs.jackson.databind)
+    implementation(libs.spring.boot.starter)
+    implementation(libs.spring.boot.starter.validation)
+    implementation(libs.jackson.databind)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 

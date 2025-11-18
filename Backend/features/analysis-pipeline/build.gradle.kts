@@ -16,10 +16,12 @@ repositories {
 
 dependencies {
     implementation(project(":shared"))
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("com.fasterxml.jackson.core:jackson-databind")
-    implementation("org.projectlombok:lombok")
+    implementation(libs.spring.boot.starter)
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.validation)
+    implementation(libs.jackson.databind)
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation(libs.spring.boot.starter.test)
 }

@@ -1,7 +1,7 @@
 package org.example.features.orchestration.application.web.controllers;
 
-import org.example.domain.dto.ApiResponse;
-import org.example.domain.dto.ProcessResponse;
+import org.example.shared.common.ApiResponse;
+import org.example.shared.common.ProcessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,7 +37,7 @@ public class ProcessController {
             java.time.Instant.now()
         );
 
-        return ResponseEntity.ok(ApiResponse.success(process, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(process));
     }
 
     /**
@@ -58,7 +58,7 @@ public class ProcessController {
                 java.time.Instant.now(), java.time.Instant.now())
         );
 
-        return ResponseEntity.ok(ApiResponse.success(processes, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(processes));
     }
 
     /**
@@ -77,7 +77,7 @@ public class ProcessController {
             java.time.Instant.now()
         );
 
-        return ResponseEntity.ok(ApiResponse.success(process, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(process));
     }
 
     /**
@@ -99,7 +99,7 @@ public class ProcessController {
             java.time.Instant.now()
         );
 
-        return ResponseEntity.ok(ApiResponse.success(process, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(process));
     }
 
     /**
@@ -127,7 +127,7 @@ public class ProcessController {
             "Process executed successfully"
         );
 
-        return ResponseEntity.ok(ApiResponse.success(result, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     // Inner DTOs for requests

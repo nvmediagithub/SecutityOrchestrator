@@ -1,6 +1,6 @@
 package org.example.features.orchestration.application.web.controllers;
 
-import org.example.domain.dto.ApiResponse;
+import org.example.shared.common.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +31,7 @@ public class WorkflowController {
             java.time.Instant.now()
         );
 
-        return ResponseEntity.ok(ApiResponse.success(workflow, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(workflow));
     }
 
     /**
@@ -48,7 +48,7 @@ public class WorkflowController {
             new WorkflowSummary("mock-workflow-2", "Test Workflow 2", "COMPLETED")
         );
 
-        return ResponseEntity.ok(ApiResponse.success(workflows, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(workflows));
     }
 
     /**
@@ -66,7 +66,7 @@ public class WorkflowController {
             java.time.Instant.now()
         );
 
-        return ResponseEntity.ok(ApiResponse.success(workflow, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(workflow));
     }
 
     /**
@@ -85,7 +85,7 @@ public class WorkflowController {
             "/api/v1/workflows/" + workflowId + "/status"
         );
 
-        return ResponseEntity.accepted().body(ApiResponse.success(response, UUID.randomUUID().toString()));
+        return ResponseEntity.accepted().body(ApiResponse.success(response));
     }
 
     /**
@@ -102,7 +102,7 @@ public class WorkflowController {
             java.time.Instant.now()
         );
 
-        return ResponseEntity.ok(ApiResponse.success(status, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(status));
     }
 
     // Inner DTOs

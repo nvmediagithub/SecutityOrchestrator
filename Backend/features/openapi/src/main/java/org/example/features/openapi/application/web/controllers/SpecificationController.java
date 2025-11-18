@@ -1,6 +1,7 @@
 package org.example.features.openapi.application.web.controllers;
 
-import org.example.domain.dto.ApiResponse;
+import org.example.shared.common.ApiResponse;
+import org.example.shared.common.SpecificationResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,7 +35,7 @@ public class SpecificationController {
             java.time.Instant.now()
         );
 
-        return ResponseEntity.ok(ApiResponse.success(spec, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(spec));
     }
 
     /**
@@ -49,7 +50,7 @@ public class SpecificationController {
             new SpecificationSummary("mock-spec-2", "User Management API", "3.0.3")
         );
 
-        return ResponseEntity.ok(ApiResponse.success(specs, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(specs));
     }
 
     /**
@@ -70,7 +71,7 @@ public class SpecificationController {
             new TestCaseResponse("tc-5", "DELETE /pets/{id}", "Delete pet")
         ));
 
-        return ResponseEntity.ok(ApiResponse.success(response, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
@@ -85,7 +86,7 @@ public class SpecificationController {
             new TestCaseSummary("tc-2", "POST /pets", "Create new pet")
         );
 
-        return ResponseEntity.ok(ApiResponse.success(testCases, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(testCases));
     }
 
     // Inner DTOs
