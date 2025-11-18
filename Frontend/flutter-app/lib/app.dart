@@ -10,11 +10,15 @@ final _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomePage(),
+      builder: (context, state) => SelectionArea(
+        child: const HomePage(),
+      ),
     ),
     GoRoute(
       path: '/processes',
-      builder: (context, state) => const AnalysisProcessesPage(),
+      builder: (context, state) => SelectionArea(
+        child: const AnalysisProcessesPage(),
+      ),
     ),
   ],
 );
