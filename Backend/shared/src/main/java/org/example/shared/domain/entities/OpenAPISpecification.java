@@ -4,11 +4,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Domain entity for OpenAPI Specification
- * Represents an OpenAPI specification in the system
+ * Entity representing an OpenAPI specification
  */
 @Entity
-@Table(name = "open_api_specifications")
+@Table(name = "openapi_specifications")
 public class OpenAPISpecification {
 
     @Id
@@ -18,17 +17,23 @@ public class OpenAPISpecification {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
-    private String version;
+    @Column(length = 2000)
+    private String description;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(nullable = false)
+    @Lob
     private String content;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private String version = "3.0.0";
 
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private SpecificationStatus status = SpecificationStatus.DRAFT;
+
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private String createdBy;
+    private String lastModifiedBy;
 
     // Constructors
     public OpenAPISpecification() {
@@ -36,97 +41,47 @@ public class OpenAPISpecification {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public OpenAPISpecification(String title, String version, String content) {
+    public OpenAPISpecification(String title, String content) {
         this();
         this.title = title;
-        this.version = version;
         this.content = content;
-    }
-
-    // Business methods
-    public void updateContent(String content) {
-        this.content = content;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void updateVersion(String version) {
-        this.version = version;
-        this.updatedAt = LocalDateTime.now();
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getTitle() {
-        return title;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setTitle(String title) {
-        this.title = title;
-        this.updatedAt = LocalDateTime.now();
-    }
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
 
-    public String getVersion() {
-        return version;
-    }
+    public String getVersion() { return version; }
+    public void setVersion(String version) { this.version = version; }
 
-    public void setVersion(String version) {
-        this.version = version;
-        this.updatedAt = LocalDateTime.now();
-    }
+    public SpecificationStatus getStatus() { return status; }
+    public void setStatus(SpecificationStatus status) { this.status = status; }
 
-    public String getContent() {
-        return content;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public void setContent(String content) {
-        this.content = content;
-        this.updatedAt = LocalDateTime.now();
-    }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    public String getLastModifiedBy() { return lastModifiedBy; }
+    public void setLastModifiedBy(String lastModifiedBy) { this.lastModifiedBy = lastModifiedBy; }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OpenAPISpecification that = (OpenAPISpecification) o;
-        return id != null && id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "OpenAPISpecification{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", version='" + version + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
+    public enum SpecificationStatus {
+        DRAFT,
+        PUBLISHED,
+        DEPRECATED,
+        ARCHIVED
     }
 }

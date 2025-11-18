@@ -33,7 +33,7 @@ public class TestCaseController {
             java.time.Instant.now()
         );
 
-        return ResponseEntity.ok(ApiResponse.success(result, UUID.randomUUID().toString()));
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     // Inner DTOs

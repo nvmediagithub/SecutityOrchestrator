@@ -1,9 +1,9 @@
 package org.example.features.testdata.application;
 
-import org.example.shared.domain.entities.DataField;
-import org.example.shared.domain.entities.TestDataTemplate;
-import org.example.features.testdata.testdata.domain.DataType;
-import org.example.features.testdata.testdata.domain.FieldConstraint;
+import org.example.features.testdata.domain.DataField;
+import org.example.features.testdata.domain.TestDataTemplate;
+import org.example.features.testdata.domain.DataType;
+import org.example.features.testdata.domain.FieldConstraint;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class GenerateTestDataUseCase {
      * Generate test data based on a template
      */
     public GenerationResult generateFromTemplate(String templateId, GenerationRequest request) {
-        org.example.shared.domain.entities.TestDataTemplate template = templateRepository.findByTemplateId(templateId)
+        TestDataTemplate template = templateRepository.findByTemplateId(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("Template not found: " + templateId));
 
         if (!template.isActive()) {
@@ -60,7 +60,7 @@ public class GenerateTestDataUseCase {
      * Preview generated data without persisting
      */
     public GenerationResult previewGeneration(String templateId, GenerationRequest request) {
-        TestDataTemplate template = templateRepository.findByTemplateId(templateId)
+        org.example.features.testdata.domain.TestDataTemplate template = templateRepository.findByTemplateId(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("Template not found: " + templateId));
 
         return dataGenerationService.previewGeneration(template, request);

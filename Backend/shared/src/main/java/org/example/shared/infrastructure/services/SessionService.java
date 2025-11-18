@@ -2,6 +2,7 @@ package org.example.shared.infrastructure.services;
 
 import org.example.shared.common.ApiResponse;
 import org.example.shared.domain.entities.TestSession;
+import org.example.shared.domain.dto.test.TestSessionCreateRequest;
 
 import java.util.List;
 
@@ -90,30 +91,4 @@ public interface SessionService {
      */
     ApiResponse<TestSession> updateSessionProgress(Long id, int passed, int failed, int skipped, int total);
 
-    /**
-     * Request DTO for session creation/update
-     */
-    class TestSessionCreateRequest {
-        private String name;
-        private String description;
-        private String executor;
-
-        public TestSessionCreateRequest() {}
-
-        public TestSessionCreateRequest(String name, String description, String executor) {
-            this.name = name;
-            this.description = description;
-            this.executor = executor;
-        }
-
-        // Getters and setters
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-
-        public String getExecutor() { return executor; }
-        public void setExecutor(String executor) { this.executor = executor; }
-    }
 }

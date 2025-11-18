@@ -1,6 +1,6 @@
 package org.example.features.testdata.domain.repositories;
 
-import org.example.features.testdata.testdata.domain.TestDataTemplate;
+import org.example.features.testdata.domain.TestDataTemplate;
 
 import java.util.List;
 import java.util.Optional;
