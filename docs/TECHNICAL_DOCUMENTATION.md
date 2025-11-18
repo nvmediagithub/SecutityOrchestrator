@@ -309,14 +309,25 @@ components:
 
 #### Code Organization
 ```
-src/main/java/com/securityorchestrator/
-├── core/                          # Shared components
-├── features/                      # Feature modules
-│   ├── bpmn-processing/
-│   ├── api-testing/
-│   └── ai-test-generation/
-├── shared/                        # Cross-cutting concerns
-└── web/                          # Presentation layer
+Backend/
+├── app/                           # Main application entry point
+│   └── src/main/java/             # Application-specific logic
+├── features/                      # Feature modules (modular architecture)
+│   ├── analysis-pipeline/         # Integrated analysis workflows
+│   ├── bpmn/                      # BPMN processing and analysis
+│   ├── llm/                       # Large Language Model integration
+│   ├── llm-providers/             # LLM provider management
+│   ├── monitoring/                # System monitoring and metrics
+│   ├── openapi/                   # OpenAPI specification handling
+│   ├── orchestration/             # Workflow orchestration
+│   ├── testdata/                  # Test data generation
+│   └── workflow/                  # BPMN workflow processing
+├── shared/                        # Cross-cutting concerns and common utilities
+│   └── src/main/java/org/example/shared/
+│       ├── common/                # Common DTOs and utilities
+│       ├── domain/                # Shared domain entities
+│       └── infrastructure/        # Shared infrastructure services
+└── gradle configuration files
 ```
 
 #### Testing

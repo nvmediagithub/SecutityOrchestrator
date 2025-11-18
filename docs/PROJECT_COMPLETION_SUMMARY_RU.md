@@ -131,12 +131,25 @@ Comprehensive Testing
 ### Backend Сервисы
 ```
 Backend/
-├── SecurityOrchestratorLLMFinal.java (853 строки)
-├── LLM Integration Services
-├── Performance Monitoring
-├── WebSocket Controllers
-├── API Endpoints (/api/health, /api/llm/*)
-└── Error Handling & Recovery
+├── app/                           # Main application entry point
+│   └── SecurityOrchestratorLLMFinal.java (853 строки)
+├── features/                      # Modular architecture (9 feature modules)
+│   ├── analysis-pipeline/         # Integrated analysis workflows
+│   ├── bpmn/                      # BPMN processing and analysis
+│   ├── llm/                       # Large Language Model integration
+│   ├── llm-providers/             # LLM provider management
+│   ├── monitoring/                # System monitoring and metrics
+│   ├── openapi/                   # OpenAPI specification handling
+│   ├── orchestration/             # Workflow orchestration
+│   ├── testdata/                  # Test data generation
+│   └── workflow/                  # BPMN workflow processing
+├── shared/                        # Cross-cutting concerns and common utilities
+│   ├── LLM Integration Services
+│   ├── Performance Monitoring
+│   ├── WebSocket Controllers
+│   ├── API Endpoints (/api/health, /api/llm/*)
+│   └── Error Handling & Recovery
+└── gradle configuration files
 ```
 
 ### Frontend Интерфейсы
@@ -283,9 +296,12 @@ Documentation/
 3. **Professional веб-интерфейс** с real-time данными
 4. **100% production readiness** — система готова к продакшену
 5. **Comprehensive документация** для поддержки и развития
+6. **Модульная архитектура** — консолидированные Backend/features/, Backend/shared/, и Backend/app/
 
 ### 🚀 Готовность к Использованию
 Проект **полностью готов к демонстрации и продакшен использованию** с современным веб-интерфейсом, надежной backend архитектурой и оптимизированной локальной LLM.
+
+**Модульная Архитектура**: Проект теперь использует консолидированную структуру с 9 специализированными feature-модулями в `Backend/features/`, общими компонентами в `Backend/shared/`, и основным приложением в `Backend/app/`. Эта архитектура обеспечивает высокую поддерживаемость, масштабируемость и независимую разработку функций.
 
 ---
 

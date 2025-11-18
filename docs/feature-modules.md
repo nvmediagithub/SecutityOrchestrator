@@ -4,34 +4,45 @@
 
 The SecurityOrchestrator follows a feature-first modular architecture where each business capability is organized as an independent module. Each module follows clean architecture principles with clear separation between domain, application, and infrastructure layers.
 
-At the Java package level the feature modules are located under `app/src/main/java/org/example`:
+At the Java package level the feature modules are located under `Backend/features/`:
 
-- `org.example.bpmn` – BPMN parsing, analysis, and reporting
-- `org.example.openapi` – OpenAPI parsing, security analysis, and reporting
-- `org.example.llm` – LLM configuration, orchestration, and analysis
-- `org.example.testdata` – AI-powered test data generation and validation
-- `org.example.orchestration` – end-to-end workflow orchestration
-- `org.example.monitoring` – runtime monitoring and metrics
-- `org.example.shared` – cross-cutting concerns (configuration, common utilities, security)
+- `analysis-pipeline` – Integrated analysis workflows and comprehensive security testing
+- `bpmn` – BPMN processing, analysis, and reporting (`org.example.features.bpmn`)
+- `llm` – Large Language Model integration and management (`org.example.features.llm`)
+- `llm-providers` – LLM provider management and orchestration (`org.example.features.llm-providers`)
+- `monitoring` – System monitoring and metrics collection (`org.example.features.monitoring`)
+- `openapi` – OpenAPI specification handling and validation (`org.example.features.openapi`)
+- `orchestration` – End-to-end workflow orchestration (`org.example.features.orchestration`)
+- `testdata` – AI-powered test data generation and validation (`org.example.features.testdata`)
+- `workflow` – BPMN workflow processing and execution (`org.example.features.workflow`)
 
-New backend code should be placed under the appropriate feature package rather than in global layer-first packages.
+Shared components are located under `Backend/shared/` with package `org.example.shared` containing:
+- `common` – Common DTOs, utilities, and cross-cutting concerns
+- `domain` – Shared domain entities and business rules
+- `infrastructure` – Shared infrastructure services and adapters
+
+New backend code should be placed under the appropriate feature module in `Backend/features/` rather than in global layer-first packages.
 
 ```
-src/main/java/com/securityorchestrator/
-├── core/                          # Shared core components
-│   ├── domain/
-│   ├── application/
-│   └── infrastructure/
-├── features/                      # Feature-specific modules
-│   ├── bpmn-processing/
-│   ├── api-testing/
-│   ├── orchestration/
-│   └── ai-test-generation/
-└── shared/                        # Cross-cutting concerns
-    ├── config/
-    ├── security/
-    ├── monitoring/
-    └── common/
+Backend/
+├── app/                           # Main application entry point
+│   └── src/main/java/             # Application-specific logic
+├── features/                      # Feature modules (modular architecture)
+│   ├── analysis-pipeline/         # Integrated analysis workflows
+│   ├── bpmn/                      # BPMN processing and analysis
+│   ├── llm/                       # Large Language Model integration
+│   ├── llm-providers/             # LLM provider management
+│   ├── monitoring/                # System monitoring and metrics
+│   ├── openapi/                   # OpenAPI specification handling
+│   ├── orchestration/             # Workflow orchestration
+│   ├── testdata/                  # Test data generation
+│   └── workflow/                  # BPMN workflow processing
+├── shared/                        # Cross-cutting concerns and common utilities
+│   └── src/main/java/org/example/shared/
+│       ├── common/                # Common DTOs and utilities
+│       ├── domain/                # Shared domain entities
+│       └── infrastructure/        # Shared infrastructure services
+└── gradle configuration files
 ```
 
 ## Core Module
@@ -566,19 +577,23 @@ public class CrossFeatureEventHandler {
 ### Gradle Multi-Module Setup
 ```kotlin
 // settings.gradle.kts
-include("core")
-include("features:bpmn-processing")
-include("features:api-testing")
-include("features:orchestration")
-include("features:ai-test-generation")
+include("app")
 include("shared")
+include("features:analysis-pipeline")
+include("features:bpmn")
+include("features:llm")
+include("features:llm-providers")
+include("features:monitoring")
+include("features:openapi")
+include("features:orchestration")
+include("features:testdata")
+include("features:workflow")
 
 // features/orchestration/build.gradle.kts
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":features:bpmn-processing"))
-    implementation(project(":features:api-testing"))
     implementation(project(":shared"))
+    implementation(project(":features:bpmn"))
+    implementation(project(":features:openapi"))
 
     // External dependencies
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -592,3 +607,30 @@ This modular structure ensures:
 - **Independent deployment** and testing capabilities
 - **Clear dependency management**
 - **Scalability** as new features are added
+
+## Current Feature Module Status
+
+Following the recent architectural consolidation, the SecurityOrchestrator now implements a clean **Backend/features/**, **Backend/shared/**, and **Backend/app/** structure:
+
+### ✅ Consolidated Feature Modules
+- `analysis-pipeline/` - Integrated analysis workflows and comprehensive security testing
+- `bpmn/` - BPMN processing, analysis, and reporting (org.example.features.bpmn)
+- `llm/` - Large Language Model integration and management (org.example.features.llm)
+- `llm-providers/` - LLM provider management and orchestration (org.example.features.llm-providers)
+- `monitoring/` - System monitoring and metrics collection (org.example.features.monitoring)
+- `openapi/` - OpenAPI specification handling and validation (org.example.features.openapi)
+- `orchestration/` - End-to-end workflow orchestration (org.example.features.orchestration)
+- `testdata/` - AI-powered test data generation and validation (org.example.features.testdata)
+- `workflow/` - BPMN workflow processing and execution (org.example.features.workflow)
+
+### ✅ Shared Infrastructure
+- `Backend/shared/` - Cross-cutting concerns, common utilities, DTOs, and shared domain entities
+- `Backend/app/` - Main application entry point and configuration
+
+### ✅ Benefits Achieved
+- **Eliminated duplicated folder structures** across the codebase
+- **Consolidated feature-specific code** into dedicated modules
+- **Improved separation of concerns** with clear module boundaries
+- **Enhanced maintainability** through focused, cohesive modules
+- **Reduced coupling** between different business capabilities
+- **Better build performance** with independent module compilation
