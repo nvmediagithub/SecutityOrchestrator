@@ -1,0 +1,53 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../domain/check_connectivity_usecase.dart';
+import '../domain/connection_status.dart';
+import '../data/connectivity_service.dart';
+import '../data/connectivity_usecase_impl.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
+// Infrastructure providers
+final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
+  final connectivity = Connectivity();
+  const backendUrl = 'http://localhost:8090'; // Backend service URL (updated to 8090)
+  return ConnectivityServiceImpl(connectivity, backendUrl);
+});
+
+// Use case providers
+final checkConnectivityUseCaseProvider = Provider<CheckConnectivityUseCase>((ref) {
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  return CheckConnectivityUseCaseImpl(connectivityService);
+});
+
+final getConnectivityStatusUseCaseProvider = Provider<GetConnectivityStatusUseCase>((ref) {
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  return GetConnectivityStatusUseCaseImpl(connectivityService);
+});
+
+// State providers
+final connectivityStatusProvider = StreamProvider<ConnectionStatus>((ref) {
+  final useCase = ref.watch(getConnectivityStatusUseCaseProvider);
+  return useCase.execute();
+});
+
+// Notifier for manual connectivity checks
+final connectivityNotifierProvider =
+    NotifierProvider<ConnectivityNotifier, AsyncValue<ConnectionStatus>>(ConnectivityNotifier.new);
+
+class ConnectivityNotifier extends Notifier<AsyncValue<ConnectionStatus>> {
+  @override
+  AsyncValue<ConnectionStatus> build() {
+    checkConnectivity();
+    return const AsyncValue.loading();
+  }
+
+  Future<void> checkConnectivity() async {
+    state = const AsyncValue.loading();
+    try {
+      final useCase = ref.read(checkConnectivityUseCaseProvider);
+      final status = await useCase.execute();
+      state = AsyncValue.data(status);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+}
