@@ -4,6 +4,7 @@ import org.example.features.analysis-processes.domain.entities.AnalysisProcess;
 import org.example.features.analysis-processes.domain.repositories.AnalysisProcessRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +28,7 @@ public class AnalysisProcessService {
 
     public AnalysisProcess createProcess(AnalysisProcess process) {
         process.setId(UUID.randomUUID().toString());
+        ensureDefaults(process);
         return repository.save(process);
     }
 
@@ -34,6 +36,10 @@ public class AnalysisProcessService {
         Optional<AnalysisProcess> existingProcess = repository.findById(id);
         if (existingProcess.isPresent()) {
             updatedProcess.setId(id);
+            if (updatedProcess.getCreatedAt() == null) {
+                updatedProcess.setCreatedAt(existingProcess.get().getCreatedAt());
+            }
+            ensureDefaults(updatedProcess);
             return Optional.of(repository.save(updatedProcess));
         }
         return Optional.empty();
@@ -45,5 +51,17 @@ public class AnalysisProcessService {
             return true;
         }
         return false;
+    }
+
+    private void ensureDefaults(AnalysisProcess process) {
+        if (process.getCreatedAt() == null) {
+            process.setCreatedAt(LocalDateTime.now());
+        }
+        if (process.getStatus() == null || process.getStatus().isBlank()) {
+            process.setStatus("pending");
+        }
+        if (process.getType() == null || process.getType().isBlank()) {
+            process.setType("custom");
+        }
     }
 }

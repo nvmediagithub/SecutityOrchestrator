@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../analysis-processes/data/analysis_process_service.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../analysis-processes/di/analysis_processes_providers.dart';
 import '../../analysis-processes/domain/analysis_process.dart';
 
-// Provider for processes - assuming AnalysisProcessService is properly implemented
 final processesProvider = FutureProvider<List<AnalysisProcess>>((ref) async {
-  final service = ref.read(analysisProcessServiceProvider);
+  final service = ref.watch(analysisProcessServiceProvider);
   return service.getProcesses();
-});
-
-// Placeholder for analysisProcessServiceProvider - should be defined in analysis-processes feature
-final analysisProcessServiceProvider = Provider<AnalysisProcessService>((ref) {
-  throw UnimplementedError('AnalysisProcessService provider not implemented');
 });
 
 class ProcessesOverviewCard extends ConsumerWidget {
@@ -37,9 +32,7 @@ class ProcessesOverviewCard extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 TextButton.icon(
-                  onPressed: () {
-                    // TODO: Navigate to full processes page
-                  },
+                  onPressed: () => context.push('/processes'),
                   icon: const Icon(Icons.arrow_forward),
                   label: const Text('View All'),
                 ),
@@ -48,42 +41,45 @@ class ProcessesOverviewCard extends ConsumerWidget {
             const SizedBox(height: 16),
             processesAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Text('Error loading processes: $error'),
-              ),
+              error: (error, _) => Text('Error loading processes: $error'),
               data: (processes) {
-                final activeProcesses = processes.where((p) => p.status.isActive).toList();
+                final activeProcesses = processes
+                    .where((p) => p.status.isActive)
+                    .toList();
                 final recentProcesses = processes
                     .where((p) => p.status.isFinished)
                     .take(3)
                     .toList();
 
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Active Processes Section
                     if (activeProcesses.isNotEmpty) ...[
                       const Text(
                         'Active Processes',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      ...activeProcesses.map((process) => _buildProcessItem(process, context)),
-                    ] else ...[
+                      ...activeProcesses.map(
+                        (process) =>
+                            _ProcessListTile(process: process, ref: ref),
+                      ),
+                    ] else
                       const Text(
                         'No active processes',
                         style: TextStyle(color: Colors.grey),
                       ),
-                    ],
                     const SizedBox(height: 16),
-
-                    // Recent Activity Section
                     if (recentProcesses.isNotEmpty) ...[
                       const Text(
                         'Recent Activity',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      ...recentProcesses.map((process) => _buildProcessItem(process, context)),
+                      ...recentProcesses.map(
+                        (process) =>
+                            _ProcessListTile(process: process, ref: ref),
+                      ),
                     ],
                   ],
                 );
@@ -94,8 +90,16 @@ class ProcessesOverviewCard extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildProcessItem(AnalysisProcess process, BuildContext context) {
+class _ProcessListTile extends StatelessWidget {
+  final AnalysisProcess process;
+  final WidgetRef ref;
+
+  const _ProcessListTile({required this.process, required this.ref});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -106,16 +110,8 @@ class ProcessesOverviewCard extends ConsumerWidget {
       child: Row(
         children: [
           Icon(
-            process.status == ProcessStatus.running
-                ? Icons.play_arrow
-                : process.status == ProcessStatus.completed
-                    ? Icons.check_circle
-                    : Icons.error,
-            color: process.status == ProcessStatus.running
-                ? Colors.blue
-                : process.status == ProcessStatus.completed
-                    ? Colors.green
-                    : Colors.red,
+            _statusIcon(process.status),
+            color: _statusColor(process.status),
             size: 20,
           ),
           const SizedBox(width: 12),
@@ -128,22 +124,22 @@ class ProcessesOverviewCard extends ConsumerWidget {
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  '${process.type.displayName} • ${process.status.displayName}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
+                  '${process.type.displayName} - ${process.status.displayName}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
               ],
             ),
           ),
-          if (process.status.isFinished)
+          if (process.status.isFinished && process.id != null)
             IconButton(
               icon: const Icon(Icons.delete, size: 20),
               onPressed: () async {
-                final confirmed = await _showDeleteConfirmationDialog(context, process);
+                final confirmed = await _showDeleteConfirmationDialog(
+                  context,
+                  process,
+                );
                 if (confirmed == true) {
-                  // TODO: Implement delete functionality
+                  await _deleteProcess(context, process);
                 }
               },
             ),
@@ -152,7 +148,55 @@ class ProcessesOverviewCard extends ConsumerWidget {
     );
   }
 
-  Future<bool?> _showDeleteConfirmationDialog(BuildContext context, AnalysisProcess process) {
+  IconData _statusIcon(ProcessStatus status) {
+    switch (status) {
+      case ProcessStatus.running:
+        return Icons.play_arrow;
+      case ProcessStatus.completed:
+        return Icons.check_circle;
+      case ProcessStatus.failed:
+        return Icons.error;
+      case ProcessStatus.pending:
+        return Icons.schedule;
+    }
+  }
+
+  Color _statusColor(ProcessStatus status) {
+    switch (status) {
+      case ProcessStatus.running:
+        return Colors.blue;
+      case ProcessStatus.completed:
+        return Colors.green;
+      case ProcessStatus.failed:
+        return Colors.red;
+      case ProcessStatus.pending:
+        return Colors.orange;
+    }
+  }
+
+  Future<void> _deleteProcess(
+    BuildContext context,
+    AnalysisProcess process,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final service = ref.read(analysisProcessServiceProvider);
+    try {
+      await service.deleteProcess(process.id!);
+      ref.invalidate(processesProvider);
+      messenger.showSnackBar(
+        SnackBar(content: Text('Process "${process.name}" deleted')),
+      );
+    } catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Failed to delete process: $error')),
+      );
+    }
+  }
+
+  Future<bool?> _showDeleteConfirmationDialog(
+    BuildContext context,
+    AnalysisProcess process,
+  ) {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

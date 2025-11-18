@@ -1,59 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../di/monitoring_providers.dart';
 import '../domain/models/metric.dart';
-
-// Placeholder provider for metrics - should be implemented with actual service
-final metricsProvider = NotifierProvider<MetricsNotifier, List<Metric>>(() {
-  return MetricsNotifier();
-});
-
-class MetricsNotifier extends Notifier<List<Metric>> {
-  @override
-  List<Metric> build() {
-    // Initialize with sample data
-    loadMetrics();
-    return [];
-  }
-
-  void loadMetrics() {
-    state = [
-      Metric(
-        id: '1',
-        name: 'Response Time',
-        type: MetricType.responseTime,
-        value: 245.5,
-        unit: 'ms',
-        timestamp: DateTime.now(),
-        description: 'Average response time',
-      ),
-      Metric(
-        id: '2',
-        name: 'Throughput',
-        type: MetricType.networkIo,
-        value: 1234.0,
-        unit: 'req/s',
-        timestamp: DateTime.now(),
-        description: 'Requests per second',
-      ),
-      Metric(
-        id: '3',
-        name: 'Error Rate',
-        type: MetricType.cpuUsage,
-        value: 0.5,
-        unit: '%',
-        timestamp: DateTime.now(),
-        description: 'Percentage of failed requests',
-      ),
-    ];
-  }
-}
 
 class MetricsList extends ConsumerWidget {
   const MetricsList({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final metrics = ref.watch(metricsProvider);
+    final metricsAsync = ref.watch(metricsProvider);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -62,18 +18,21 @@ class MetricsList extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Key Metrics',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('Key Metrics', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
-            if (metrics.isNotEmpty) ...[
-              ...metrics.map((metric) => _buildMetricItem(metric)),
-            ] else
-              const Text(
-                'No metrics available',
-                style: TextStyle(color: Colors.grey),
+            metricsAsync.when(
+              data: (metrics) => metrics.isNotEmpty
+                  ? Column(children: metrics.map(_buildMetricItem).toList())
+                  : const Text(
+                      'No metrics available',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Text(
+                'Failed to load metrics: $error',
+                style: const TextStyle(color: Colors.redAccent),
               ),
+            ),
           ],
         ),
       ),
@@ -109,11 +68,7 @@ class MetricsList extends ConsumerWidget {
               ],
             ),
           ),
-          Icon(
-            Icons.trending_up,
-            color: Colors.green,
-            size: 20,
-          ),
+          Icon(Icons.trending_up, color: Colors.green, size: 20),
         ],
       ),
     );

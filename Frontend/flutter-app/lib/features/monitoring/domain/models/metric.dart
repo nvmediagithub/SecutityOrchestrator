@@ -1,10 +1,4 @@
-enum MetricType {
-  cpuUsage,
-  memoryUsage,
-  diskUsage,
-  networkIo,
-  responseTime,
-}
+enum MetricType { cpuUsage, memoryUsage, diskUsage, networkIo, responseTime }
 
 class Metric {
   final String id;
@@ -30,12 +24,14 @@ class Metric {
       id: json['id'] as String,
       name: json['name'] as String,
       type: MetricType.values.firstWhere(
-        (e) => e.name == (json['type'] as String).toLowerCase().replaceAll('_', ''),
+        (e) =>
+            e.name ==
+            (json['type'] as String).toLowerCase().replaceAll('_', ''),
       ),
       value: (json['value'] as num).toDouble(),
       unit: json['unit'] as String,
       timestamp: DateTime.parse(json['timestamp'] as String),
-      description: json['description'] as String,
+      description: (json['description'] ?? json['tags'] ?? '') as String,
     );
   }
 
@@ -44,13 +40,14 @@ class Metric {
       'id': id,
       'name': name,
       'type': type.name.toUpperCase().replaceAllMapped(
-            RegExp(r'([a-z])([A-Z])'),
-            (match) => '${match.group(1)}_${match.group(2)}',
-          ),
+        RegExp(r'([a-z])([A-Z])'),
+        (match) => '${match.group(1)}_${match.group(2)}',
+      ),
       'value': value,
       'unit': unit,
       'timestamp': timestamp.toIso8601String(),
       'description': description,
+      'tags': description,
     };
   }
 }

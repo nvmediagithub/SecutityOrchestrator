@@ -1,67 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../di/monitoring_providers.dart';
 import '../domain/models/alert.dart';
-
-// Placeholder provider for alerts - should be implemented with actual service
-final alertsProvider = NotifierProvider<AlertsNotifier, List<Alert>>(() {
-  return AlertsNotifier();
-});
-
-class AlertsNotifier extends Notifier<List<Alert>> {
-  @override
-  List<Alert> build() {
-    // Initialize with sample data
-    return [
-      Alert(
-        id: '1',
-        title: 'High CPU Usage',
-        description: 'CPU usage has exceeded 80% for the last 5 minutes',
-        severity: AlertSeverity.high,
-        status: AlertStatus.active,
-        source: 'System Monitor',
-        createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
-        tags: 'performance,cpu',
-      ),
-      Alert(
-        id: '2',
-        title: 'Disk Space Low',
-        description: 'Available disk space is below 10%',
-        severity: AlertSeverity.medium,
-        status: AlertStatus.active,
-        source: 'Storage Monitor',
-        createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-        tags: 'storage,disk',
-      ),
-    ];
-  }
-
-  void acknowledgeAlert(String alertId) {
-    state = state.map((alert) {
-      if (alert.id == alertId) {
-        return Alert(
-          id: alert.id,
-          title: alert.title,
-          description: alert.description,
-          severity: alert.severity,
-          status: AlertStatus.resolved,
-          source: alert.source,
-          createdAt: alert.createdAt,
-          resolvedAt: DateTime.now(),
-          tags: alert.tags,
-        );
-      }
-      return alert;
-    }).toList();
-  }
-}
 
 class AlertsList extends ConsumerWidget {
   const AlertsList({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final alerts = ref.watch(alertsProvider);
-    final alertsNotifier = ref.read(alertsProvider.notifier);
+    final alertsAsync = ref.watch(alertsProvider);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -77,27 +25,36 @@ class AlertsList extends ConsumerWidget {
                   'Active Alerts',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                Text(
-                  '${alerts.where((a) => a.status == AlertStatus.active).length} active',
-                  style: TextStyle(color: Colors.grey.shade600),
+                alertsAsync.maybeWhen(
+                  data: (alerts) => Text(
+                    '${alerts.where((a) => a.status == AlertStatus.active).length} active',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                  orElse: () => const SizedBox.shrink(),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            if (alerts.isNotEmpty) ...[
-              ...alerts.map((alert) => _buildAlertItem(alert, alertsNotifier)),
-            ] else
-              const Text(
-                'No active alerts',
-                style: TextStyle(color: Colors.grey),
+            alertsAsync.when(
+              data: (alerts) => alerts.isNotEmpty
+                  ? Column(children: alerts.map(_buildAlertItem).toList())
+                  : const Text(
+                      'No active alerts',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Text(
+                'Failed to load alerts: $error',
+                style: const TextStyle(color: Colors.redAccent),
               ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAlertItem(Alert alert, AlertsNotifier notifier) {
+  Widget _buildAlertItem(Alert alert) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -108,11 +65,7 @@ class AlertsList extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            alert.icon,
-            color: alert.color,
-            size: 24,
-          ),
+          Icon(alert.icon, color: alert.color, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -126,15 +79,6 @@ class AlertsList extends ConsumerWidget {
                         style: const TextStyle(fontWeight: FontWeight.w500),
                       ),
                     ),
-                    if (!alert.isAcknowledged)
-                      TextButton(
-                        onPressed: () => notifier.acknowledgeAlert(alert.id),
-                        child: const Text('Acknowledge'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: alert.color,
-                          textStyle: const TextStyle(fontSize: 12),
-                        ),
-                      ),
                   ],
                 ),
                 Text(

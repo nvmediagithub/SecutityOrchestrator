@@ -1,27 +1,32 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../domain/check_connectivity_usecase.dart';
-import '../domain/connection_status.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
+import '../../../core/providers.dart';
 import '../data/connectivity_service.dart';
 import '../data/connectivity_usecase_impl.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+import '../domain/check_connectivity_usecase.dart';
+import '../domain/connection_status.dart';
 
 // Infrastructure providers
 final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
   final connectivity = Connectivity();
-  const backendUrl = 'http://localhost:8090'; // Backend service URL (updated to 8090)
+  final backendUrl = ref.watch(backendBaseUrlProvider);
   return ConnectivityServiceImpl(connectivity, backendUrl);
 });
 
 // Use case providers
-final checkConnectivityUseCaseProvider = Provider<CheckConnectivityUseCase>((ref) {
+final checkConnectivityUseCaseProvider = Provider<CheckConnectivityUseCase>((
+  ref,
+) {
   final connectivityService = ref.watch(connectivityServiceProvider);
   return CheckConnectivityUseCaseImpl(connectivityService);
 });
 
-final getConnectivityStatusUseCaseProvider = Provider<GetConnectivityStatusUseCase>((ref) {
-  final connectivityService = ref.watch(connectivityServiceProvider);
-  return GetConnectivityStatusUseCaseImpl(connectivityService);
-});
+final getConnectivityStatusUseCaseProvider =
+    Provider<GetConnectivityStatusUseCase>((ref) {
+      final connectivityService = ref.watch(connectivityServiceProvider);
+      return GetConnectivityStatusUseCaseImpl(connectivityService);
+    });
 
 // State providers
 final connectivityStatusProvider = StreamProvider<ConnectionStatus>((ref) {
@@ -31,7 +36,9 @@ final connectivityStatusProvider = StreamProvider<ConnectionStatus>((ref) {
 
 // Notifier for manual connectivity checks
 final connectivityNotifierProvider =
-    NotifierProvider<ConnectivityNotifier, AsyncValue<ConnectionStatus>>(ConnectivityNotifier.new);
+    NotifierProvider<ConnectivityNotifier, AsyncValue<ConnectionStatus>>(
+      ConnectivityNotifier.new,
+    );
 
 class ConnectivityNotifier extends Notifier<AsyncValue<ConnectionStatus>> {
   @override

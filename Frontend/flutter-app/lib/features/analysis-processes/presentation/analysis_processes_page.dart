@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/analysis_process_service.dart';
+import '../di/analysis_processes_providers.dart';
 import '../domain/analysis_process.dart';
 import '../domain/create_analysis_process_usecase.dart';
 import 'create_process_dialog.dart';
@@ -10,7 +11,8 @@ class AnalysisProcessesPage extends ConsumerStatefulWidget {
   const AnalysisProcessesPage({super.key});
 
   @override
-  ConsumerState<AnalysisProcessesPage> createState() => _AnalysisProcessesPageState();
+  ConsumerState<AnalysisProcessesPage> createState() =>
+      _AnalysisProcessesPageState();
 }
 
 class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
@@ -34,7 +36,8 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
 
     final result = await showDialog<AnalysisProcess>(
       context: context,
-      builder: (context) => CreateProcessDialog(createProcessUseCase: createUseCase),
+      builder: (context) =>
+          CreateProcessDialog(createProcessUseCase: createUseCase),
     );
 
     if (result != null) {
@@ -102,22 +105,24 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
                     title: Text(process.name),
-                    subtitle: Text('${process.type.displayName} - ${process.status.displayName}'),
+                    subtitle: Text(
+                      '${process.type.displayName} - ${process.status.displayName}',
+                    ),
                     trailing: Icon(
                       process.status == ProcessStatus.running
                           ? Icons.play_arrow
                           : process.status == ProcessStatus.completed
-                              ? Icons.check_circle
-                              : process.status == ProcessStatus.failed
-                                  ? Icons.error
-                                  : Icons.schedule,
+                          ? Icons.check_circle
+                          : process.status == ProcessStatus.failed
+                          ? Icons.error
+                          : Icons.schedule,
                       color: process.status == ProcessStatus.running
                           ? Colors.blue
                           : process.status == ProcessStatus.completed
-                              ? Colors.green
-                              : process.status == ProcessStatus.failed
-                                  ? Colors.red
-                                  : Colors.grey,
+                          ? Colors.green
+                          : process.status == ProcessStatus.failed
+                          ? Colors.red
+                          : Colors.grey,
                     ),
                     onTap: () {
                       // TODO: Navigate to process details
@@ -137,12 +142,3 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
     );
   }
 }
-
-// Placeholder providers - these need to be defined in a provider file
-final analysisProcessServiceProvider = Provider<AnalysisProcessService>((ref) {
-  throw UnimplementedError('AnalysisProcessService provider not implemented');
-});
-
-final createAnalysisProcessUseCaseProvider = Provider<CreateAnalysisProcessUseCase>((ref) {
-  throw UnimplementedError('CreateAnalysisProcessUseCase provider not implemented');
-});
