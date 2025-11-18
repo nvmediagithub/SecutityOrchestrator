@@ -1,7 +1,7 @@
-package org.example.features.analysis-processes.domain.services;
+package org.example.features.analysis_processes.domain.services;
 
-import org.example.features.analysis-processes.domain.entities.AnalysisProcess;
-import org.example.features.analysis-processes.domain.repositories.AnalysisProcessRepository;
+import org.example.features.analysis_processes.domain.entities.AnalysisProcess;
+import org.example.features.analysis_processes.domain.repositories.AnalysisProcessRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

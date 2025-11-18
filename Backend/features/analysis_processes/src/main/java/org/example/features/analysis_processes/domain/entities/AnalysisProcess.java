@@ -1,4 +1,4 @@
-package org.example.features.analysis-processes.domain.entities;
+package org.example.features.analysis_processes.domain.entities;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,6 @@
-package org.example.features.analysis-processes.domain.repositories;
+package org.example.features.analysis_processes.domain.repositories;
 
-import org.example.features.analysis-processes.domain.entities.AnalysisProcess;
+import org.example.features.analysis_processes.domain.entities.AnalysisProcess;
 import java.util.List;
 import java.util.Optional;
 

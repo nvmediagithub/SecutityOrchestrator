@@ -16,7 +16,7 @@ rootProject.name = "Backend"
 include("shared")
 include("features:llm-providers")
 include("features:analysis_pipeline")
-include("features:analysis-processes")
+include("features:analysis_processes")
 include("features:llm")
 include("features:bpmn")
 include("features:openapi_module")

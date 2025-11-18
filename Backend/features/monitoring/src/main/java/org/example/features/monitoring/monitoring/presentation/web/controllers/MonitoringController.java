@@ -51,9 +51,9 @@ public class MonitoringController {
 
     @GetMapping("/metrics")
     public CompletableFuture<ResponseEntity<ApiResponse<List<MetricResponse>>>> getMetrics(
-            @RequestParam(required = false) MetricType type,
-            @RequestParam(required = false) LocalDateTime startTime,
-            @RequestParam(required = false) LocalDateTime endTime) {
+            @RequestParam(name = "type", required = false) MetricType type,
+            @RequestParam(name = "startTime", required = false) LocalDateTime startTime,
+            @RequestParam(name = "endTime", required = false) LocalDateTime endTime) {
 
         LocalDateTime effectiveStart = startTime != null ? startTime : LocalDateTime.now().minusHours(1);
         LocalDateTime effectiveEnd = endTime != null ? endTime : LocalDateTime.now();
@@ -71,7 +71,7 @@ public class MonitoringController {
 
     @GetMapping("/alerts")
     public CompletableFuture<ResponseEntity<ApiResponse<List<AlertResponse>>>> getAlerts(
-            @RequestParam(required = false) AlertStatus status) {
+            @RequestParam(name = "status", required = false) AlertStatus status) {
         return getAlertsUseCase.execute(status)
             .thenApply(alerts -> alerts.stream()
                 .map(this::mapToAlertResponse)

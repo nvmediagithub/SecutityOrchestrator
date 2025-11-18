@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":shared"))
     implementation(project(":features:llm-providers"))
     implementation(project(":features:analysis_pipeline"))
+    implementation(project(":features:analysis_processes"))
     implementation(project(":features:llm"))
     implementation(project(":features:bpmn"))
     implementation(project(":features:openapi_module"))

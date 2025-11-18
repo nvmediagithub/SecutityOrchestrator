@@ -1,7 +1,7 @@
-package org.example.features.analysis-processes.application.web.controllers;
+package org.example.features.analysis_processes.application.web.controllers;
 
-import org.example.features.analysis-processes.domain.entities.AnalysisProcess;
-import org.example.features.analysis-processes.domain.services.AnalysisProcessService;
+import org.example.features.analysis_processes.domain.entities.AnalysisProcess;
+import org.example.features.analysis_processes.domain.services.AnalysisProcessService;
 import org.example.shared.common.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
