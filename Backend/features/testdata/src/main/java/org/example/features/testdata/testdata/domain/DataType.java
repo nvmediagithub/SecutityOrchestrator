@@ -1,4 +1,4 @@
-package org.example.features.testdata.domain;
+package org.example.features.testdata.testdata.domain;
 
 /**
  * Value object representing different data types for test data generation

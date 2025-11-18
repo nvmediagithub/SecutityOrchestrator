@@ -1,4 +1,4 @@
-package org.example.features.testdata.presentation;
+package org.example.features.testdata.testdata.presentation;
 
 import org.example.features.testdata.application.GenerateTestDataUseCase;
 import org.springframework.http.ResponseEntity;

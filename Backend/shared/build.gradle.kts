@@ -19,6 +19,8 @@ dependencies {
     annotationProcessor(libs.lombok)
     compileOnly(libs.jackson.databind)
     compileOnly(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter.validation)
+    implementation(libs.jakarta.persistence.api)
 
     // Testing
     testImplementation(libs.spring.boot.starter.test)

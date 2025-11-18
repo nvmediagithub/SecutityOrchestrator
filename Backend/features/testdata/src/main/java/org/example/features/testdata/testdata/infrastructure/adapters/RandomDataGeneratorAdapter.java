@@ -1,7 +1,10 @@
-package org.example.features.testdata.infrastructure.adapters;
+package org.example.features.testdata.testdata.infrastructure.adapters;
 
 import org.example.features.testdata.application.GenerateTestDataUseCase;
-import org.example.features.testdata.domain.*;
+import org.example.shared.domain.entities.DataField;
+import org.example.shared.domain.entities.TestDataTemplate;
+import org.example.features.testdata.testdata.domain.DataType;
+import org.example.features.testdata.testdata.domain.*;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;

@@ -1,6 +1,9 @@
-package org.example.features.testdata.application;
+package org.example.features.testdata.testdata.application;
 
-import org.example.features.testdata.domain.*;
+import org.example.shared.domain.entities.DataField;
+import org.example.shared.domain.entities.TestDataTemplate;
+import org.example.features.testdata.testdata.domain.DataType;
+import org.example.features.testdata.testdata.domain.FieldConstraint;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,13 +15,13 @@ import java.util.Map;
 @Service
 public class GenerateTestDataUseCase {
 
-    private final DataGenerationService dataGenerationService;
-    private final TestDataTemplateRepository templateRepository;
-    private final DataFieldRepository fieldRepository;
+    private final org.example.features.testdata.domain.services.DataGenerationService dataGenerationService;
+    private final org.example.features.testdata.domain.repositories.TestDataTemplateRepository templateRepository;
+    private final org.example.features.testdata.domain.repositories.DataFieldRepository fieldRepository;
 
-    public GenerateTestDataUseCase(DataGenerationService dataGenerationService,
-                                   TestDataTemplateRepository templateRepository,
-                                   DataFieldRepository fieldRepository) {
+    public GenerateTestDataUseCase(org.example.features.testdata.domain.services.DataGenerationService dataGenerationService,
+                                   org.example.features.testdata.domain.repositories.TestDataTemplateRepository templateRepository,
+                                   org.example.features.testdata.domain.repositories.DataFieldRepository fieldRepository) {
         this.dataGenerationService = dataGenerationService;
         this.templateRepository = templateRepository;
         this.fieldRepository = fieldRepository;
@@ -28,7 +31,7 @@ public class GenerateTestDataUseCase {
      * Generate test data based on a template
      */
     public GenerationResult generateFromTemplate(String templateId, GenerationRequest request) {
-        TestDataTemplate template = templateRepository.findByTemplateId(templateId)
+        org.example.shared.domain.entities.TestDataTemplate template = templateRepository.findByTemplateId(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("Template not found: " + templateId));
 
         if (!template.isActive()) {

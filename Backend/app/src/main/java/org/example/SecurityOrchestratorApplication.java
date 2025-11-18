@@ -32,8 +32,10 @@ public class SecurityOrchestratorApplication {
                 // LLM API endpoints
                 registry.addMapping("/api/llm/**")
                     .allowedOriginPatterns(
+                        "http://localhost:3000",  // Frontend server
                         "http://localhost:4200",  // Flutter dev server
                         "http://localhost:*",     // Any localhost port
+                        "http://127.0.0.1:3000", // Alternative localhost
                         "http://127.0.0.1:4200", // Alternative localhost
                         "http://127.0.0.1:*"     // Any localhost port alternative
                     )
@@ -45,8 +47,10 @@ public class SecurityOrchestratorApplication {
                 // General API endpoints
                 registry.addMapping("/api/**")
                     .allowedOriginPatterns(
+                        "http://localhost:3000",  // Frontend server
                         "http://localhost:4200",
                         "http://localhost:*",
+                        "http://127.0.0.1:3000", // Alternative localhost
                         "http://127.0.0.1:4200",
                         "http://127.0.0.1:*"
                     )
@@ -58,8 +62,10 @@ public class SecurityOrchestratorApplication {
                 // WebSocket endpoints
                 registry.addMapping("/ws/**")
                     .allowedOriginPatterns(
+                        "http://localhost:3000",  // Frontend server
                         "http://localhost:4200",
                         "http://localhost:*",
+                        "http://127.0.0.1:3000", // Alternative localhost
                         "http://127.0.0.1:4200",
                         "http://127.0.0.1:*"
                     )
@@ -70,8 +76,10 @@ public class SecurityOrchestratorApplication {
                 // Actuator endpoints (for health checks)
                 registry.addMapping("/actuator/**")
                     .allowedOriginPatterns(
+                        "http://localhost:3000",  // Frontend server
                         "http://localhost:4200",
                         "http://localhost:*",
+                        "http://127.0.0.1:3000", // Alternative localhost
                         "http://127.0.0.1:4200",
                         "http://127.0.0.1:*"
                     )

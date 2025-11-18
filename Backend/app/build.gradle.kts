@@ -19,10 +19,10 @@ repositories {
 dependencies {
     implementation(project(":shared"))
     implementation(project(":features:llm-providers"))
-    implementation(project(":features:analysis-pipeline"))
+    implementation(project(":features:analysis_pipeline"))
     implementation(project(":features:llm"))
     implementation(project(":features:bpmn"))
-    implementation(project(":features:openapi"))
+    implementation(project(":features:openapi_module"))
     implementation(project(":features:testdata"))
     implementation(project(":features:orchestration"))
     implementation(project(":features:monitoring"))

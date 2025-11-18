@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":shared"))
     implementation(project(":features:llm-providers"))
     implementation(libs.spring.boot.starter)
+    implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.jackson.databind)
     compileOnly(libs.lombok)

@@ -15,10 +15,10 @@ rootProject.name = "Backend"
 // Feature modules
 include("shared")
 include("features:llm-providers")
-include("features:analysis-pipeline")
+include("features:analysis_pipeline")
 include("features:llm")
 include("features:bpmn")
-include("features:openapi")
+include("features:openapi_module")
 include("features:testdata")
 include("features:orchestration")
 include("features:monitoring")

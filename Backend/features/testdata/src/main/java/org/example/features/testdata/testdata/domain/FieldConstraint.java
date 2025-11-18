@@ -1,4 +1,4 @@
-package org.example.features.testdata.domain;
+package org.example.features.testdata.testdata.domain;
 
 import java.util.regex.Pattern;
 

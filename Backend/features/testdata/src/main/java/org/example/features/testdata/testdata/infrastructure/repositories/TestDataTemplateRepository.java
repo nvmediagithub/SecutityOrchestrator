@@ -1,6 +1,6 @@
-package org.example.features.testdata.infrastructure.repositories;
+package org.example.features.testdata.testdata.infrastructure.repositories;
 
-import org.example.features.testdata.domain.TestDataTemplate;
+import org.example.features.testdata.testdata.domain.TestDataTemplate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

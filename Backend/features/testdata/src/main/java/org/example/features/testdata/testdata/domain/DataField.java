@@ -1,4 +1,4 @@
-package org.example.features.testdata.domain;
+package org.example.features.testdata.testdata.domain;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

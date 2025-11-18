@@ -2,9 +2,9 @@ package org.example.features.testdata.application.web.controllers;
 
 import org.example.shared.common.ApiResponse;
 import org.example.shared.domain.entities.TestProject;
-import org.example.domain.dto.test.TestProjectCreateRequest;
+import org.example.shared.domain.dto.test.TestProjectCreateRequest;
 import org.example.shared.core.valueobjects.Version;
-import org.example.infrastructure.services.ProjectService;
+import org.example.features.testdata.domain.services.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
