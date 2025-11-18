@@ -1,9 +1,9 @@
 package org.example.features.openapi_module.infrastructure.adapters;
 
-import org.example.features.openapi_module.domain.entities.OpenAPISpecification;
-import org.example.features.openapi_module.domain.entities.ValidationError;
-import org.example.features.openapi_module.domain.entities.ValidationResult;
-import org.example.features.openapi_module.domain.entities.ValidationSummary;
+import org.example.features.openapi.domain.entities.OpenAPISpecification;
+import org.example.features.openapi.domain.entities.ValidationError;
+import org.example.features.openapi.domain.entities.ValidationResult;
+import org.example.features.openapi.domain.entities.ValidationSummary;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;

@@ -1,7 +1,7 @@
 package org.example.features.openapi_module.infrastructure.adapters;
 
 import org.example.features.openapi_module.application.usecases.AnalyzeOpenAPISpecUseCase;
-import org.example.features.openapi_module.domain.entities.OpenAPISpecification;
+import org.example.features.openapi.domain.entities.OpenAPISpecification;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;

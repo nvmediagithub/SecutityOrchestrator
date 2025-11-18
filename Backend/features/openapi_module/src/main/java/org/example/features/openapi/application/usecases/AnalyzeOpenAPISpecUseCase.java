@@ -1,6 +1,6 @@
 package org.example.features.openapi_module.application.usecases;
 
-import org.example.features.openapi_module.domain.entities.OpenAPISpecification;
+import org.example.features.openapi.domain.entities.OpenAPISpecification;
 import java.util.Map;
 
 /**
