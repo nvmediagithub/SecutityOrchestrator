@@ -7,7 +7,6 @@ import '../data/create_analysis_process_usecase_impl.dart';
 import '../domain/analysis_process.dart';
 import '../domain/create_analysis_process_usecase.dart';
 import '../domain/analysis_session.dart';
-import '../presentation/controllers/analysis_session_controller.dart';
 
 final analysisProcessServiceProvider = Provider<AnalysisProcessService>((ref) {
   final client = ref.watch(httpClientProvider);
@@ -35,12 +34,10 @@ final analysisSessionServiceProvider = Provider<AnalysisSessionService>((ref) {
   return AnalysisSessionService(client, baseUrl);
 });
 
-final analysisSessionControllerProvider =
-    AutoDisposeStateNotifierProviderFamily<
-      AnalysisSessionController,
-      AsyncValue<AnalysisSession?>,
-      String
-    >((ref, processId) {
-  final service = ref.watch(analysisSessionServiceProvider);
-  return AnalysisSessionController(service, processId);
-});
+final analysisSessionProvider =
+    FutureProvider.autoDispose.family<AnalysisSession?, String>(
+  (ref, processId) async {
+    final service = ref.watch(analysisSessionServiceProvider);
+    return service.getLatestSession(processId);
+  },
+);

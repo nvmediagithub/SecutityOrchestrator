@@ -21,7 +21,7 @@ class AnalysisSessionSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionState = ref.watch(
-      analysisSessionControllerProvider(processId),
+      analysisSessionProvider(processId),
     );
 
     return Card(
@@ -39,11 +39,8 @@ class AnalysisSessionSection extends ConsumerWidget {
                 const Spacer(),
                 IconButton(
                   tooltip: 'Refresh status',
-                  onPressed: () => ref
-                      .read(
-                        analysisSessionControllerProvider(processId).notifier,
-                      )
-                      .loadLatest(),
+                  onPressed: () =>
+                      ref.invalidate(analysisSessionProvider(processId)),
                   icon: const Icon(Icons.refresh),
                 ),
               ],
@@ -65,11 +62,8 @@ class AnalysisSessionSection extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   FilledButton(
-                    onPressed: () => ref
-                        .read(
-                          analysisSessionControllerProvider(processId).notifier,
-                        )
-                        .loadLatest(),
+                    onPressed: () =>
+                        ref.invalidate(analysisSessionProvider(processId)),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -95,10 +89,22 @@ class _AnalysisSessionBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(
-      analysisSessionControllerProvider(processId).notifier,
-    );
     final messenger = ScaffoldMessenger.of(context);
+    final sessionService = ref.read(analysisSessionServiceProvider);
+
+    Future<void> runSessionAction(
+      Future<void> Function() action,
+      String errorMessage,
+    ) async {
+      try {
+        await action();
+        ref.invalidate(analysisSessionProvider(processId));
+      } catch (error) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('$errorMessage: $error')),
+        );
+      }
+    }
 
     if (session == null) {
       return Column(
@@ -112,15 +118,10 @@ class _AnalysisSessionBody extends ConsumerWidget {
           const SizedBox(height: 12),
           FilledButton(
             onPressed: canStart
-                ? () async {
-                    try {
-                      await controller.startAnalysis();
-                    } catch (error) {
-                      messenger.showSnackBar(
-                        SnackBar(content: Text('Не удалось запустить: $error')),
-                      );
-                    }
-                  }
+                ? () => runSessionAction(
+                      () async => sessionService.startSession(processId),
+                      'Не удалось запустить',
+                    )
                 : null,
             child: const Text('Начать анализ'),
           ),
@@ -147,19 +148,10 @@ class _AnalysisSessionBody extends ConsumerWidget {
             if (session!.status == AnalysisSessionStatus.completed)
               TextButton(
                 onPressed: canStart
-                    ? () async {
-                        try {
-                          await controller.startAnalysis();
-                        } catch (error) {
-                          messenger.showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Не удалось запустить новый анализ: $error',
-                              ),
-                            ),
-                          );
-                        }
-                      }
+                    ? () => runSessionAction(
+                          () async => sessionService.startSession(processId),
+                          'Не удалось запустить новый анализ',
+                        )
                     : null,
                 child: const Text('Запустить заново'),
               ),
@@ -176,33 +168,18 @@ class _AnalysisSessionBody extends ConsumerWidget {
         _AnalysisActions(
           session: session!,
           currentStep: currentStep,
-          onSubmitInputs: (inputs) async {
-            try {
-              await controller.submitInputs(inputs);
-            } catch (error) {
-              messenger.showSnackBar(
-                SnackBar(content: Text('Ошибка отправки данных: $error')),
-              );
-            }
-          },
-          onCompleteLlm: () async {
-            try {
-              await controller.completeLlmStep();
-            } catch (error) {
-              messenger.showSnackBar(
-                SnackBar(content: Text('Ошибка генерации плана: $error')),
-              );
-            }
-          },
-          onSubmitTest: (result) async {
-            try {
-              await controller.submitTest(result);
-            } catch (error) {
-              messenger.showSnackBar(
-                SnackBar(content: Text('Ошибка отправки результата: $error')),
-              );
-            }
-          },
+          onSubmitInputs: (inputs) => runSessionAction(
+            () async => sessionService.provideInputs(session!.id, inputs),
+            'Ошибка отправки данных',
+          ),
+          onCompleteLlm: () => runSessionAction(
+            () async => sessionService.completeLlm(session!.id),
+            'Ошибка генерации плана',
+          ),
+          onSubmitTest: (result) => runSessionAction(
+            () async => sessionService.submitTestResult(session!.id, result),
+            'Ошибка отправки результата',
+          ),
         ),
       ],
     );
