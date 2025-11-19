@@ -50,6 +50,39 @@ class BpmnApiService {
         .toList();
   }
 
+  Future<BpmnAnalysis?> getProcessDiagram(String processId) async {
+    final uri = Uri.parse('$baseUrl/api/analysis-processes/$processId/bpmn');
+    final response = await client.get(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 404) {
+      return null;
+    }
+    final payload = _parseApiResponse(response);
+    return BpmnAnalysis.fromJson(payload as Map<String, dynamic>);
+  }
+
+  Future<BpmnAnalysis> uploadProcessDiagram({
+    required String processId,
+    required Uint8List bytes,
+    required String fileName,
+  }) async {
+    final uri = Uri.parse('$baseUrl/api/analysis-processes/$processId/bpmn');
+    final request = http.MultipartRequest('POST', uri);
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'file',
+        bytes,
+        filename: fileName,
+        contentType: null,
+      ),
+    );
+    final response = await http.Response.fromStream(await request.send());
+    final payload = _parseApiResponse(response);
+    return BpmnAnalysis.fromJson(payload as Map<String, dynamic>);
+  }
+
   dynamic _parseApiResponse(http.Response response) {
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('BPMN API request failed: ${response.statusCode}');

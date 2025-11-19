@@ -1,6 +1,6 @@
 import 'dart:html' as html;
 import 'dart:math';
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
 
@@ -24,7 +24,8 @@ class _BpmnWebRendererState extends State<_BpmnWebRenderer> {
   @override
   void initState() {
     super.initState();
-    _viewType = 'bpmn-viewer-${Random().nextInt(1 << 32)}';
+    final randomId = Random().nextInt(1 << 31);
+    _viewType = 'bpmn-viewer-$randomId';
     _registerHtmlView(widget.bpmnXml);
   }
 
@@ -44,7 +45,10 @@ class _BpmnWebRendererState extends State<_BpmnWebRenderer> {
       ..srcdoc = _buildHtml(xml);
 
     // ignore: undefined_prefixed_name
-    ui.platformViewRegistry.registerViewFactory(_viewType, (int _) => iframe);
+    ui_web.platformViewRegistry.registerViewFactory(
+      _viewType,
+      (int _) => iframe,
+    );
   }
 
   String _buildHtml(String xml) {

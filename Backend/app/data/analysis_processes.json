@@ -18,5 +18,8 @@
   "description" : "фыввфыв",
   "createdAt" : "2025-11-19T12:05:25",
   "status" : "pending",
-  "type" : "performanceTest"
+  "type" : "performanceTest",
+  "bpmnDiagramPath" : "E:\\GitRepositoties\\llm_projects\\SecutityOrchestrator\\Backend\\app\\data\\analysis_processes\\bpmn\\549954e8-9bc8-4435-92ab-1827913c5720.bpmn",
+  "bpmnDiagramName" : "01_bonus_payment.bpmn",
+  "bpmnUploadedAt" : "2025-11-19T14:09:42"
 } ]

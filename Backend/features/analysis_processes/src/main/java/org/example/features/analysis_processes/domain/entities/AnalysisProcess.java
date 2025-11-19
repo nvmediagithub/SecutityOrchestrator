@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AnalysisProcess {
 
@@ -41,4 +41,14 @@ public class AnalysisProcess {
      */
     @JsonProperty("type")
     private String type;
+
+    @JsonProperty("bpmnDiagramPath")
+    private String bpmnDiagramPath;
+
+    @JsonProperty("bpmnDiagramName")
+    private String bpmnDiagramName;
+
+    @JsonProperty("bpmnUploadedAt")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime bpmnUploadedAt;
 }

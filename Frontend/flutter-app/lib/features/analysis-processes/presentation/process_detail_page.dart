@@ -71,7 +71,13 @@ class _ProcessDetailView extends ConsumerWidget {
             child: Text(process.createdAt.toLocal().toString()),
           ),
           const SizedBox(height: 16),
-          BpmnUploadSection(suggestedName: process.name),
+          if (process.id != null)
+            BpmnUploadSection(
+              processId: process.id,
+              suggestedName: process.name,
+            )
+          else
+            BpmnUploadSection(suggestedName: process.name),
           const SizedBox(height: 16),
           if (process.id != null)
             FilledButton.icon(

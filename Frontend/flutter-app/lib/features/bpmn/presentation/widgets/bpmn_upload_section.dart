@@ -10,8 +10,9 @@ import 'bpmn_viewer.dart';
 
 class BpmnUploadSection extends ConsumerStatefulWidget {
   final String? suggestedName;
+  final String? processId;
 
-  const BpmnUploadSection({super.key, this.suggestedName});
+  const BpmnUploadSection({super.key, this.suggestedName, this.processId});
 
   @override
   ConsumerState<BpmnUploadSection> createState() => _BpmnUploadSectionState();
@@ -22,6 +23,36 @@ class _BpmnUploadSectionState extends ConsumerState<BpmnUploadSection> {
   List<BpmnAnalysis>? _examples;
   bool _isLoading = false;
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.processId != null) {
+      _loadExistingDiagram();
+    }
+  }
+
+  Future<void> _loadExistingDiagram() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final service = ref.read(bpmnApiServiceProvider);
+      final analysis = await service.getProcessDiagram(widget.processId!);
+      setState(() {
+        _analysis = analysis;
+      });
+    } catch (error) {
+      setState(() {
+        _error = error.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   Future<void> _pickAndAnalyze() async {
     setState(() {
@@ -46,7 +77,11 @@ class _BpmnUploadSectionState extends ConsumerState<BpmnUploadSection> {
       return;
     }
 
-    await _analyze(bytes, file.name);
+    if (widget.processId != null) {
+      await _uploadForProcess(bytes, file.name);
+    } else {
+      await _analyze(bytes, file.name);
+    }
   }
 
   Future<void> _analyze(Uint8List bytes, String fileName) async {
@@ -60,6 +95,32 @@ class _BpmnUploadSectionState extends ConsumerState<BpmnUploadSection> {
         bytes: bytes,
         fileName: fileName,
         diagramName: widget.suggestedName,
+      );
+      setState(() {
+        _analysis = analysis;
+      });
+    } catch (error) {
+      setState(() {
+        _error = error.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _uploadForProcess(Uint8List bytes, String fileName) async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final service = ref.read(bpmnApiServiceProvider);
+      final analysis = await service.uploadProcessDiagram(
+        processId: widget.processId!,
+        bytes: bytes,
+        fileName: fileName,
       );
       setState(() {
         _analysis = analysis;
