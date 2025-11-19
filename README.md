@@ -67,6 +67,7 @@ For **Organizations**:
 - **Multi-Model Support**: Manage multiple models with provider-specific configurations
 - **Cost Tracking**: Token usage monitoring and cost analysis for cloud providers
 - **Resilient Architecture**: Circuit breaker patterns and intelligent fallback mechanisms
+- **Local-first Friendly**: Toggle between OpenRouter and local Ollama models via `config/llm-providers.yml` (default `ollama` with `llama3.2:3b` for 8GB GPUs). Use `GET /api/monitoring/llm` to inspect status and `GET /api/monitoring/llm/check` to verify connectivity.
 
 ### 📊 End-to-End Security Testing
 - Orchestrated execution of BPMN workflows with integrated API tests

@@ -34,3 +34,4 @@ Thumbs.db
 *.swp
 *.swo
 *~
+Backend/app/src/main/resources/config/llm-providers.yml

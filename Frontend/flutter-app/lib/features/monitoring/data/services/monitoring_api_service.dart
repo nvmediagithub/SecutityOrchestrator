@@ -4,6 +4,7 @@ import '../../domain/models/alert.dart';
 import '../../domain/models/metric.dart';
 import '../../domain/models/system_health.dart';
 import '../../domain/models/llm_analytics.dart';
+import '../../domain/models/llm_connectivity.dart';
 
 class MonitoringApiService {
   final String baseUrl;
@@ -53,6 +54,22 @@ class MonitoringApiService {
       throw Exception(message);
     }
     return LlmAnalytics.fromJson(decoded['data'] as Map<String, dynamic>);
+  }
+
+  Future<LlmConnectivity> checkConnectivity() async {
+    final response = await client.get(
+      Uri.parse('$baseUrl/api/monitoring/llm/check'),
+      headers: _jsonHeaders,
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Connectivity check failed: ${response.statusCode}');
+    }
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    if (decoded['success'] != true) {
+      final message = decoded['message'] ?? 'Unknown error';
+      throw Exception(message);
+    }
+    return LlmConnectivity.fromJson(decoded['data'] as Map<String, dynamic>);
   }
 
   Future<dynamic> _getData(String path) async {

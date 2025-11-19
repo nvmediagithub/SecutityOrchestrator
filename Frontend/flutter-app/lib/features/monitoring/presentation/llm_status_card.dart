@@ -44,6 +44,11 @@ class LlmStatusCard extends ConsumerWidget {
                     const SizedBox(width: 12),
                     _ModeChip(mode: active.mode),
                     const Spacer(),
+                    IconButton(
+                      tooltip: 'Check connection',
+                      icon: const Icon(Icons.wifi_tethering),
+                      onPressed: () => _checkConnection(context, ref),
+                    ),
                     PopupMenuButton<LlmProviderStatus>(
                       tooltip: 'Switch provider',
                       onSelected: (provider) =>
@@ -129,6 +134,27 @@ class LlmStatusCard extends ConsumerWidget {
       ref.invalidate(llmAnalyticsProvider);
     } catch (error) {
       ref.invalidate(llmAnalyticsProvider);
+    }
+  }
+
+  Future<void> _checkConnection(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final service = ref.read(monitoringApiServiceProvider);
+      final result = await service.checkConnectivity();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            result.success
+                ? 'Connected to ${result.providerName} in ${result.latencyMs} ms'
+                : 'LLM probe failed (${result.statusCode}): ${result.message}',
+          ),
+        ),
+      );
+    } catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Connectivity check failed: $error')),
+      );
     }
   }
 }

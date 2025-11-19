@@ -2,12 +2,14 @@ package org.example.features.monitoring.monitoring.presentation.web.controllers;
 
 import org.example.features.monitoring.monitoring.application.dto.AlertResponse;
 import org.example.features.monitoring.monitoring.application.dto.LlmAnalyticsResponse;
+import org.example.features.monitoring.monitoring.application.dto.LlmConnectivityResponse;
 import org.example.features.monitoring.monitoring.application.dto.MetricResponse;
 import org.example.features.monitoring.monitoring.application.dto.SystemHealthResponse;
 import org.example.features.monitoring.monitoring.application.usecases.GetAlertsUseCase;
 import org.example.features.monitoring.monitoring.application.usecases.GetLlmAnalyticsUseCase;
 import org.example.features.monitoring.monitoring.application.usecases.GetMetricsUseCase;
 import org.example.features.monitoring.monitoring.application.usecases.GetSystemHealthUseCase;
+import org.example.features.monitoring.monitoring.application.usecases.CheckLlmConnectivityUseCase;
 import org.example.features.monitoring.monitoring.application.usecases.SwitchLlmProviderUseCase;
 import org.example.features.monitoring.monitoring.domain.entities.Alert;
 import org.example.features.monitoring.monitoring.domain.entities.Metric;
@@ -40,17 +42,20 @@ public class MonitoringController {
     private final GetAlertsUseCase getAlertsUseCase;
     private final GetLlmAnalyticsUseCase getLlmAnalyticsUseCase;
     private final SwitchLlmProviderUseCase switchLlmProviderUseCase;
+    private final CheckLlmConnectivityUseCase checkLlmConnectivityUseCase;
 
     public MonitoringController(GetSystemHealthUseCase getSystemHealthUseCase,
                                 GetMetricsUseCase getMetricsUseCase,
                                 GetAlertsUseCase getAlertsUseCase,
                                 GetLlmAnalyticsUseCase getLlmAnalyticsUseCase,
-                                SwitchLlmProviderUseCase switchLlmProviderUseCase) {
+                                SwitchLlmProviderUseCase switchLlmProviderUseCase,
+                                CheckLlmConnectivityUseCase checkLlmConnectivityUseCase) {
         this.getSystemHealthUseCase = getSystemHealthUseCase;
         this.getMetricsUseCase = getMetricsUseCase;
         this.getAlertsUseCase = getAlertsUseCase;
         this.getLlmAnalyticsUseCase = getLlmAnalyticsUseCase;
         this.switchLlmProviderUseCase = switchLlmProviderUseCase;
+        this.checkLlmConnectivityUseCase = checkLlmConnectivityUseCase;
     }
 
     @GetMapping("/health")
@@ -115,6 +120,16 @@ public class MonitoringController {
                 String message = ex.getCause() instanceof IllegalArgumentException
                     ? ex.getCause().getMessage()
                     : ex.getMessage();
+                return ResponseEntity.badRequest().body(ApiResponse.error(message));
+            });
+    }
+
+    @GetMapping("/llm/check")
+    public CompletableFuture<ResponseEntity<ApiResponse<LlmConnectivityResponse>>> checkLlmConnectivity() {
+        return checkLlmConnectivityUseCase.execute()
+            .thenApply(response -> ResponseEntity.ok(ApiResponse.success(response)))
+            .exceptionally(ex -> {
+                String message = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
                 return ResponseEntity.badRequest().body(ApiResponse.error(message));
             });
     }

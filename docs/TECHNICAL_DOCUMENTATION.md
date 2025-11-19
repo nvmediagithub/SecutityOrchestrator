@@ -361,6 +361,10 @@ This comprehensive technical documentation provides everything developers need t
    - Process retrieval: GET /api/analysis-processes/{id}/bpmn, GET /api/analysis-processes/{id}/openapi (re-parse stored artifacts, return ApiResponse with analysis DTOs).
    - Ad-hoc analysis + examples: /api/bpmn/analyze, /api/bpmn/examples, /api/openapi/analyze, /api/openapi/examples.
 3. **DTOs & UI**
-   - BPMN responses continue to use BpmnAnalysisResponse.
-   - OpenAPI responses are serialized as OpenApiAnalysisResponse (validation summary, endpoints, schema counts, security issues, recommendations, raw spec payload).
+   - BPMN responses continue to use `BpmnAnalysisResponse`.
+   - OpenAPI responses are serialized as `OpenApiAnalysisResponse` (validation summary, endpoints, schema counts, security issues, recommendations, raw spec payload).
    - Flutter embeds paired upload sections and status badges on the Process Detail screen so both artifacts share one UX pattern.
+4. **LLM Provider Management**
+   - `config/llm-providers.yml` (sample in `config/llm-providers-example.yml`) defines provider metadata. Default active provider is `ollama` with the `llama3.2:3b` model, suitable for RTX 3070 8 GB cards—pull it via `ollama pull llama3.2:3b`.
+   - Monitoring REST surface: `GET /api/monitoring/llm` (analytics), `POST /api/monitoring/llm/providers/{id}/activate` (switch), `GET /api/monitoring/llm/check` (connectivity probe hitting Ollama `/api/tags` or remote `/models`).
+   - Flutter dashboard card shows provider stats, exposes switch and connectivity controls, and consumes the new endpoints.
