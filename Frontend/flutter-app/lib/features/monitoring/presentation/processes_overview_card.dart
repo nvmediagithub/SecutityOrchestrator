@@ -100,50 +100,55 @@ class _ProcessListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            _statusIcon(process.status),
-            color: _statusColor(process.status),
-            size: 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  process.name,
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-                Text(
-                  '${process.type.displayName} - ${process.status.displayName}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                ),
-              ],
+    return InkWell(
+      onTap: process.id == null
+          ? null
+          : () => context.push('/processes/${process.id}'),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              _statusIcon(process.status),
+              color: _statusColor(process.status),
+              size: 20,
             ),
-          ),
-          if (process.status.isFinished && process.id != null)
-            IconButton(
-              icon: const Icon(Icons.delete, size: 20),
-              onPressed: () async {
-                final confirmed = await _showDeleteConfirmationDialog(
-                  context,
-                  process,
-                );
-                if (confirmed == true) {
-                  await _deleteProcess(context, process);
-                }
-              },
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    process.name,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    '${process.type.displayName} - ${process.status.displayName}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
             ),
-        ],
+            if (process.status.isFinished && process.id != null)
+              IconButton(
+                icon: const Icon(Icons.delete, size: 20),
+                onPressed: () async {
+                  final confirmed = await _showDeleteConfirmationDialog(
+                    context,
+                    process,
+                  );
+                  if (confirmed == true) {
+                    await _deleteProcess(context, process);
+                  }
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

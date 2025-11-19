@@ -19,11 +19,4 @@
   "createdAt" : "2025-11-19T12:05:25",
   "status" : "pending",
   "type" : "performanceTest"
-}, {
-  "id" : "75cb8d83-6bbe-4509-8cc0-e53e8d21a5ac",
-  "name" : "ысыфв",
-  "description" : "ывсыфв",
-  "createdAt" : "2025-11-19T12:05:34",
-  "status" : "pending",
-  "type" : "integrationTest"
 } ]

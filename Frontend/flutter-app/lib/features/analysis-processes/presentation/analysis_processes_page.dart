@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/analysis_process_service.dart';
 import '../di/analysis_processes_providers.dart';
@@ -183,9 +184,17 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
                           ),
                       ],
                     ),
-                    onTap: () {
-                      // TODO: Navigate to process details
-                    },
+                    onTap: process.id == null
+                        ? null
+                        : () async {
+                            final deleted = await context.push<bool>(
+                              '/processes/${process.id}',
+                            );
+                            if (deleted == true) {
+                              if (!mounted) return;
+                              setState(() => _loadProcesses());
+                            }
+                          },
                   ),
                 );
               },

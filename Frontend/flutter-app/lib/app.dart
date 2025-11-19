@@ -4,21 +4,30 @@ import 'package:go_router/go_router.dart';
 import 'features/monitoring/presentation/home_page.dart';
 import 'features/monitoring/di/connectivity_provider.dart';
 import 'features/analysis-processes/presentation/analysis_processes_page.dart';
+import 'features/analysis-processes/presentation/process_detail_page.dart';
 
 final _router = GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => SelectionArea(
-        child: const HomePage(),
-      ),
+      builder: (context, state) => SelectionArea(child: const HomePage()),
     ),
     GoRoute(
       path: '/processes',
-      builder: (context, state) => SelectionArea(
-        child: const AnalysisProcessesPage(),
-      ),
+      builder: (context, state) =>
+          SelectionArea(child: const AnalysisProcessesPage()),
+      routes: [
+        GoRoute(
+          path: ':id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return SelectionArea(
+              child: ProcessDetailPage(key: state.pageKey, processId: id),
+            );
+          },
+        ),
+      ],
     ),
   ],
 );
