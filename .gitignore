@@ -35,3 +35,6 @@ Thumbs.db
 *.swo
 *~
 Backend/app/src/main/resources/config/llm-providers.yml
+
+# Runtime analysis session storage
+data/analysis_sessions.json

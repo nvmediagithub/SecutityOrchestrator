@@ -75,7 +75,7 @@ graph TB
   - Test Generation (AI‑генерация тестов)
   - Monitoring (метрики и health‑checks)
   - Reporting (отчёты по безопасности)
-- Flutter‑приложение с Riverpod‑стейт‑менеджментом
+- Flutter‑приложение с flutter_riverpod стейт‑менеджментом
 - Общий слой `shared/` для доменных моделей, DTO и событий
 - Инфраструктура: Docker, Kubernetes, PostgreSQL, Redis, RabbitMQ, Prometheus/Grafana
 

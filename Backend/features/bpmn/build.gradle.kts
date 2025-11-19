@@ -29,7 +29,7 @@ dependencies {
     implementation("org.camunda.bpm:camunda-engine:7.21.0")
 
     // In-memory database for BPMN feature
-    runtimeOnly("com.h2database:h2")
+    runtimeOnly("com.h2database:h2:2.2.224")
 
     testImplementation(libs.spring.boot.starter.test)
 }

@@ -286,7 +286,7 @@ sequenceDiagram
 
 ### Frontend (Flutter)
 - **Framework**: Flutter Web
-- **State Management**: Riverpod
+- **State Management**: flutter_riverpod
 - **UI Components**: Material Design
 - **Data Visualization**: Charts library
 - **File Upload**: File picker

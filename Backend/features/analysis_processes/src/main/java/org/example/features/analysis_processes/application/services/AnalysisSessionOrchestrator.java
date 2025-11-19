@@ -1,13 +1,14 @@
 package org.example.features.analysis_processes.application.services;
 
+import org.example.features.analysis_processes.domain.entities.AnalysisProcess;
 import org.example.features.analysis_processes.domain.entities.AnalysisSession;
 import org.example.features.analysis_processes.domain.entities.AnalysisStep;
+import org.example.features.analysis_processes.domain.services.AnalysisProcessService;
 import org.example.features.analysis_processes.domain.services.AnalysisSessionService;
 import org.example.features.analysis_processes.domain.valueobjects.AnalysisSessionStatus;
 import org.example.features.analysis_processes.domain.valueobjects.AnalysisStepStatus;
 import org.example.features.analysis_processes.domain.valueobjects.AnalysisStepType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -17,9 +18,17 @@ import java.util.Optional;
 public class AnalysisSessionOrchestrator {
 
     private final AnalysisSessionService sessionService;
+    private final AnalysisProcessService processService;
+    private final ProcessAnalysisPlanner planner;
 
-    public AnalysisSessionOrchestrator(AnalysisSessionService sessionService) {
+    public AnalysisSessionOrchestrator(
+        AnalysisSessionService sessionService,
+        AnalysisProcessService processService,
+        ProcessAnalysisPlanner planner
+    ) {
         this.sessionService = sessionService;
+        this.processService = processService;
+        this.planner = planner;
     }
 
     public Optional<AnalysisSession> provideInputs(String sessionId, Map<String, Object> inputs) {
@@ -32,23 +41,29 @@ public class AnalysisSessionOrchestrator {
             markStepCompleted(current);
             activateNextStep(session, AnalysisStepType.LLM_ANALYSIS);
             session.setStatus(AnalysisSessionStatus.RUNNING);
-            session.getContext().put("llmPlan", "LLM план анализа будет сформирован после интеграции с реальным провайдером.");
             return sessionService.updateSession(session);
         });
     }
 
-    public Optional<AnalysisSession> completeLlmStep(String sessionId, String scriptContent) {
+    public Optional<AnalysisSession> generatePlan(String sessionId) {
         return sessionService.getSession(sessionId).map(session -> {
             AnalysisStep current = getCurrentStep(session);
             if (current.getType() != AnalysisStepType.LLM_ANALYSIS) {
                 return session;
             }
+
+            AnalysisProcess process = processService.getProcessById(session.getProcessId())
+                .orElseThrow(() -> new IllegalStateException("Process not found for session"));
+
+            current.setStatus(AnalysisStepStatus.RUNNING);
+            ProcessAnalysisPlanner.PlanResult planResult = planner.generatePlan(process, session.getContext());
+            session.getContext().put("llmPlan", planResult.plan());
+            session.getContext().put("testScript", planResult.script());
+            session.getContext().put("llmSummary", planResult.summary());
+            session.getContext().put("llmPlanActions", planResult.actions());
+            session.getContext().put("llmTestAssertions", planResult.assertions());
+
             markStepCompleted(current);
-            session.getContext().put("testScript", StringUtils.hasText(scriptContent) ? scriptContent :
-                """
-                // TODO: заменить на код, полученный от LLM
-                console.log('Security test stub');
-                """);
             activateNextStep(session, AnalysisStepType.TEST_EXECUTION);
             session.setStatus(AnalysisSessionStatus.WAITING_FOR_TEST);
             return sessionService.updateSession(session);
@@ -84,7 +99,7 @@ public class AnalysisSessionOrchestrator {
         List<AnalysisStep> steps = session.getSteps();
         for (AnalysisStep step : steps) {
             if (step.getType() == type) {
-                step.setStatus(type == AnalysisStepType.LLM_ANALYSIS ? AnalysisStepStatus.RUNNING : AnalysisStepStatus.WAITING);
+                step.setStatus(AnalysisStepStatus.WAITING);
                 session.setCurrentStepId(step.getId());
                 return;
             }

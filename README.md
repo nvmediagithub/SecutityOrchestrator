@@ -291,6 +291,13 @@ The repository includes sample files in the `examples/` directory:
      }'
    ```
 
+#### Analysis Sessions & Planner Output
+
+- **New HTTP-based LLM service**: `HttpLlmService` automatically routes chat completions to the active provider declared in `config/llm-providers.yml`. Local Ollama instances are called via `/api/chat`, while remote/OpenRouter providers use OpenAI-compatible `/chat/completions`. Tune latency budgets with `llm.service.timeout-seconds`.
+- **Structured planner context**: `ProcessAnalysisPlanner` now stores `llmPlan`, `llmPlanActions`, `llmSummary`, `llmTestAssertions`, and `testScript` for each session. The Flutter Process Detail screen renders those sections so analysts can resume work even after a page refresh.
+- **Persistent sessions**: every transition is flushed to the JSON file defined by `analysis.sessions.storage-path` (`data/analysis_sessions.json` by default, ignored in git). Adjust the path when deploying to multi-user environments.
+- **Graceful fallback**: if an LLM is unavailable the planner still emits deterministic actions, scripts, and assertions generated from the uploaded BPMN/OpenAPI artifacts, ensuring smoke tests remain runnable offline.
+
 #### LLM Management API Examples
 
 ```bash
@@ -379,7 +386,7 @@ SecurityOrchestrator follows Clean Architecture with clear separation of concern
 
 **Frontend:**
 - **Framework**: Flutter Web
-- **State Management**: Riverpod
+- **State Management**: flutter_riverpod
 - **UI Components**: Material Design
 
 ## 📚 Documentation Links

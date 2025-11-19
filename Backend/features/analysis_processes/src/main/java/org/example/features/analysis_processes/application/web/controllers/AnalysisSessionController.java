@@ -64,12 +64,10 @@ public class AnalysisSessionController {
     }
 
     @PostMapping("/analysis-sessions/{sessionId}/llm")
-    public ResponseEntity<ApiResponse<AnalysisSessionResponse>> completeLlm(
-        @PathVariable("sessionId") String sessionId,
-        @RequestBody(required = false) Map<String, String> payload
+    public ResponseEntity<ApiResponse<AnalysisSessionResponse>> generatePlan(
+        @PathVariable("sessionId") String sessionId
     ) {
-        String script = payload != null ? payload.getOrDefault("script", null) : null;
-        return orchestrator.completeLlmStep(sessionId, script)
+        return orchestrator.generatePlan(sessionId)
             .map(session -> ResponseEntity.ok(ApiResponse.success(AnalysisSessionResponse.from(session))))
             .orElseGet(() -> ResponseEntity.notFound().build());
     }

@@ -35,12 +35,12 @@ final analysisSessionServiceProvider = Provider<AnalysisSessionService>((ref) {
   return AnalysisSessionService(client, baseUrl);
 });
 
-final analysisSessionControllerProvider = StateNotifierProvider.family
-    .autoDispose<
+final analysisSessionControllerProvider =
+    AutoDisposeStateNotifierProviderFamily<
       AnalysisSessionController,
       AsyncValue<AnalysisSession?>,
       String
     >((ref, processId) {
-      final service = ref.watch(analysisSessionServiceProvider);
-      return AnalysisSessionController(service, processId);
-    });
+  final service = ref.watch(analysisSessionServiceProvider);
+  return AnalysisSessionController(service, processId);
+});

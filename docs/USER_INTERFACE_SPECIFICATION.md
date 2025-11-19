@@ -6,7 +6,7 @@
 
 **Технологический стек:**
 - **Flutter Web** - кроссплатформенный UI
-- **Riverpod** - state management
+- **flutter_riverpod** - state management
 - **Material Design 3** - современный дизайн
 - **WebSocket** - real-time коммуникация
 - **HTTP Client** - API взаимодействие

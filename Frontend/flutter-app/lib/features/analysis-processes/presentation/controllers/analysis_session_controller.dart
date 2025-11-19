@@ -4,14 +4,19 @@ import '../../data/analysis_session_service.dart';
 import '../../domain/analysis_session.dart';
 
 class AnalysisSessionController
-    extends StateNotifier<AsyncValue<AnalysisSession?>> {
-  AnalysisSessionController(this._service, this._processId)
-    : super(const AsyncValue.loading()) {
-    loadLatest();
-  }
-
-  final AnalysisSessionService _service;
+    extends Notifier<AsyncValue<AnalysisSession?>> {
   final String _processId;
+  final AnalysisSessionService _service;
+
+  AnalysisSessionController(String processId, AnalysisSessionService service)
+      : _processId = processId,
+        _service = service;
+
+  @override
+  AsyncValue<AnalysisSession?> build() {
+    loadLatest();
+    return const AsyncValue.loading();
+  }
 
   Future<void> loadLatest() async {
     try {
@@ -32,10 +37,10 @@ class AnalysisSessionController
     await _runAction(() => _service.provideInputs(session.id, inputs));
   }
 
-  Future<void> completeLlmStep({String? script}) async {
+  Future<void> completeLlmStep() async {
     final session = state.value;
     if (session == null) return;
-    await _runAction(() => _service.completeLlm(session.id, script: script));
+    await _runAction(() => _service.completeLlm(session.id));
   }
 
   Future<void> submitTest(Map<String, Object> result) async {

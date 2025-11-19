@@ -50,15 +50,10 @@ class AnalysisSessionService {
     return AnalysisSession.fromJson(data as Map<String, dynamic>);
   }
 
-  Future<AnalysisSession> completeLlm(
-    String sessionId, {
-    String? script,
-  }) async {
-    final body = script != null ? jsonEncode({'script': script}) : '{}';
+  Future<AnalysisSession> completeLlm(String sessionId) async {
     final response = await _client.post(
       Uri.parse('$_baseUrl/api/analysis-sessions/$sessionId/llm'),
       headers: _jsonHeaders,
-      body: body,
     );
     final data = _parseResponse(response);
     return AnalysisSession.fromJson(data as Map<String, dynamic>);
