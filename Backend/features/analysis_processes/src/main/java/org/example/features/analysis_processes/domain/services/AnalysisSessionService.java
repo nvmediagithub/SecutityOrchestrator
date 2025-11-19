@@ -6,10 +6,12 @@ import org.example.features.analysis_processes.domain.repositories.AnalysisSessi
 import org.example.features.analysis_processes.domain.valueobjects.AnalysisSessionStatus;
 import org.example.features.analysis_processes.domain.valueobjects.AnalysisStepStatus;
 import org.example.features.analysis_processes.domain.valueobjects.AnalysisStepType;
+import org.example.features.analysis_processes.domain.valueobjects.InputRequirement;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,29 +24,35 @@ public class AnalysisSessionService {
         this.repository = repository;
     }
 
-    public AnalysisSession startSession(String processId, List<String> requiredInputs) {
+    public AnalysisSession startSession(String processId, List<InputRequirement> requiredInputs) {
+        List<InputRequirement> normalizedInputs = requiredInputs == null
+            ? List.of()
+            : requiredInputs.stream()
+                .filter(Objects::nonNull)
+                .map(InputRequirement::withDefaults)
+                .toList();
         String firstStepId = UUID.randomUUID().toString();
         AnalysisStep collectInputs = AnalysisStep.builder()
             .id(firstStepId)
-            .title("Сбор дополнительных данных")
-            .description("LLM требует дополнительные данные перед запуском анализа")
+            .title("Collect additional inputs")
+            .description("Provide extra parameters the LLM needs before starting the analysis")
             .type(AnalysisStepType.COLLECT_INPUTS)
             .status(AnalysisStepStatus.WAITING)
-            .metadata(Map.of("requiredInputs", requiredInputs))
+            .metadata(Map.of("requiredInputs", normalizedInputs))
             .build();
 
         AnalysisStep llmStep = AnalysisStep.builder()
             .id(UUID.randomUUID().toString())
-            .title("Запуск LLM анализа")
-            .description("После получения параметров запускаем LLM для построения плана тестирования")
+            .title("Run LLM analysis")
+            .description("Use the collected parameters to ask the LLM for a test plan")
             .type(AnalysisStepType.LLM_ANALYSIS)
             .status(AnalysisStepStatus.PENDING)
             .build();
 
         AnalysisStep testStep = AnalysisStep.builder()
             .id(UUID.randomUUID().toString())
-            .title("Выполнение тестового скрипта")
-            .description("Запустить предоставленный LLM скрипт и отправить результат")
+            .title("Execute test script")
+            .description("Run the LLM-provided script and submit the execution result")
             .type(AnalysisStepType.TEST_EXECUTION)
             .status(AnalysisStepStatus.PENDING)
             .build();

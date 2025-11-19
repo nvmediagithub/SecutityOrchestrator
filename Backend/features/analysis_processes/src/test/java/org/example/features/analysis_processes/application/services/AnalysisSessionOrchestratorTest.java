@@ -7,6 +7,7 @@ import org.example.features.analysis_processes.domain.repositories.AnalysisSessi
 import org.example.features.analysis_processes.domain.services.AnalysisProcessService;
 import org.example.features.analysis_processes.domain.services.AnalysisSessionService;
 import org.example.features.analysis_processes.domain.valueobjects.AnalysisSessionStatus;
+import org.example.features.analysis_processes.domain.valueobjects.InputRequirement;
 import org.example.features.llm.domain.dto.ChatCompletionResponse;
 import org.example.features.llm.domain.services.LLMService;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,11 @@ class AnalysisSessionOrchestratorTest {
         ProcessAnalysisPlanner planner = new ProcessAnalysisPlanner(new StaticProvider(llmService));
         AnalysisSessionOrchestrator orchestrator = new AnalysisSessionOrchestrator(sessionService, processService, planner);
 
-        AnalysisSession session = sessionService.startSession(process.getId(), List.of("baseUrl", "authToken"));
+        List<InputRequirement> requirements = List.of(
+            new InputRequirement("base_url", "Base URL", "Target base URL", true),
+            new InputRequirement("auth_token", "Auth token", "Token for Authorization header", true)
+        );
+        AnalysisSession session = sessionService.startSession(process.getId(), requirements);
         String sessionId = session.getId();
 
         orchestrator.provideInputs(sessionId, Map.of("baseUrl", "https://sandbox", "authToken", "demo"));

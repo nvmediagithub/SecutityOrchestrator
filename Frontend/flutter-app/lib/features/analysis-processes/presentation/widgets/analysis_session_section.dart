@@ -238,10 +238,13 @@ class _AnalysisActions extends StatelessWidget {
 
     switch (currentStep!.type) {
       case AnalysisStepType.collectInputs:
-        final inputs = List<String>.from(
-          currentStep!.metadata['requiredInputs'] ?? const <String>[],
+        final fields = _parseInputFields(
+          currentStep!.metadata['requiredInputs'],
         );
-        return _CollectInputsForm(fields: inputs, onSubmit: onSubmitInputs);
+        if (fields.isEmpty) {
+          return const Text('Дополнительные данные не требуются.');
+        }
+        return _CollectInputsForm(fields: fields, onSubmit: onSubmitInputs);
       case AnalysisStepType.llmAnalysis:
         if (currentStep!.status == AnalysisStepStatus.running ||
             currentStep!.status == AnalysisStepStatus.waiting) {
@@ -263,7 +266,7 @@ class _AnalysisActions extends StatelessWidget {
 }
 
 class _CollectInputsForm extends StatefulWidget {
-  final List<String> fields;
+  final List<_InputFieldSpec> fields;
   final Future<void> Function(Map<String, String>) onSubmit;
 
   const _CollectInputsForm({required this.fields, required this.onSubmit});
@@ -280,7 +283,7 @@ class _CollectInputsFormState extends State<_CollectInputsForm> {
   void initState() {
     super.initState();
     for (final field in widget.fields) {
-      _controllers[field] = TextEditingController();
+      _controllers[field.name] = TextEditingController();
     }
   }
 
@@ -297,20 +300,51 @@ class _CollectInputsFormState extends State<_CollectInputsForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Введите дополнительные данные:'),
+        const Text('Введите дополнительные данные (можно пропустить):'),
         const SizedBox(height: 8),
-        ..._controllers.entries.map(
-          (entry) => Padding(
+        ...widget.fields.map((field) {
+          final controller = _controllers[field.name]!;
+          return Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: TextField(
-              controller: entry.value,
-              decoration: InputDecoration(
-                labelText: entry.key,
-                border: const OutlineInputBorder(),
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      field.label,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    if (!field.required)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 4),
+                        child: Text(
+                          '(optional)',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                  ],
+                ),
+                if (field.description != null &&
+                    field.description!.trim().isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2, bottom: 8),
+                    child: Text(
+                      field.description!,
+                      style: const TextStyle(color: Colors.black54),
+                    ),
+                  ),
+                TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    labelText: field.label,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ),
+          );
+        }),
         FilledButton(
           onPressed: _submitting ? null : _submit,
           child: _submitting
@@ -326,13 +360,19 @@ class _CollectInputsFormState extends State<_CollectInputsForm> {
   }
 
   Future<void> _submit() async {
-    setState(() => _submitting = true);
+    setState(() {
+      _submitting = true;
+    });
+    final values = <String, String>{};
+    for (final field in widget.fields) {
+      final controller = _controllers[field.name]!;
+      final value = controller.text.trim();
+      if (value.isNotEmpty) {
+        values[field.name] = value;
+      }
+    }
     try {
-      final inputs = <String, String>{};
-      _controllers.forEach((key, controller) {
-        inputs[key] = controller.text;
-      });
-      await widget.onSubmit(inputs);
+      await widget.onSubmit(values);
     } finally {
       if (mounted) {
         setState(() => _submitting = false);
@@ -552,4 +592,65 @@ Color _stepStatusColor(AnalysisStepStatus status) {
     default:
       return Colors.orange;
   }
+}
+
+List<_InputFieldSpec> _parseInputFields(dynamic raw) {
+  if (raw is List) {
+    return raw.map((entry) {
+      if (entry is String) {
+        return _InputFieldSpec(
+          name: entry,
+          label: _humanize(entry),
+          description: null,
+          required: true,
+        );
+      }
+      if (entry is Map) {
+        final name = entry['name']?.toString();
+        if (name == null || name.isEmpty) return null;
+        final label = (entry['label'] ?? _humanize(name)).toString();
+        final description = entry['description']?.toString();
+        final required =
+            entry['required'] is bool ? entry['required'] as bool : true;
+        return _InputFieldSpec(
+          name: name,
+          label: label,
+          description: description,
+          required: required,
+        );
+      }
+      return null;
+    }).whereType<_InputFieldSpec>().toList();
+  }
+  return const <_InputFieldSpec>[];
+}
+
+String _humanize(String value) {
+  if (value.isEmpty) return 'Input';
+  final buffer = StringBuffer();
+  bool nextUpper = true;
+  for (final char in value.replaceAll('_', ' ').replaceAll('-', ' ').split('')) {
+    if (char.trim().isEmpty) {
+      buffer.write(' ');
+      nextUpper = true;
+      continue;
+    }
+    buffer.write(nextUpper ? char.toUpperCase() : char);
+    nextUpper = false;
+  }
+  return buffer.toString();
+}
+
+class _InputFieldSpec {
+  final String name;
+  final String label;
+  final String? description;
+  final bool required;
+
+  const _InputFieldSpec({
+    required this.name,
+    required this.label,
+    this.description,
+    required this.required,
+  });
 }

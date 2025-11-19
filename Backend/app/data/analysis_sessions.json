@@ -1,14 +1,14 @@
 [ {
   "id" : "6522d735-2d61-4a3c-98d7-be71b6d98dbb",
   "processId" : "549954e8-9bc8-4435-92ab-1827913c5720",
-  "status" : "WAITING_FOR_INPUT",
+  "status" : "waiting_for_input",
   "currentStepId" : "1dc045ff-a4ad-43b8-990a-422717ea3aa4",
   "steps" : [ {
     "id" : "1dc045ff-a4ad-43b8-990a-422717ea3aa4",
     "title" : "РЎР±РѕСЂ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹С… РґР°РЅРЅС‹С…",
     "description" : "LLM С‚СЂРµР±СѓРµС‚ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РґР°РЅРЅС‹Рµ РїРµСЂРµРґ Р·Р°РїСѓСЃРєРѕРј Р°РЅР°Р»РёР·Р°",
-    "type" : "COLLECT_INPUTS",
-    "status" : "WAITING",
+    "type" : "collect_inputs",
+    "status" : "waiting",
     "metadata" : {
       "requiredInputs" : [ "authToken", "baseUrl" ]
     }
@@ -16,15 +16,15 @@
     "id" : "42283f25-ec57-4f28-8f54-9bf1041ead41",
     "title" : "Р—Р°РїСѓСЃРє LLM Р°РЅР°Р»РёР·Р°",
     "description" : "РџРѕСЃР»Рµ РїРѕР»СѓС‡РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂРѕРІ Р·Р°РїСѓСЃРєР°РµРј LLM РґР»СЏ РїРѕСЃС‚СЂРѕРµРЅРёСЏ РїР»Р°РЅР° С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ",
-    "type" : "LLM_ANALYSIS",
-    "status" : "PENDING",
+    "type" : "llm_analysis",
+    "status" : "pending",
     "metadata" : { }
   }, {
     "id" : "4a0a3960-7d99-4ec8-b1a5-ae78f1be2106",
     "title" : "Р’С‹РїРѕР»РЅРµРЅРёРµ С‚РµСЃС‚РѕРІРѕРіРѕ СЃРєСЂРёРїС‚Р°",
     "description" : "Р—Р°РїСѓСЃС‚РёС‚СЊ РїСЂРµРґРѕСЃС‚Р°РІР»РµРЅРЅС‹Р№ LLM СЃРєСЂРёРїС‚ Рё РѕС‚РїСЂР°РІРёС‚СЊ СЂРµР·СѓР»СЊС‚Р°С‚",
-    "type" : "TEST_EXECUTION",
-    "status" : "PENDING",
+    "type" : "test_execution",
+    "status" : "pending",
     "metadata" : { }
   } ],
   "context" : { },
@@ -33,14 +33,14 @@
 }, {
   "id" : "ad275bba-42c2-4b5d-979e-26481bf16502",
   "processId" : "549954e8-9bc8-4435-92ab-1827913c5720",
-  "status" : "WAITING_FOR_INPUT",
+  "status" : "waiting_for_input",
   "currentStepId" : "cf996ae0-2966-4922-8b46-8ab17b36396e",
   "steps" : [ {
     "id" : "cf996ae0-2966-4922-8b46-8ab17b36396e",
     "title" : "РЎР±РѕСЂ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹С… РґР°РЅРЅС‹С…",
     "description" : "LLM С‚СЂРµР±СѓРµС‚ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РґР°РЅРЅС‹Рµ РїРµСЂРµРґ Р·Р°РїСѓСЃРєРѕРј Р°РЅР°Р»РёР·Р°",
-    "type" : "COLLECT_INPUTS",
-    "status" : "WAITING",
+    "type" : "collect_inputs",
+    "status" : "waiting",
     "metadata" : {
       "requiredInputs" : [ "authToken", "baseUrl" ]
     }
@@ -48,18 +48,278 @@
     "id" : "dd599cc0-301d-4827-b2bc-e842f29a37b5",
     "title" : "Р—Р°РїСѓСЃРє LLM Р°РЅР°Р»РёР·Р°",
     "description" : "РџРѕСЃР»Рµ РїРѕР»СѓС‡РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂРѕРІ Р·Р°РїСѓСЃРєР°РµРј LLM РґР»СЏ РїРѕСЃС‚СЂРѕРµРЅРёСЏ РїР»Р°РЅР° С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ",
-    "type" : "LLM_ANALYSIS",
-    "status" : "PENDING",
+    "type" : "llm_analysis",
+    "status" : "pending",
     "metadata" : { }
   }, {
     "id" : "9f497c24-b90c-41ff-9042-3d1a0b04853d",
     "title" : "Р’С‹РїРѕР»РЅРµРЅРёРµ С‚РµСЃС‚РѕРІРѕРіРѕ СЃРєСЂРёРїС‚Р°",
     "description" : "Р—Р°РїСѓСЃС‚РёС‚СЊ РїСЂРµРґРѕСЃС‚Р°РІР»РµРЅРЅС‹Р№ LLM СЃРєСЂРёРїС‚ Рё РѕС‚РїСЂР°РІРёС‚СЊ СЂРµР·СѓР»СЊС‚Р°С‚",
-    "type" : "TEST_EXECUTION",
-    "status" : "PENDING",
+    "type" : "test_execution",
+    "status" : "pending",
     "metadata" : { }
   } ],
   "context" : { },
   "createdAt" : "2025-11-19T20:44:30",
   "updatedAt" : "2025-11-19T20:44:30"
+}, {
+  "id" : "da91f02d-cbd2-46ba-a860-db61e5319c3d",
+  "processId" : "7da73c91-1e7c-438e-8e7f-2b1f5bf24b67",
+  "status" : "waiting_for_input",
+  "currentStepId" : "10150579-4cd2-44e7-b8ff-24ae384f5ac9",
+  "steps" : [ {
+    "id" : "10150579-4cd2-44e7-b8ff-24ae384f5ac9",
+    "title" : "РЎР±РѕСЂ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹С… РґР°РЅРЅС‹С…",
+    "description" : "LLM С‚СЂРµР±СѓРµС‚ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РґР°РЅРЅС‹Рµ РїРµСЂРµРґ Р·Р°РїСѓСЃРєРѕРј Р°РЅР°Р»РёР·Р°",
+    "type" : "collect_inputs",
+    "status" : "waiting",
+    "metadata" : {
+      "requiredInputs" : [ "authToken", "baseUrl" ]
+    }
+  }, {
+    "id" : "d808f662-a1c5-4552-8ffb-db533872e0b3",
+    "title" : "Р—Р°РїСѓСЃРє LLM Р°РЅР°Р»РёР·Р°",
+    "description" : "РџРѕСЃР»Рµ РїРѕР»СѓС‡РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂРѕРІ Р·Р°РїСѓСЃРєР°РµРј LLM РґР»СЏ РїРѕСЃС‚СЂРѕРµРЅРёСЏ РїР»Р°РЅР° С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ",
+    "type" : "llm_analysis",
+    "status" : "pending",
+    "metadata" : { }
+  }, {
+    "id" : "b92de529-c703-4286-b12f-b591ffeb0eba",
+    "title" : "Р’С‹РїРѕР»РЅРµРЅРёРµ С‚РµСЃС‚РѕРІРѕРіРѕ СЃРєСЂРёРїС‚Р°",
+    "description" : "Р—Р°РїСѓСЃС‚РёС‚СЊ РїСЂРµРґРѕСЃС‚Р°РІР»РµРЅРЅС‹Р№ LLM СЃРєСЂРёРїС‚ Рё РѕС‚РїСЂР°РІРёС‚СЊ СЂРµР·СѓР»СЊС‚Р°С‚",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : { },
+  "createdAt" : "2025-11-19T21:20:55",
+  "updatedAt" : "2025-11-19T21:20:55"
+}, {
+  "id" : "a535ee3e-a686-4451-a27a-5386edd03e1c",
+  "processId" : "0f05d2f5-bd3f-4d1a-947f-a6cfc7836898",
+  "status" : "waiting_for_input",
+  "currentStepId" : "76a552da-da95-4a00-9f0e-2ff417269e7f",
+  "steps" : [ {
+    "id" : "76a552da-da95-4a00-9f0e-2ff417269e7f",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "waiting",
+    "metadata" : {
+      "requiredInputs" : [ "authToken", "baseUrl" ]
+    }
+  }, {
+    "id" : "29beda78-309f-4ec1-8c3d-5e4b55cca77f",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "pending",
+    "metadata" : { }
+  }, {
+    "id" : "fd461bbb-115e-4697-ac75-26c7344e213b",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : { },
+  "createdAt" : "2025-11-19T21:59:25",
+  "updatedAt" : "2025-11-19T21:59:25"
+}, {
+  "id" : "d7745c57-1c80-460c-85ed-7125b6f53abb",
+  "processId" : "5bace9f2-49f1-40af-8b1b-c6c9ea435087",
+  "status" : "waiting_for_input",
+  "currentStepId" : "5c138225-8e2d-4ab2-8291-9d55af0e21db",
+  "steps" : [ {
+    "id" : "5c138225-8e2d-4ab2-8291-9d55af0e21db",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "waiting",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "66f4e3d0-4376-4a52-83fd-74df333b7ec3",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "pending",
+    "metadata" : { }
+  }, {
+    "id" : "1fac6aed-4661-4e46-822e-05da52787d08",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : { },
+  "createdAt" : "2025-11-19T22:33:37",
+  "updatedAt" : "2025-11-19T22:33:37"
+}, {
+  "id" : "8ce71f8b-8c80-4757-bd1a-63f634ec080b",
+  "processId" : "2f3e6058-1384-4e93-b00c-59e17c06063e",
+  "status" : "waiting_for_test",
+  "currentStepId" : "5c9c0852-16fd-4f36-aba5-1327a358af10",
+  "steps" : [ {
+    "id" : "ad7050d1-3c4c-41a6-8889-436d6a80c592",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "754f25b1-6420-4044-8bf2-c742cf964c22",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "5c9c0852-16fd-4f36-aba5-1327a358af10",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "waiting",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "BPMN snippet: <?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\r\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\r\n         ...; OpenAPI endpoints analyzed: 5",
+    "llmPlanActions" : [ {
+      "title" : "BPMN consistency review",
+      "detail" : "Compare swimlanes vs. deployment reality",
+      "relatedArtifact" : "01_bonus_payment.bpmn"
+    }, {
+      "title" : "OpenAPI surface scan",
+      "detail" : "Focus on top endpoints: [/cards, /account-consents/{consent_id}, /payment-consents/request, /product-agreements, /accounts/{account_id}/transactions]",
+      "relatedArtifact" : "Virtual Bank API"
+    }, {
+      "title" : "Prepare smoke payloads",
+      "detail" : "Reuse supplied auth token to hit /cards",
+      "relatedArtifact" : "http://localhost:8080"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team143",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    },
+    "llmPlan" : "1. РџСЂРѕРІРµСЃС‚Рё СЃС‚Р°С‚РёС‡РµСЃРєРёР№ Р°РЅР°Р»РёР· BPMN РґРёР°РіСЂР°РјРјС‹ \"2qweqwe\" Рё СѓР±РµРґРёС‚СЊСЃСЏ, С‡С‚Рѕ РІСЃРµ РіРµР№С‚С‹ Рё Р·Р°РґР°РЅРёСЏ Р·Р°РґРѕРєСѓРјРµРЅС‚РёСЂРѕРІР°РЅС‹.\n2. Р’С‹РїРѕР»РЅРёС‚СЊ Р·Р°РїСЂРѕСЃС‹ Рє РєСЂРёС‚РёС‡РЅС‹Рј OpenAPI СЌРЅРґРїРѕРёРЅС‚Р°Рј: /cards, /account-consents/{consent_id}, /payment-consents/request, /product-agreements, /accounts/{account_id}/transactions\n3. Р—Р°С„РёРєСЃРёСЂРѕРІР°С‚СЊ СЂРµР·СѓР»СЊС‚Р°С‚ Рё РїРѕРґРіРѕС‚РѕРІРёС‚СЊ СЂРµРєРѕРјРµРЅРґР°С†РёРё РїРѕ СѓР»СѓС‡С€РµРЅРёСЋ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё.",
+    "testScript" : "async function runSecuritySmokeTest() {\n  const baseUrl = 'http://localhost:8080';\n  const endpoint = '/cards';\n  const headers = {\n    'Content-Type': 'application/json',\n    'Authorization': 'Bearer token-placeholder'\n  };\n\n  const response = await fetch(`${baseUrl}${endpoint}`, { headers });\n  const text = await response.text();\n  console.log('Response status:', response.status);\n  console.log('Body:', text);\n  return { status: response.status, body: text };\n}\n\nrunSecuritySmokeTest()\n  .then((result) => console.log('Test finished', result))\n  .catch((error) => console.error('Test failed', error));\n"
+  },
+  "createdAt" : "2025-11-19T22:42:12",
+  "updatedAt" : "2025-11-19T22:42:36"
 } ]

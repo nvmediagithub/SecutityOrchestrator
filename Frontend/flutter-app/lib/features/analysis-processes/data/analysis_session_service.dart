@@ -73,14 +73,21 @@ class AnalysisSessionService {
   }
 
   dynamic _parseResponse(http.Response response) {
+    print('Response status: ${response.statusCode}');
+    print('Response headers: ${response.headers}');
+    print('Response body raw: ${response.body}');
+    print('Response bodyBytes length: ${response.bodyBytes.length}');
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('Session request failed: ${response.statusCode}');
     }
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final decoded = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    print('Decoded JSON: $decoded');
     if (decoded['success'] != true) {
       final message = decoded['message'] ?? 'Unknown error';
       throw Exception(message);
     }
-    return decoded['data'];
+    final data = decoded['data'];
+    print('Extracted data: $data');
+    return data;
   }
 }

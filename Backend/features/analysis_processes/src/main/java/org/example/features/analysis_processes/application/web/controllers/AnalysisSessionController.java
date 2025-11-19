@@ -1,11 +1,13 @@
 package org.example.features.analysis_processes.application.web.controllers;
 
 import org.example.features.analysis_processes.application.dto.AnalysisSessionResponse;
+import org.example.features.analysis_processes.application.services.AnalysisInputAdvisor;
 import org.example.features.analysis_processes.application.services.AnalysisSessionOrchestrator;
 import org.example.features.analysis_processes.domain.entities.AnalysisProcess;
 import org.example.features.analysis_processes.domain.entities.AnalysisSession;
 import org.example.features.analysis_processes.domain.services.AnalysisProcessService;
 import org.example.features.analysis_processes.domain.services.AnalysisSessionService;
+import org.example.features.analysis_processes.domain.valueobjects.InputRequirement;
 import org.example.shared.common.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,15 +27,18 @@ public class AnalysisSessionController {
     private final AnalysisProcessService processService;
     private final AnalysisSessionService sessionService;
     private final AnalysisSessionOrchestrator orchestrator;
+    private final AnalysisInputAdvisor inputAdvisor;
 
     public AnalysisSessionController(
         AnalysisProcessService processService,
         AnalysisSessionService sessionService,
-        AnalysisSessionOrchestrator orchestrator
+        AnalysisSessionOrchestrator orchestrator,
+        AnalysisInputAdvisor inputAdvisor
     ) {
         this.processService = processService;
         this.sessionService = sessionService;
         this.orchestrator = orchestrator;
+        this.inputAdvisor = inputAdvisor;
     }
 
     @PostMapping("/analysis-processes/{processId}/analysis-sessions")
@@ -44,12 +49,11 @@ public class AnalysisSessionController {
             .orElseThrow(() -> new IllegalArgumentException("Process not found"));
         if (process.getBpmnDiagramPath() == null || process.getOpenapiSpecPath() == null) {
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error("Для запуска анализа нужны BPMN и OpenAPI диаграммы"));
+                .body(ApiResponse.error("Для запуска анализа необходимо загрузить BPMN и OpenAPI артефакты"));
         }
-        AnalysisSession session = sessionService.startSession(
-            processId,
-            List.of("authToken", "baseUrl")
-        );
+
+        List<InputRequirement> requirements = inputAdvisor.determineInputs(process);
+        AnalysisSession session = sessionService.startSession(processId, requirements);
         return ResponseEntity.ok(ApiResponse.success(AnalysisSessionResponse.from(session)));
     }
 
