@@ -322,4 +322,206 @@
   },
   "createdAt" : "2025-11-19T22:42:12",
   "updatedAt" : "2025-11-19T22:42:36"
+}, {
+  "id" : "5cabf5af-63a6-49da-b1b6-400cbef21540",
+  "processId" : "4bd4f923-f0cb-4348-b0c7-a7ed8d73aa03",
+  "status" : "waiting_for_test",
+  "currentStepId" : "fa6e2974-3784-4e99-83f0-56d42d600a6a",
+  "steps" : [ {
+    "id" : "da53ab40-9a0c-4813-927e-75f56913b7b3",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "9e8e7e1b-17d8-409e-ae5e-8c10378043e4",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "fa6e2974-3784-4e99-83f0-56d42d600a6a",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "waiting",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "BPMN snippet: <?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\r\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\r\n         ...; OpenAPI endpoints analyzed: 5",
+    "llmPlanActions" : [ {
+      "title" : "BPMN consistency review",
+      "detail" : "Compare swimlanes vs. deployment reality",
+      "relatedArtifact" : "01_bonus_payment.bpmn"
+    }, {
+      "title" : "OpenAPI surface scan",
+      "detail" : "Focus on top endpoints: [/cards, /account-consents/{consent_id}, /payment-consents/request, /product-agreements, /accounts/{account_id}/transactions]",
+      "relatedArtifact" : "Virtual Bank API"
+    }, {
+      "title" : "Prepare smoke payloads",
+      "detail" : "Reuse supplied auth token to hit /cards",
+      "relatedArtifact" : "http://localhost:8080"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru",
+      "client_id" : "team134",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    },
+    "llmPlan" : "1. РџСЂРѕРІРµСЃС‚Рё СЃС‚Р°С‚РёС‡РµСЃРєРёР№ Р°РЅР°Р»РёР· BPMN РґРёР°РіСЂР°РјРјС‹ \"3ыфвфы\" Рё СѓР±РµРґРёС‚СЊСЃСЏ, С‡С‚Рѕ РІСЃРµ РіРµР№С‚С‹ Рё Р·Р°РґР°РЅРёСЏ Р·Р°РґРѕРєСѓРјРµРЅС‚РёСЂРѕРІР°РЅС‹.\n2. Р’С‹РїРѕР»РЅРёС‚СЊ Р·Р°РїСЂРѕСЃС‹ Рє РєСЂРёС‚РёС‡РЅС‹Рј OpenAPI СЌРЅРґРїРѕРёРЅС‚Р°Рј: /cards, /account-consents/{consent_id}, /payment-consents/request, /product-agreements, /accounts/{account_id}/transactions\n3. Р—Р°С„РёРєСЃРёСЂРѕРІР°С‚СЊ СЂРµР·СѓР»СЊС‚Р°С‚ Рё РїРѕРґРіРѕС‚РѕРІРёС‚СЊ СЂРµРєРѕРјРµРЅРґР°С†РёРё РїРѕ СѓР»СѓС‡С€РµРЅРёСЋ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё.",
+    "testScript" : "async function runSecuritySmokeTest() {\n  const baseUrl = 'http://localhost:8080';\n  const endpoint = '/cards';\n  const headers = {\n    'Content-Type': 'application/json',\n    'Authorization': 'Bearer token-placeholder'\n  };\n\n  const response = await fetch(`${baseUrl}${endpoint}`, { headers });\n  const text = await response.text();\n  console.log('Response status:', response.status);\n  console.log('Body:', text);\n  return { status: response.status, body: text };\n}\n\nrunSecuritySmokeTest()\n  .then((result) => console.log('Test finished', result))\n  .catch((error) => console.error('Test failed', error));\n"
+  },
+  "createdAt" : "2025-11-19T23:03:54",
+  "updatedAt" : "2025-11-19T23:04:42"
+}, {
+  "id" : "73820448-dbcc-4e53-9b48-2d167d741014",
+  "processId" : "d8b59534-6b74-42d9-b6dd-dd9320747ab4",
+  "status" : "running",
+  "currentStepId" : "3aee4d53-7bf6-4c21-9a5d-38ef7d798f2d",
+  "steps" : [ {
+    "id" : "3eb0fa10-8e90-4227-817a-d02ca1062d69",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "3aee4d53-7bf6-4c21-9a5d-38ef7d798f2d",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "waiting",
+    "metadata" : { }
+  }, {
+    "id" : "09fc89d8-e362-4569-81b9-a9f6ebf77af4",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru",
+      "client_id" : "team134",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    }
+  },
+  "createdAt" : "2025-11-19T23:14:59",
+  "updatedAt" : "2025-11-19T23:15:36"
 } ]

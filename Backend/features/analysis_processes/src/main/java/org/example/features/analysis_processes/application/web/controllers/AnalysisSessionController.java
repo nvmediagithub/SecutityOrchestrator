@@ -71,9 +71,13 @@ public class AnalysisSessionController {
     public ResponseEntity<ApiResponse<AnalysisSessionResponse>> generatePlan(
         @PathVariable("sessionId") String sessionId
     ) {
-        return orchestrator.generatePlan(sessionId)
-            .map(session -> ResponseEntity.ok(ApiResponse.success(AnalysisSessionResponse.from(session))))
-            .orElseGet(() -> ResponseEntity.notFound().build());
+        try {
+            return orchestrator.generatePlan(sessionId)
+                .map(session -> ResponseEntity.ok(ApiResponse.success(AnalysisSessionResponse.from(session))))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage()));
+        }
     }
 
     @PostMapping("/analysis-sessions/{sessionId}/tests")

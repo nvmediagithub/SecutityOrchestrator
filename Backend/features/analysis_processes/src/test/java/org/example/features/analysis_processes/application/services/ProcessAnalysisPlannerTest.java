@@ -25,7 +25,7 @@ class ProcessAnalysisPlannerTest {
     @Test
     void fallbackPlanIncludesStructuredActions(@TempDir Path tempDir) throws IOException {
         AnalysisProcess process = sampleProcess(tempDir);
-        ProcessAnalysisPlanner planner = new ProcessAnalysisPlanner(new StaticProvider(null));
+        ProcessAnalysisPlanner planner = new ProcessAnalysisPlanner(new StaticProvider(null), true);
 
         ProcessAnalysisPlanner.PlanResult result = planner.generatePlan(
             process,
@@ -54,7 +54,7 @@ class ProcessAnalysisPlannerTest {
               ]
             }
             """);
-        ProcessAnalysisPlanner planner = new ProcessAnalysisPlanner(new StaticProvider(service));
+        ProcessAnalysisPlanner planner = new ProcessAnalysisPlanner(new StaticProvider(service), false);
 
         ProcessAnalysisPlanner.PlanResult result = planner.generatePlan(
             process,

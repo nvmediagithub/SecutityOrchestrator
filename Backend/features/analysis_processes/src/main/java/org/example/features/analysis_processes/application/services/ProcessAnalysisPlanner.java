@@ -10,6 +10,7 @@ import org.example.features.llm.domain.services.LLMService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -34,9 +35,14 @@ public class ProcessAnalysisPlanner {
     private final ObjectProvider<LLMService> llmServiceProvider;
     private final ObjectMapper yamlMapper;
     private final ObjectMapper jsonMapper;
+    private final boolean allowFallback;
 
-    public ProcessAnalysisPlanner(ObjectProvider<LLMService> llmServiceProvider) {
+    public ProcessAnalysisPlanner(
+        ObjectProvider<LLMService> llmServiceProvider,
+        @Value("${analysis.planner.allow-fallback:true}") boolean allowFallback
+    ) {
         this.llmServiceProvider = llmServiceProvider;
+        this.allowFallback = allowFallback;
         this.yamlMapper = new ObjectMapper(new YAMLFactory());
         this.yamlMapper.findAndRegisterModules();
         this.jsonMapper = new ObjectMapper();
@@ -60,9 +66,15 @@ public class ProcessAnalysisPlanner {
             openApiSummary,
             primaryEndpoint
         );
-        return llmPlan.orElseGet(() ->
-            fallbackPlan(process, baseUrl, authToken, bpmnSnippet, openApiSummary, primaryEndpoint)
-        );
+        if (llmPlan.isPresent()) {
+            return llmPlan.get();
+        }
+        if (!allowFallback) {
+            throw new IllegalStateException(
+                "LLM planner is unavailable. Configure an active provider or enable analysis.planner.allow-fallback.");
+        }
+        LOGGER.warn("Falling back to heuristic plan because LLM provider was unavailable");
+        return fallbackPlan(process, baseUrl, authToken, bpmnSnippet, openApiSummary, primaryEndpoint);
     }
 
     private Optional<PlanResult> tryGenerateWithLlm(
@@ -133,15 +145,17 @@ public class ProcessAnalysisPlanner {
         String selectedEndpoint
     ) {
         StringJoiner plan = new StringJoiner("\n");
-        plan.add(String.format("1. Провести статический анализ BPMN диаграммы \"%s\" и убедиться,"
-                + " что все гейты и задания задокументированы.", process.getName()));
+        plan.add(String.format(
+            "1. Perform a static review of the BPMN diagram \"%s\" and ensure every gateway/task has a documented owner.",
+            process.getName()
+        ));
         if (!summary.endpoints().isEmpty()) {
-            plan.add("2. Выполнить запросы к критичным OpenAPI эндпоинтам: "
+            plan.add("2. Probe the most critical OpenAPI endpoints: "
                 + String.join(", ", summary.endpoints()));
         } else {
-            plan.add("2. Проверить базовый API эндпоинт и убедиться в корректных ответах.");
+            plan.add("2. Hit the primary API endpoint and verify that authentication/authorization responses are sane.");
         }
-        plan.add("3. Зафиксировать результат и подготовить рекомендации по улучшению безопасности.");
+        plan.add("3. Capture the execution result and prepare remediation notes for the security team.");
 
         String script = """
         async function runSecuritySmokeTest() {
