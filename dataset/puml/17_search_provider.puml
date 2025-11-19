@@ -1,0 +1,10 @@
+@startuml
+actor Client as C
+participant "External Registry API" as E
+
+C -> E: Search provider by INN
+activate E
+E -> C: provider details
+deactivate E
+
+@enduml

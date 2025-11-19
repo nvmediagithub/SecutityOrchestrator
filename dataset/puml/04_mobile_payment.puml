@@ -1,0 +1,31 @@
+@startuml
+actor Client as C
+participant "API Bank" as Bank
+participant "External Provider API" as P
+
+C -> Bank: POST /auth/bank-token (client_id, client_secret)
+activate Bank
+Bank -> C: access_token
+deactivate Bank
+
+C -> P: Identify provider by phone number
+activate P
+P -> C: provider details
+deactivate P
+
+C -> P: Get payment details
+activate P
+P -> C: account details
+deactivate P
+
+C -> Bank: GET /accounts
+activate Bank
+Bank -> C: list of accounts
+deactivate Bank
+
+C -> Bank: POST /payments (mobile provider)
+activate Bank
+Bank -> C: payment_id
+deactivate Bank
+
+@enduml

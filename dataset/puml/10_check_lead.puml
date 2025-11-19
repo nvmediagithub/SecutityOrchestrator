@@ -1,0 +1,16 @@
+@startuml
+actor Client as C
+participant "External Check API" as E
+
+C -> E: Validate INN
+activate E
+E -> C: OK / Failed
+deactivate E
+
+if (Result == OK) then (Yes)
+  note right: Continue process
+else (No)
+  note right: Decline process
+end
+
+@enduml

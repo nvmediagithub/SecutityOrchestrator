@@ -1,0 +1,25 @@
+@startuml
+actor Client as C
+participant "API Bank" as Bank
+
+C -> Bank: POST /auth/bank-token (client_id, client_secret)
+activate Bank
+Bank -> C: access_token
+deactivate Bank
+
+C -> Bank: GET /accounts
+activate Bank
+Bank -> C: list of accounts
+deactivate Bank
+
+C -> Bank: POST /vrp-consents (limits)
+activate Bank
+Bank -> C: vrp_consent_id
+deactivate Bank
+
+C -> Bank: POST /domestic-vrp-payments (consent_id, amount, dest)
+activate Bank
+Bank -> C: payment_id
+deactivate Bank
+
+@enduml

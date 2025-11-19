@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../bpmn/presentation/widgets/bpmn_upload_section.dart';
 import '../di/analysis_processes_providers.dart';
 import '../domain/analysis_process.dart';
 
@@ -69,6 +70,8 @@ class _ProcessDetailView extends ConsumerWidget {
             title: 'Created',
             child: Text(process.createdAt.toLocal().toString()),
           ),
+          const SizedBox(height: 16),
+          BpmnUploadSection(suggestedName: process.name),
           const SizedBox(height: 16),
           if (process.id != null)
             FilledButton.icon(

@@ -1,0 +1,20 @@
+@startuml
+actor Client as C
+participant "API Bank" as Bank
+
+C -> Bank: POST /auth/bank-token (client_id, client_secret)
+activate Bank
+Bank -> C: access_token
+deactivate Bank
+
+C -> Bank: GET /products
+activate Bank
+Bank -> C: list of products
+deactivate Bank
+
+C -> Bank: POST /product-application (product_id, amount, etc.)
+activate Bank
+Bank -> C: application_id
+deactivate Bank
+
+@enduml

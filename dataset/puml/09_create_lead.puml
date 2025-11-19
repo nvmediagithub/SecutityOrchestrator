@@ -1,0 +1,10 @@
+@startuml
+actor Client as C
+participant "API Bank" as Bank
+
+C -> Bank: POST /customer-leads (B2B data)
+activate Bank
+Bank -> C: lead_id
+deactivate Bank
+
+@enduml

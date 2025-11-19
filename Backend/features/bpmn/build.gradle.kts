@@ -17,6 +17,7 @@ repositories {
 dependencies {
     implementation(project(":shared"))
     implementation(libs.spring.boot.starter)
+    implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.data.jpa)
     implementation("org.springframework.boot:spring-boot-starter-jdbc")

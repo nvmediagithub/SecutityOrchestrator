@@ -1,0 +1,21 @@
+@startuml
+actor Client as C
+participant "API Bank" as Bank
+
+C -> Bank: POST /auth/bank-token (client_id, client_secret)
+activate Bank
+Bank -> C: access_token
+deactivate Bank
+
+C -> Bank: GET /accounts/{account_id}/transactions
+activate Bank
+Bank -> C: list of transactions
+deactivate Bank
+
+C -> Bank: Select last payment transaction
+C -> Bank: POST /payments (data from last payment)
+activate Bank
+Bank -> C: payment_id
+deactivate Bank
+
+@enduml

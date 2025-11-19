@@ -63,37 +63,6 @@ public class BpmnConfiguration {
 
 
     @Bean
-    public ProcessAnalyzer processAnalyzer(ProcessParser processParser) {
-        // TODO: Implement actual ProcessAnalyzer implementation
-        return new ProcessAnalyzer() {
-            @Override
-            public java.util.List<ProcessIssue> analyzeStructure(org.example.features.bpmn.domain.entities.BpmnDiagram diagram) {
-                return java.util.Collections.emptyList();
-            }
-
-            @Override
-            public java.util.List<ProcessIssue> analyzeSecurity(org.example.features.bpmn.domain.entities.BpmnDiagram diagram) {
-                return java.util.Collections.emptyList();
-            }
-
-            @Override
-            public java.util.List<ProcessIssue> analyzePerformance(org.example.features.bpmn.domain.entities.BpmnDiagram diagram) {
-                return java.util.Collections.emptyList();
-            }
-
-            @Override
-            public AnalysisResult analyzeComprehensive(org.example.features.bpmn.domain.entities.BpmnDiagram diagram) {
-                return new AnalysisResult(
-                    diagram.getId(),
-                    java.util.Collections.emptyList(),
-                    java.util.Collections.emptyList(),
-                    java.util.Collections.emptyList()
-                );
-            }
-        };
-    }
-
-    @Bean
     public ProcessExecutor processExecutor() {
         // TODO: Implement actual ProcessExecutor implementation
         return new ProcessExecutor() {
