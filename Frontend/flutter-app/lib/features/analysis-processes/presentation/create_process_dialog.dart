@@ -6,10 +6,7 @@ import '../domain/create_analysis_process_usecase.dart';
 class CreateProcessDialog extends StatefulWidget {
   final CreateAnalysisProcessUseCase createProcessUseCase;
 
-  const CreateProcessDialog({
-    super.key,
-    required this.createProcessUseCase,
-  });
+  const CreateProcessDialog({super.key, required this.createProcessUseCase});
 
   @override
   State<CreateProcessDialog> createState() => _CreateProcessDialogState();
@@ -43,9 +40,9 @@ class _CreateProcessDialogState extends State<CreateProcessDialog> {
       Navigator.of(context).pop(process);
     } catch (e) {
       // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create process: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to create process: $e')));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -92,9 +89,7 @@ class _CreateProcessDialogState extends State<CreateProcessDialog> {
               const SizedBox(height: 16),
               DropdownButtonFormField<ProcessType>(
                 value: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'Process Type',
-                ),
+                decoration: const InputDecoration(labelText: 'Process Type'),
                 items: ProcessType.values.map((type) {
                   return DropdownMenuItem(
                     value: type,

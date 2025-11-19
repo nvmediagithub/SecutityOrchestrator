@@ -51,4 +51,14 @@ public class AnalysisProcess {
     @JsonProperty("bpmnUploadedAt")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime bpmnUploadedAt;
+
+    @JsonProperty("openapiSpecPath")
+    private String openapiSpecPath;
+
+    @JsonProperty("openapiSpecName")
+    private String openapiSpecName;
+
+    @JsonProperty("openapiUploadedAt")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime openapiUploadedAt;
 }

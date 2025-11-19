@@ -350,4 +350,17 @@ Backend/
 
 ---
 
-This comprehensive technical documentation provides everything developers need to understand, implement, deploy, and maintain the SecurityOrchestrator system. The documentation covers system architecture, API specifications, database design, deployment procedures, development guidelines, integration patterns, and troubleshooting guides.
+This comprehensive technical documentation provides everything developers need to understand, implement, deploy, and maintain the SecurityOrchestrator system. The documentation covers system architecture, API specifications, database design, deployment procedures, development guidelines, integration patterns, and troubleshooting guides.### BPMN & OpenAPI Analysis Pipeline Updates
+
+1. **Storage layout**
+   - BPMN files live under nalysis.processes.bpmn-storage-path (default data/analysis_processes/bpmn).
+   - OpenAPI specs reuse the same pattern via nalysis.processes.openapi-storage-path with configurable max size (nalysis.processes.max-upload-size-bytes).
+   - Datasets ship in dataset/bpmn and dataset/openapi (configurable via pmn.dataset-path / openapi.dataset-path).
+2. **REST endpoints**
+   - Process specific uploads: POST /api/analysis-processes/{id}/bpmn, POST /api/analysis-processes/{id}/openapi (multipart, size limited, validation + analyzer + Camunda/Camunda+Swagger stacks).
+   - Process retrieval: GET /api/analysis-processes/{id}/bpmn, GET /api/analysis-processes/{id}/openapi (re-parse stored artifacts, return ApiResponse with analysis DTOs).
+   - Ad-hoc analysis + examples: /api/bpmn/analyze, /api/bpmn/examples, /api/openapi/analyze, /api/openapi/examples.
+3. **DTOs & UI**
+   - BPMN responses continue to use BpmnAnalysisResponse.
+   - OpenAPI responses are serialized as OpenApiAnalysisResponse (validation summary, endpoints, schema counts, security issues, recommendations, raw spec payload).
+   - Flutter embeds paired upload sections and status badges on the Process Detail screen so both artifacts share one UX pattern.

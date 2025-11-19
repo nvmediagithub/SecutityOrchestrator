@@ -4,6 +4,7 @@ import org.example.features.openapi.domain.entities.OpenAPISpecification;
 import org.example.features.openapi.domain.entities.ValidationError;
 import org.example.features.openapi.domain.entities.ValidationResult;
 import org.example.features.openapi.domain.entities.ValidationSummary;
+import org.example.features.openapi_module.application.usecases.ValidateOpenAPISpecUseCase;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
@@ -22,7 +23,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class OpenAPISpecificationValidator {
+public class OpenAPISpecificationValidator implements ValidateOpenAPISpecUseCase {
 
     private final ObjectMapper objectMapper;
     private final JsonValidator jsonValidator;
@@ -40,6 +41,7 @@ public class OpenAPISpecificationValidator {
      * @param specification The specification to validate
      * @return ValidationResult with validation status and errors
      */
+    @Override
     public ValidationResult validate(OpenAPISpecification specification) {
         long startTime = System.currentTimeMillis();
         List<ValidationError> errors = new ArrayList<>();
@@ -78,7 +80,8 @@ public class OpenAPISpecificationValidator {
      * @param content The raw OpenAPI content
      * @return ValidationResult
      */
-    public ValidationResult validateContent(String content) {
+    @Override
+    public ValidationResult validateFromContent(String content) {
         long startTime = System.currentTimeMillis();
         List<ValidationError> errors = new ArrayList<>();
 
@@ -175,5 +178,10 @@ public class OpenAPISpecificationValidator {
                 .errors(errors)
                 .summary(summary)
                 .build();
+    }
+ 
+    @Override
+    public ValidationResult comprehensiveValidate(OpenAPISpecification specification) {
+        return validate(specification);
     }
 }

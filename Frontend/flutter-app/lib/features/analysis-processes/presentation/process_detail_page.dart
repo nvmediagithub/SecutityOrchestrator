@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../bpmn/presentation/widgets/bpmn_upload_section.dart';
+import '../../openapi/presentation/widgets/openapi_upload_section.dart';
 import '../di/analysis_processes_providers.dart';
 import '../domain/analysis_process.dart';
 
@@ -60,6 +61,23 @@ class _ProcessDetailView extends ConsumerWidget {
             '${process.type.displayName} • ${process.status.displayName}',
             style: textTheme.titleMedium?.copyWith(color: Colors.grey),
           ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              _ArtifactBadge(
+                label: 'BPMN',
+                uploaded: process.hasBpmn,
+                timestamp: process.bpmnUploadedAt,
+              ),
+              _ArtifactBadge(
+                label: 'OpenAPI',
+                uploaded: process.hasOpenApi,
+                timestamp: process.openapiUploadedAt,
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
           _DetailSection(
             title: 'Description',
@@ -78,6 +96,14 @@ class _ProcessDetailView extends ConsumerWidget {
             )
           else
             BpmnUploadSection(suggestedName: process.name),
+          const SizedBox(height: 16),
+          if (process.id != null)
+            OpenApiUploadSection(
+              processId: process.id,
+              suggestedName: process.name,
+            )
+          else
+            OpenApiUploadSection(suggestedName: process.name),
           const SizedBox(height: 16),
           if (process.id != null)
             FilledButton.icon(
@@ -150,6 +176,36 @@ class _DetailSection extends StatelessWidget {
         const SizedBox(height: 8),
         child,
       ],
+    );
+  }
+}
+
+class _ArtifactBadge extends StatelessWidget {
+  final String label;
+  final bool uploaded;
+  final DateTime? timestamp;
+
+  const _ArtifactBadge({
+    required this.label,
+    required this.uploaded,
+    this.timestamp,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final statusText = uploaded ? '$label uploaded' : '$label missing';
+    final details = uploaded && timestamp != null
+        ? '${timestamp!.toLocal()}'
+        : null;
+    return Chip(
+      avatar: Icon(
+        uploaded ? Icons.check_circle_outline : Icons.warning_amber_outlined,
+        color: uploaded ? Colors.green : Colors.orange,
+      ),
+      backgroundColor: uploaded
+          ? Colors.green.withOpacity(0.15)
+          : Colors.orange.withOpacity(0.15),
+      label: Text(details != null ? '$statusText · $details' : statusText),
     );
   }
 }

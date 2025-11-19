@@ -57,7 +57,13 @@ public class OpenAPISpecificationParser {
      */
     public OpenAPISpecification parseToDomainEntity(String content) throws OpenAPIParseException {
         OpenAPI openAPI = parseFromContent(content);
+        return toDomain(openAPI);
+    }
 
+    /**
+     * Converts an OpenAPI object to the domain entity representation.
+     */
+    public OpenAPISpecification toDomain(OpenAPI openAPI) {
         return OpenAPISpecification.builder()
                 .version(openAPI.getOpenapi())
                 .title(openAPI.getInfo() != null ? openAPI.getInfo().getTitle() : null)

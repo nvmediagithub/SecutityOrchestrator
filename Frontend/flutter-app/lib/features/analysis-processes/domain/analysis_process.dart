@@ -1,16 +1,6 @@
-enum ProcessStatus {
-  pending,
-  running,
-  completed,
-  failed,
-}
+enum ProcessStatus { pending, running, completed, failed }
 
-enum ProcessType {
-  securityAnalysis,
-  performanceTest,
-  integrationTest,
-  custom,
-}
+enum ProcessType { securityAnalysis, performanceTest, integrationTest, custom }
 
 extension ProcessStatusExtension on ProcessStatus {
   String get displayName {
@@ -27,7 +17,8 @@ extension ProcessStatusExtension on ProcessStatus {
   }
 
   bool get isActive => this == ProcessStatus.running;
-  bool get isFinished => this == ProcessStatus.completed || this == ProcessStatus.failed;
+  bool get isFinished =>
+      this == ProcessStatus.completed || this == ProcessStatus.failed;
 }
 
 extension ProcessTypeExtension on ProcessType {
@@ -52,6 +43,10 @@ class AnalysisProcess {
   final DateTime createdAt;
   final ProcessStatus status;
   final ProcessType type;
+  final String? bpmnDiagramName;
+  final DateTime? bpmnUploadedAt;
+  final String? openapiSpecName;
+  final DateTime? openapiUploadedAt;
 
   const AnalysisProcess({
     this.id,
@@ -60,6 +55,10 @@ class AnalysisProcess {
     required this.createdAt,
     required this.status,
     required this.type,
+    this.bpmnDiagramName,
+    this.bpmnUploadedAt,
+    this.openapiSpecName,
+    this.openapiUploadedAt,
   });
 
   AnalysisProcess copyWith({
@@ -69,6 +68,10 @@ class AnalysisProcess {
     DateTime? createdAt,
     ProcessStatus? status,
     ProcessType? type,
+    String? bpmnDiagramName,
+    DateTime? bpmnUploadedAt,
+    String? openapiSpecName,
+    DateTime? openapiUploadedAt,
   }) {
     return AnalysisProcess(
       id: id ?? this.id,
@@ -77,6 +80,10 @@ class AnalysisProcess {
       createdAt: createdAt ?? this.createdAt,
       status: status ?? this.status,
       type: type ?? this.type,
+      bpmnDiagramName: bpmnDiagramName ?? this.bpmnDiagramName,
+      bpmnUploadedAt: bpmnUploadedAt ?? this.bpmnUploadedAt,
+      openapiSpecName: openapiSpecName ?? this.openapiSpecName,
+      openapiUploadedAt: openapiUploadedAt ?? this.openapiUploadedAt,
     );
   }
 
@@ -103,6 +110,10 @@ class AnalysisProcess {
       'createdAt': createdAt.toIso8601String(),
       'status': status.name,
       'type': type.name,
+      'bpmnDiagramName': bpmnDiagramName,
+      'bpmnUploadedAt': bpmnUploadedAt?.toIso8601String(),
+      'openapiSpecName': openapiSpecName,
+      'openapiUploadedAt': openapiUploadedAt?.toIso8601String(),
     };
   }
 
@@ -110,8 +121,10 @@ class AnalysisProcess {
     return AnalysisProcess(
       id: json['id'] as String?,
       name: json['name'] as String,
-      description: json['description'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      description: (json['description'] ?? '') as String,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
       status: ProcessStatus.values.firstWhere(
         (e) => e.name == json['status'],
         orElse: () => ProcessStatus.pending,
@@ -120,12 +133,25 @@ class AnalysisProcess {
         (e) => e.name == json['type'],
         orElse: () => ProcessType.custom,
       ),
+      bpmnDiagramName: json['bpmnDiagramName'] as String?,
+      bpmnUploadedAt: json['bpmnUploadedAt'] != null
+          ? DateTime.parse(json['bpmnUploadedAt'] as String)
+          : null,
+      openapiSpecName: json['openapiSpecName'] as String?,
+      openapiUploadedAt: json['openapiUploadedAt'] != null
+          ? DateTime.parse(json['openapiUploadedAt'] as String)
+          : null,
     );
   }
 
+  bool get hasBpmn => bpmnDiagramName != null && bpmnUploadedAt != null;
+
+  bool get hasOpenApi => openapiSpecName != null && openapiUploadedAt != null;
+
   @override
   String toString() {
-    return 'AnalysisProcess(id: $id, name: $name, status: $status, type: $type)';
+    return 'AnalysisProcess(id: $id, name: $name, status: $status, type: $type, '
+        'bpmnDiagramName: $bpmnDiagramName, openapiSpecName: $openapiSpecName)';
   }
 
   @override
@@ -137,7 +163,11 @@ class AnalysisProcess {
         other.description == description &&
         other.createdAt == createdAt &&
         other.status == status &&
-        other.type == type;
+        other.type == type &&
+        other.bpmnDiagramName == bpmnDiagramName &&
+        other.bpmnUploadedAt == bpmnUploadedAt &&
+        other.openapiSpecName == openapiSpecName &&
+        other.openapiUploadedAt == openapiUploadedAt;
   }
 
   @override
@@ -147,6 +177,10 @@ class AnalysisProcess {
         description.hashCode ^
         createdAt.hashCode ^
         status.hashCode ^
-        type.hashCode;
+        type.hashCode ^
+        (bpmnDiagramName?.hashCode ?? 0) ^
+        (bpmnUploadedAt?.hashCode ?? 0) ^
+        (openapiSpecName?.hashCode ?? 0) ^
+        (openapiUploadedAt?.hashCode ?? 0);
   }
 }

@@ -153,8 +153,28 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
                     title: Text(process.name),
-                    subtitle: Text(
-                      '${process.type.displayName} - ${process.status.displayName}',
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${process.type.displayName} - ${process.status.displayName}',
+                        ),
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            _buildArtifactChip(
+                              label: 'BPMN',
+                              available: process.hasBpmn,
+                            ),
+                            _buildArtifactChip(
+                              label: 'OpenAPI',
+                              available: process.hasOpenApi,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -207,6 +227,20 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
         tooltip: 'Create Process',
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Widget _buildArtifactChip({required String label, required bool available}) {
+    return Chip(
+      avatar: Icon(
+        available ? Icons.check_circle : Icons.radio_button_unchecked,
+        color: available ? Colors.green : Colors.grey,
+        size: 18,
+      ),
+      backgroundColor: available
+          ? Colors.green.withOpacity(0.1)
+          : Colors.grey.withOpacity(0.1),
+      label: Text('$label ${available ? '✓' : '✗'}'),
     );
   }
 }

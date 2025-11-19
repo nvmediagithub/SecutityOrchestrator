@@ -635,3 +635,11 @@ We welcome community input on roadmap priorities. Please:
 **SecurityOrchestrator** - Revolutionizing security testing through intelligent automation and comprehensive workflow orchestration.
 
 For questions or contributions, please visit our [GitHub repository](https://github.com/your-org/securityorchestrator).
+## OpenAPI Artifact Workflow
+
+Security Orchestrator now keeps BPMN and OpenAPI assets in sync:
+
+- **Process endpoints:** upload specs with POST /api/analysis-processes/{id}/openapi and reopen the stored artifact with GET /api/analysis-processes/{id}/openapi alongside the existing BPMN endpoints.
+- **Self-service analysis:** developers can run independent checks via POST /api/openapi/analyze or explore curated GET /api/openapi/examples responses powered by the dataset/openapi bundle.
+- **Configurable storage:** tune nalysis.processes.openapi-storage-path, nalysis.processes.max-upload-size-bytes, and openapi.dataset-path to change storage locations or file limits without touching the code.
+- **Frontend UX:** the process detail page renders matching upload/viewer widgets for BPMN and OpenAPI plus indicator badges (BPMN ✓/✗, OpenAPI ✓/✗) so teams immediately see what artifacts are available.

@@ -17,6 +17,7 @@ repositories {
 dependencies {
     implementation(project(":shared"))
     implementation(project(":features:bpmn"))
+    implementation(project(":features:openapi_module"))
     implementation(libs.spring.boot.starter)
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.validation)

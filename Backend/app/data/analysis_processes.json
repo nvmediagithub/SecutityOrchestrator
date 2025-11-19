@@ -21,5 +21,8 @@
   "type" : "performanceTest",
   "bpmnDiagramPath" : "E:\\GitRepositoties\\llm_projects\\SecutityOrchestrator\\Backend\\app\\data\\analysis_processes\\bpmn\\549954e8-9bc8-4435-92ab-1827913c5720.bpmn",
   "bpmnDiagramName" : "01_bonus_payment.bpmn",
-  "bpmnUploadedAt" : "2025-11-19T14:09:42"
+  "bpmnUploadedAt" : "2025-11-19T14:09:42",
+  "openapiSpecPath" : "E:\\GitRepositoties\\llm_projects\\SecutityOrchestrator\\Backend\\app\\data\\analysis_processes\\openapi\\549954e8-9bc8-4435-92ab-1827913c5720-b07724cc-0bbc-4305-98c1-0c8a2ffd69cc.json",
+  "openapiSpecName" : "openapi_test.json",
+  "openapiUploadedAt" : "2025-11-19T15:29:43"
 } ]
