@@ -51,9 +51,9 @@ class ConnectivityServiceImpl implements ConnectivityService {
   Future<ConnectionStatus> checkBackendConnectivity() async {
     try {
       // Connect to backend service (port 8080)
-      final response = await http.get(Uri.parse('$_backendUrl/api/health')).timeout(
-            const Duration(seconds: 10),
-          );
+      final response = await http
+          .get(Uri.parse('$_backendUrl/api/health'))
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         return ConnectionStatus.connected;

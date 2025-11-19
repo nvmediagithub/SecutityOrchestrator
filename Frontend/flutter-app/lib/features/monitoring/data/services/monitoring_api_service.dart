@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../../domain/models/alert.dart';
 import '../../domain/models/metric.dart';
 import '../../domain/models/system_health.dart';
+import '../../domain/models/llm_analytics.dart';
 
 class MonitoringApiService {
   final String baseUrl;
@@ -31,6 +32,27 @@ class MonitoringApiService {
     return data
         .map((json) => Alert.fromJson(json as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<LlmAnalytics> getLlmAnalytics() async {
+    final data = await _getData('/api/monitoring/llm') as Map<String, dynamic>;
+    return LlmAnalytics.fromJson(data);
+  }
+
+  Future<LlmAnalytics> activateProvider(String providerId) async {
+    final response = await client.post(
+      Uri.parse('$baseUrl/api/monitoring/llm/providers/$providerId/activate'),
+      headers: _jsonHeaders,
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Failed to activate provider: ${response.statusCode}');
+    }
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    if (decoded['success'] != true) {
+      final message = decoded['message'] ?? 'Unknown error';
+      throw Exception(message);
+    }
+    return LlmAnalytics.fromJson(decoded['data'] as Map<String, dynamic>);
   }
 
   Future<dynamic> _getData(String path) async {

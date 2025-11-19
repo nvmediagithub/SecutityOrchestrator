@@ -5,6 +5,7 @@ import 'system_health_card.dart';
 import 'metrics_list.dart';
 import 'alerts_list.dart';
 import 'processes_overview_card.dart';
+import 'llm_status_card.dart';
 import '../../analysis-processes/presentation/create_process_dialog.dart';
 import '../../analysis-processes/domain/create_analysis_process_usecase.dart';
 
@@ -25,7 +26,11 @@ class HomePage extends ConsumerWidget {
             SizedBox(height: 24),
             Text(
               'Security Orchestrator Dashboard',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 8),
@@ -37,6 +42,7 @@ class HomePage extends ConsumerWidget {
             SizedBox(height: 32),
             ConnectionStatusCard(),
             SystemHealthCard(),
+            LlmStatusCard(),
             MetricsList(),
             AlertsList(),
             ProcessesOverviewCard(),

@@ -1,0 +1,15 @@
+activeProvider: openrouter
+providers:
+  - id: openrouter
+    displayName: OpenRouter Community
+    mode: remote
+    baseUrl: https://openrouter.ai/api/v1
+    apiKey: "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"
+    model: tngtech/deepseek-r1t-chimera:free
+    enabled: true
+  - id: ollama
+    displayName: Ollama Local
+    mode: local
+    baseUrl: http://localhost:11434
+    model: llama3
+    enabled: true

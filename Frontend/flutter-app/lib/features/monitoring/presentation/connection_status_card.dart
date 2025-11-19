@@ -30,7 +30,9 @@ class ConnectionStatusCard extends ConsumerWidget {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () {
-                final notifier = ref.read(connectivityNotifierProvider.notifier);
+                final notifier = ref.read(
+                  connectivityNotifierProvider.notifier,
+                );
                 notifier.checkConnectivity();
               },
               icon: const Icon(Icons.refresh),
@@ -53,12 +55,20 @@ Widget _buildStatusDisplay(ConnectionStatus status) {
       const SizedBox(height: 8),
       Text(
         status.displayName,
-        style: TextStyle(fontSize: 18, color: color, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 18,
+          color: color,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       if (status == ConnectionStatus.checking)
         const Padding(
           padding: EdgeInsets.only(top: 8),
-          child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
         ),
     ],
   );
@@ -71,7 +81,11 @@ Widget _buildErrorDisplay(Object error) {
       const SizedBox(height: 8),
       Text(
         'Connection Error',
-        style: const TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.w500),
+        style: const TextStyle(
+          fontSize: 18,
+          color: Colors.red,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       const SizedBox(height: 4),
       Text(

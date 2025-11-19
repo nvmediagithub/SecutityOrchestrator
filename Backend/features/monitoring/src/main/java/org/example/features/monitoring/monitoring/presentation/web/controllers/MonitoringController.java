@@ -1,11 +1,14 @@
 package org.example.features.monitoring.monitoring.presentation.web.controllers;
 
 import org.example.features.monitoring.monitoring.application.dto.AlertResponse;
+import org.example.features.monitoring.monitoring.application.dto.LlmAnalyticsResponse;
 import org.example.features.monitoring.monitoring.application.dto.MetricResponse;
 import org.example.features.monitoring.monitoring.application.dto.SystemHealthResponse;
 import org.example.features.monitoring.monitoring.application.usecases.GetAlertsUseCase;
+import org.example.features.monitoring.monitoring.application.usecases.GetLlmAnalyticsUseCase;
 import org.example.features.monitoring.monitoring.application.usecases.GetMetricsUseCase;
 import org.example.features.monitoring.monitoring.application.usecases.GetSystemHealthUseCase;
+import org.example.features.monitoring.monitoring.application.usecases.SwitchLlmProviderUseCase;
 import org.example.features.monitoring.monitoring.domain.entities.Alert;
 import org.example.features.monitoring.monitoring.domain.entities.Metric;
 import org.example.features.monitoring.monitoring.domain.entities.SystemHealth;
@@ -14,6 +17,8 @@ import org.example.features.monitoring.monitoring.domain.valueobjects.MetricType
 import org.example.shared.common.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,13 +38,19 @@ public class MonitoringController {
     private final GetSystemHealthUseCase getSystemHealthUseCase;
     private final GetMetricsUseCase getMetricsUseCase;
     private final GetAlertsUseCase getAlertsUseCase;
+    private final GetLlmAnalyticsUseCase getLlmAnalyticsUseCase;
+    private final SwitchLlmProviderUseCase switchLlmProviderUseCase;
 
     public MonitoringController(GetSystemHealthUseCase getSystemHealthUseCase,
                                 GetMetricsUseCase getMetricsUseCase,
-                                GetAlertsUseCase getAlertsUseCase) {
+                                GetAlertsUseCase getAlertsUseCase,
+                                GetLlmAnalyticsUseCase getLlmAnalyticsUseCase,
+                                SwitchLlmProviderUseCase switchLlmProviderUseCase) {
         this.getSystemHealthUseCase = getSystemHealthUseCase;
         this.getMetricsUseCase = getMetricsUseCase;
         this.getAlertsUseCase = getAlertsUseCase;
+        this.getLlmAnalyticsUseCase = getLlmAnalyticsUseCase;
+        this.switchLlmProviderUseCase = switchLlmProviderUseCase;
     }
 
     @GetMapping("/health")
@@ -86,6 +97,26 @@ public class MonitoringController {
                 .map(this::mapToAlertResponse)
                 .collect(Collectors.toList()))
             .thenApply(responses -> ResponseEntity.ok(ApiResponse.success(responses)));
+    }
+
+    @GetMapping("/llm")
+    public CompletableFuture<ResponseEntity<ApiResponse<LlmAnalyticsResponse>>> getLlmAnalytics() {
+        return getLlmAnalyticsUseCase.execute()
+            .thenApply(response -> ResponseEntity.ok(ApiResponse.success(response)));
+    }
+
+    @PostMapping("/llm/providers/{providerId}/activate")
+    public CompletableFuture<ResponseEntity<ApiResponse<LlmAnalyticsResponse>>> activateLlmProvider(
+        @PathVariable("providerId") String providerId
+    ) {
+        return switchLlmProviderUseCase.execute(providerId)
+            .thenApply(response -> ResponseEntity.ok(ApiResponse.success(response)))
+            .exceptionally(ex -> {
+                String message = ex.getCause() instanceof IllegalArgumentException
+                    ? ex.getCause().getMessage()
+                    : ex.getMessage();
+                return ResponseEntity.badRequest().body(ApiResponse.error(message));
+            });
     }
 
     private SystemHealthResponse mapToSystemHealthResponse(SystemHealth health) {
