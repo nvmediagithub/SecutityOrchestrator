@@ -1,53 +1,65 @@
-enum MetricType { cpuUsage, memoryUsage, diskUsage, networkIo, responseTime }
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class Metric {
-  final String id;
-  final String name;
-  final MetricType type;
-  final double value;
-  final String unit;
-  final DateTime timestamp;
-  final String description;
+part 'metric.freezed.dart';
+part 'metric.g.dart';
 
-  Metric({
-    required this.id,
-    required this.name,
-    required this.type,
-    required this.value,
-    required this.unit,
-    required this.timestamp,
-    required this.description,
-  });
+@JsonEnum(fieldRename: FieldRename.screamingSnake)
+enum MetricType {
+  cpuUsage,
+  memoryUsage,
+  diskUsage,
+  networkUsage,
+  databaseConnections,
+  externalServiceLatency,
+  applicationHealth,
+  systemLoad,
+  @JsonValue('NETWORK_IO')
+  networkIo,
+  @JsonValue('RESPONSE_TIME')
+  responseTime,
+  unknown,
+}
 
-  factory Metric.fromJson(Map<String, dynamic> json) {
-    return Metric(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      type: MetricType.values.firstWhere(
-        (e) =>
-            e.name ==
-            (json['type'] as String).toLowerCase().replaceAll('_', ''),
-      ),
-      value: (json['value'] as num).toDouble(),
-      unit: json['unit'] as String,
-      timestamp: DateTime.parse(json['timestamp'] as String),
-      description: (json['description'] ?? json['tags'] ?? '') as String,
-    );
+extension MetricTypeDisplay on MetricType {
+  String get displayName {
+    switch (this) {
+      case MetricType.cpuUsage:
+        return 'CPU Usage';
+      case MetricType.memoryUsage:
+        return 'Memory Usage';
+      case MetricType.diskUsage:
+        return 'Disk Usage';
+      case MetricType.networkUsage:
+      case MetricType.networkIo:
+        return 'Network Throughput';
+      case MetricType.databaseConnections:
+        return 'Database Connections';
+      case MetricType.externalServiceLatency:
+        return 'External Service Latency';
+      case MetricType.applicationHealth:
+        return 'Application Health';
+      case MetricType.systemLoad:
+        return 'System Load';
+      case MetricType.responseTime:
+        return 'Response Time';
+      case MetricType.unknown:
+        return 'Metric';
+    }
   }
+}
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'type': type.name.toUpperCase().replaceAllMapped(
-        RegExp(r'([a-z])([A-Z])'),
-        (match) => '${match.group(1)}_${match.group(2)}',
-      ),
-      'value': value,
-      'unit': unit,
-      'timestamp': timestamp.toIso8601String(),
-      'description': description,
-      'tags': description,
-    };
-  }
+@freezed
+class Metric with _$Metric {
+  const factory Metric({
+    required String id,
+    required String name,
+    @JsonKey(unknownEnumValue: MetricType.unknown) required MetricType type,
+    required double value,
+    required String unit,
+    required DateTime timestamp,
+    @Default('') String description,
+    @Default('') String tags,
+  }) = _Metric;
+
+  factory Metric.fromJson(Map<String, dynamic> json) => _$MetricFromJson(json);
 }

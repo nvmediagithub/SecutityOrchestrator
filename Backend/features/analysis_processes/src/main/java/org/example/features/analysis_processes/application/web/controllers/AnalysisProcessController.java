@@ -33,7 +33,7 @@ public class AnalysisProcessController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<AnalysisProcess>> getProcess(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<AnalysisProcess>> getProcess(@PathVariable("id") String id) {
         return analysisProcessService.getProcessById(id)
             .map(process -> ResponseEntity.ok(ApiResponse.success(process)))
             .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -50,7 +50,7 @@ public class AnalysisProcessController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<AnalysisProcess>> updateProcess(
-            @PathVariable String id,
+            @PathVariable("id") String id,
             @RequestBody AnalysisProcessRequest request) {
         AnalysisProcess process = request.toEntity();
         return analysisProcessService.updateProcess(id, process)
@@ -60,7 +60,7 @@ public class AnalysisProcessController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProcess(@PathVariable String id) {
+    public ResponseEntity<Void> deleteProcess(@PathVariable("id") String id) {
         boolean deleted = analysisProcessService.deleteProcess(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }

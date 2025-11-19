@@ -1,0 +1,29 @@
+[ {
+  "id" : "6fa43c4b-5450-4291-b326-d6e31006e3a7",
+  "name" : "Post-release regression",
+  "description" : "Smoke tests across staging clusters",
+  "createdAt" : "2025-11-19T09:53:04",
+  "status" : "completed",
+  "type" : "integrationTest"
+}, {
+  "id" : "9faf276e-2bf5-4b54-a541-4c757117fb2f",
+  "name" : "qwe",
+  "description" : "qwe",
+  "createdAt" : "2025-11-19T11:55:27",
+  "status" : "pending",
+  "type" : "securityAnalysis"
+}, {
+  "id" : "549954e8-9bc8-4435-92ab-1827913c5720",
+  "name" : "йцуйцу",
+  "description" : "фыввфыв",
+  "createdAt" : "2025-11-19T12:05:25",
+  "status" : "pending",
+  "type" : "performanceTest"
+}, {
+  "id" : "75cb8d83-6bbe-4509-8cc0-e53e8d21a5ac",
+  "name" : "ысыфв",
+  "description" : "ывсыфв",
+  "createdAt" : "2025-11-19T12:05:34",
+  "status" : "pending",
+  "type" : "integrationTest"
+} ]

@@ -30,6 +30,53 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
     _processesFuture = service.getProcesses();
   }
 
+  Future<void> _deleteProcess(AnalysisProcess process) async {
+    final id = process.id;
+    if (id == null) return;
+    final service = ref.read(analysisProcessServiceProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await service.deleteProcess(id);
+      if (!mounted) return;
+      setState(() {
+        _loadProcesses();
+      });
+      messenger.showSnackBar(
+        SnackBar(content: Text('Process "${process.name}" deleted')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Failed to delete process: $e')),
+      );
+    }
+  }
+
+  Future<void> _confirmDeleteProcess(AnalysisProcess process) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Process'),
+        content: Text('Delete "${process.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) {
+      await _deleteProcess(process);
+    }
+  }
+
   Future<void> _showCreateProcessDialog() async {
     // Assuming provider for CreateAnalysisProcessUseCase is defined
     final createUseCase = ref.read(createAnalysisProcessUseCaseProvider);
@@ -108,21 +155,33 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
                     subtitle: Text(
                       '${process.type.displayName} - ${process.status.displayName}',
                     ),
-                    trailing: Icon(
-                      process.status == ProcessStatus.running
-                          ? Icons.play_arrow
-                          : process.status == ProcessStatus.completed
-                          ? Icons.check_circle
-                          : process.status == ProcessStatus.failed
-                          ? Icons.error
-                          : Icons.schedule,
-                      color: process.status == ProcessStatus.running
-                          ? Colors.blue
-                          : process.status == ProcessStatus.completed
-                          ? Colors.green
-                          : process.status == ProcessStatus.failed
-                          ? Colors.red
-                          : Colors.grey,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          process.status == ProcessStatus.running
+                              ? Icons.play_arrow
+                              : process.status == ProcessStatus.completed
+                              ? Icons.check_circle
+                              : process.status == ProcessStatus.failed
+                              ? Icons.error
+                              : Icons.schedule,
+                          color: process.status == ProcessStatus.running
+                              ? Colors.blue
+                              : process.status == ProcessStatus.completed
+                              ? Colors.green
+                              : process.status == ProcessStatus.failed
+                              ? Colors.red
+                              : Colors.grey,
+                        ),
+                        if (process.id != null)
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline),
+                            color: Colors.red.shade400,
+                            tooltip: 'Delete',
+                            onPressed: () => _confirmDeleteProcess(process),
+                          ),
+                      ],
                     ),
                     onTap: () {
                       // TODO: Navigate to process details

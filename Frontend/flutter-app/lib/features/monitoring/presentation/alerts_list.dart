@@ -55,39 +55,35 @@ class AlertsList extends ConsumerWidget {
   }
 
   Widget _buildAlertItem(Alert alert) {
+    final color = _alertColor(alert.severity);
+    final icon = _alertIcon(alert.severity);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: alert.color.withOpacity(0.1),
-        border: Border.all(color: alert.color.withOpacity(0.3)),
+        color: color.withOpacity(0.1),
+        border: Border.all(color: color.withOpacity(0.3)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          Icon(alert.icon, color: alert.color, size: 24),
+          Icon(icon, color: color, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        alert.title,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ],
+                Text(
+                  alert.title,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  alert.message,
+                  alert.description,
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'From ${alert.source} • ${alert.timestamp.toString().substring(11, 19)}',
+                  'From ${alert.source} · ${_formatTime(alert.createdAt)}',
                   style: TextStyle(color: Colors.grey.shade500, fontSize: 10),
                 ),
               ],
@@ -96,5 +92,37 @@ class AlertsList extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Color _alertColor(AlertSeverity severity) {
+    switch (severity) {
+      case AlertSeverity.low:
+        return Colors.yellow.shade700;
+      case AlertSeverity.medium:
+        return Colors.orange.shade600;
+      case AlertSeverity.high:
+        return Colors.red.shade600;
+      case AlertSeverity.critical:
+        return Colors.red.shade900;
+    }
+  }
+
+  IconData _alertIcon(AlertSeverity severity) {
+    switch (severity) {
+      case AlertSeverity.low:
+        return Icons.warning;
+      case AlertSeverity.medium:
+        return Icons.warning_amber;
+      case AlertSeverity.high:
+        return Icons.error;
+      case AlertSeverity.critical:
+        return Icons.error_outline;
+    }
+  }
+
+  String _formatTime(DateTime timestamp) {
+    final local = timestamp.toLocal();
+    final time = local.toIso8601String().substring(11, 19);
+    return time;
   }
 }

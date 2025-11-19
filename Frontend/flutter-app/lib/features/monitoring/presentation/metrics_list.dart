@@ -59,12 +59,21 @@ class MetricsList extends ConsumerWidget {
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 Text(
+                  metric.type.displayName,
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+                Text(
                   '${metric.value.toStringAsFixed(1)} ${metric.unit}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                if (metric.description.isNotEmpty)
+                  Text(
+                    metric.description,
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  ),
               ],
             ),
           ),
