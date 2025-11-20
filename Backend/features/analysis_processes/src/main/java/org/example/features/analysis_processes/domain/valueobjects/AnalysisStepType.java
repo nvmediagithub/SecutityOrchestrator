@@ -9,6 +9,7 @@ import java.util.Locale;
 public enum AnalysisStepType {
     COLLECT_INPUTS,
     LLM_ANALYSIS,
+    HTTP_REQUEST,
     TEST_EXECUTION;
 
     @JsonValue

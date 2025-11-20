@@ -70,6 +70,7 @@ Map<String, dynamic> _$$AnalysisStepImplToJson(_$AnalysisStepImpl instance) =>
 const _$AnalysisStepTypeEnumMap = {
   AnalysisStepType.collectInputs: 'collect_inputs',
   AnalysisStepType.llmAnalysis: 'llm_analysis',
+  AnalysisStepType.httpRequest: 'http_request',
   AnalysisStepType.testExecution: 'test_execution',
 };
 

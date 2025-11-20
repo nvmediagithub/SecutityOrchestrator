@@ -293,10 +293,11 @@ The repository includes sample files in the `examples/` directory:
 
 #### Analysis Sessions & Planner Output
 
-- **New HTTP-based LLM service**: `HttpLlmService` automatically routes chat completions to the active provider declared in `config/llm-providers.yml`. Local Ollama instances are called via `/api/chat`, while remote/OpenRouter providers use OpenAI-compatible `/chat/completions`. Tune latency budgets with `llm.service.timeout-seconds`.
-- **Structured planner context**: `ProcessAnalysisPlanner` now stores `llmPlan`, `llmPlanActions`, `llmSummary`, `llmTestAssertions`, and `testScript` for each session. The Flutter Process Detail screen renders those sections so analysts can resume work even after a page refresh.
+- **New HTTP-driven LLM planner**: `ProcessAnalysisPlanner` captures the full prompt/response pair, stores `llmPrompt`, `llmRawResponse`, `requiresAdditionalInput`, and any `requiredInputFields` so the UI can resume conversations, surface dynamic forms, and flag when the LLM asks for more data.
+- **Sequential HTTP step execution**: the planner emits `httpRequests` as explicit steps. The orchestrator persists each step plus metadata (description, a flag for `requiresAdditionalInput`, and additional input specs), exposes `POST /api/analysis-sessions/{sessionId}/steps/{stepId}/execute` for idempotent execution, logs every HTTP response into `httpResults`, and advances the session to the next HTTP step or the final `TEST_EXECUTION` step.
+- **Interactive Next Step workflow**: each step now appears in the analysis block with a spinner/status badge, editable additional-input forms when requested, and a “Next step” control that knows when the backend has progressed. The Flutter UI polls the session or refreshes on demand to keep the timeline and trace logs in sync with the new state machine.
 - **Persistent sessions**: every transition is flushed to the JSON file defined by `analysis.sessions.storage-path` (`data/analysis_sessions.json` by default, ignored in git). Adjust the path when deploying to multi-user environments.
-- **Graceful fallback**: if an LLM is unavailable the planner still emits deterministic actions, scripts, and assertions generated from the uploaded BPMN/OpenAPI artifacts, ensuring smoke tests remain runnable offline.
+- **Graceful fallback**: if an LLM is unavailable, the planner still emits deterministic HTTP checks, actions, and assertions derived from the uploaded BPMN/OpenAPI artifacts so smoke tests remain runnable offline.
 
 #### LLM Management API Examples
 

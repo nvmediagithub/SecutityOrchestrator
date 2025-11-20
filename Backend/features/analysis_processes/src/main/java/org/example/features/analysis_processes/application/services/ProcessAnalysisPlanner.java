@@ -8,6 +8,7 @@ import org.example.features.llm.domain.dto.ChatCompletionRequest;
 import org.example.features.llm.domain.dto.ChatCompletionResponse;
 import org.example.features.llm.domain.services.LLMService;
 import org.example.features.analysis_processes.domain.valueobjects.HttpRequestStep;
+import org.example.features.analysis_processes.domain.valueobjects.InputRequirement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -23,8 +24,10 @@ import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
@@ -121,13 +124,24 @@ public class ProcessAnalysisPlanner {
         if (assertions.isEmpty()) {
             assertions = defaultAssertions(defaultEndpoint);
         }
-        List<HttpRequestStep> httpRequests = parseHttpRequests(parsed.get("httpRequests"), defaultEndpoint);
+        HttpPlan httpPlan = parseHttpRequests(parsed.get("httpRequests"), defaultEndpoint);
+        boolean requiresAdditionalInput = parseRequiresAdditionalInput(parsed, httpPlan.additionalInputs());
+        List<InputRequirement> rootAdditionalInputs = parseInputRequirements(parsed.get("additionalInputs"));
+        if (rootAdditionalInputs.isEmpty()) {
+            rootAdditionalInputs = parseInputRequirements(parsed.get("inputFields"));
+        }
+        List<HttpRequestStep> httpRequests = httpPlan.steps();
         return Optional.of(new PlanResult(
             planText,
             summaryText,
             actions,
             assertions,
-            httpRequests
+            httpRequests,
+            prompt,
+            content,
+            requiresAdditionalInput,
+            rootAdditionalInputs,
+            httpPlan.additionalInputs()
         ));
         } catch (Exception e) {
             LOGGER.warn("LLM plan generation failed, falling back to heuristics: {}", e.getMessage());
@@ -178,12 +192,18 @@ public class ProcessAnalysisPlanner {
             )
         );
 
+        List<List<InputRequirement>> inputLists = defaultHttpInputLists(httpRequests.size());
         return new PlanResult(
             plan.toString(),
             summaryText,
             actions,
             assertions,
-            httpRequests
+            httpRequests,
+            "",
+            "",
+            false,
+            List.of(),
+            inputLists
         );
     }
 
@@ -307,7 +327,17 @@ public class ProcessAnalysisPlanner {
         String summary,
         List<ActionItem> actions,
         List<TestAssertion> assertions,
-        List<HttpRequestStep> httpRequests
+        List<HttpRequestStep> httpRequests,
+        String prompt,
+        String rawResponse,
+        boolean requiresAdditionalInput,
+        List<InputRequirement> additionalInputs,
+        List<List<InputRequirement>> httpAdditionalInputs
+    ) {}
+
+    private record HttpPlan(
+        List<HttpRequestStep> steps,
+        List<List<InputRequirement>> additionalInputs
     ) {}
 
     public record ActionItem(String title, String detail, String relatedArtifact) {}
@@ -335,12 +365,50 @@ public class ProcessAnalysisPlanner {
         return normalized;
     }
 
-    @SuppressWarnings("unchecked")
-    private List<HttpRequestStep> parseHttpRequests(Object source, String defaultEndpoint) {
+    private boolean parseRequiresAdditionalInput(
+        Map<String, Object> parsed,
+        List<List<InputRequirement>> httpInputs
+    ) {
+        if (Boolean.TRUE.equals(parsed.get("requires_additional_input"))
+            || Boolean.TRUE.equals(parsed.get("requiresAdditionalInput"))) {
+            return true;
+        }
+        if (!parseInputRequirements(parsed.get("additionalInputs")).isEmpty()
+            || !parseInputRequirements(parsed.get("inputFields")).isEmpty()) {
+            return true;
+        }
+        return httpInputs.stream().anyMatch(inputs -> inputs != null && !inputs.isEmpty());
+    }
+
+    private List<InputRequirement> parseInputRequirements(Object source) {
         if (!(source instanceof List<?> list)) {
-            return defaultHttpRequests(defaultEndpoint);
+            return List.of();
+        }
+        List<InputRequirement> requirements = new ArrayList<>();
+        for (Object entry : list) {
+            if (entry instanceof Map<?, ?> mapEntry) {
+                Map<String, Object> normalized = normalizeRecord(mapEntry);
+                String name = asText(normalized.get("name"));
+                if (!StringUtils.hasText(name)) {
+                    continue;
+                }
+                String label = asText(normalized.get("label"));
+                String description = asText(normalized.get("description"));
+                boolean required = Boolean.TRUE.equals(normalized.get("required"));
+                requirements.add(new InputRequirement(name, label, description, required).withDefaults());
+            }
+        }
+        return requirements;
+    }
+
+    @SuppressWarnings("unchecked")
+    private HttpPlan parseHttpRequests(Object source, String defaultEndpoint) {
+        if (!(source instanceof List<?> list)) {
+            List<HttpRequestStep> defaultSteps = defaultHttpRequests(defaultEndpoint);
+            return new HttpPlan(defaultSteps, defaultHttpInputLists(defaultSteps.size()));
         }
         List<HttpRequestStep> steps = new ArrayList<>();
+        List<List<InputRequirement>> additionalInputs = new ArrayList<>();
         for (Object entry : list) {
             if (entry instanceof Map<?, ?> map) {
                 Map<String, Object> normalized = normalizeRecord(map);
@@ -372,9 +440,21 @@ public class ProcessAnalysisPlanner {
                     StringUtils.hasText(body) ? body : null,
                     description
                 ));
+                List<InputRequirement> inputs = parseInputRequirements(normalized.get("additionalInputs"));
+                if (inputs.isEmpty()) {
+                    inputs = parseInputRequirements(normalized.get("inputFields"));
+                }
+                additionalInputs.add(inputs);
             }
         }
-        return steps.isEmpty() ? defaultHttpRequests(defaultEndpoint) : steps;
+        if (steps.isEmpty()) {
+            List<HttpRequestStep> defaultSteps = defaultHttpRequests(defaultEndpoint);
+            return new HttpPlan(defaultSteps, defaultHttpInputLists(defaultSteps.size()));
+        }
+        while (additionalInputs.size() < steps.size()) {
+            additionalInputs.add(List.of());
+        }
+        return new HttpPlan(steps, additionalInputs);
     }
 
     private List<HttpRequestStep> defaultHttpRequests(String defaultEndpoint) {
@@ -389,6 +469,14 @@ public class ProcessAnalysisPlanner {
             null,
             "Basic connectivity check"
         ));
+    }
+
+    private List<List<InputRequirement>> defaultHttpInputLists(int count) {
+        List<List<InputRequirement>> result = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            result.add(List.of());
+        }
+        return result;
     }
 
     private Optional<Map<String, Object>> parseJsonContent(String content) {

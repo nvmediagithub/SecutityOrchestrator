@@ -13,7 +13,7 @@ enum AnalysisSessionStatus {
 }
 
 @JsonEnum(fieldRename: FieldRename.snake)
-enum AnalysisStepType { collectInputs, llmAnalysis, testExecution }
+enum AnalysisStepType { collectInputs, llmAnalysis, httpRequest, testExecution }
 
 @JsonEnum(fieldRename: FieldRename.snake)
 enum AnalysisStepStatus { pending, waiting, running, completed, failed }

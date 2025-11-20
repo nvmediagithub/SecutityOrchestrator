@@ -12,6 +12,9 @@ public class HttpRequestStep {
     @JsonProperty("name")
     private String name;
 
+    @JsonProperty("stepId")
+    private String stepId;
+
     @JsonProperty("method")
     private String method;
 
@@ -38,6 +41,14 @@ public class HttpRequestStep {
         this.headers = headers == null ? Collections.emptyMap() : headers;
         this.body = body;
         this.description = description;
+    }
+
+    public String getStepId() {
+        return stepId;
+    }
+
+    public void setStepId(String stepId) {
+        this.stepId = stepId;
     }
 
     public String getName() {

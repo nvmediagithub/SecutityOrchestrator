@@ -42,10 +42,22 @@ public class HttpRequestExecutorImpl implements HttpRequestExecutor {
             Instant start = Instant.now();
             try {
                 HttpResponse<String> response = httpClient.send(builder.build(), HttpResponse.BodyHandlers.ofString());
-                results.add(createResult(step, response.statusCode(), response.body(), Duration.between(start, Instant.now()).toMillis()));
+                results.add(createResult(
+                    step,
+                    step.getStepId() != null ? step.getStepId() : step.getName(),
+                    response.statusCode(),
+                    response.body(),
+                    Duration.between(start, Instant.now()).toMillis()
+                ));
             } catch (Exception ex) {
                 LOGGER.warn("HTTP request step {} failed: {}", step.getName(), ex.getMessage());
-                results.add(createResult(step, 0, ex.getMessage(), Duration.between(start, Instant.now()).toMillis()));
+                results.add(createResult(
+                    step,
+                    step.getStepId() != null ? step.getStepId() : step.getName(),
+                    0,
+                    ex.getMessage(),
+                    Duration.between(start, Instant.now()).toMillis()
+                ));
             }
         }
         return results;
@@ -74,7 +86,7 @@ public class HttpRequestExecutorImpl implements HttpRequestExecutor {
         return baseUrl + candidate;
     }
 
-    private Map<String, Object> createResult(HttpRequestStep step, int status, String body, long durationMs) {
+    private Map<String, Object> createResult(HttpRequestStep step, String stepId, int status, String body, long durationMs) {
         Map<String, Object> result = new HashMap<>();
         result.put("name", step.getName());
         result.put("status", status);
@@ -82,6 +94,7 @@ public class HttpRequestExecutorImpl implements HttpRequestExecutor {
         result.put("durationMs", durationMs);
         result.put("method", step.getMethod());
         result.put("url", step.getUrl());
+        result.put("stepId", stepId);
         return result;
     }
 }

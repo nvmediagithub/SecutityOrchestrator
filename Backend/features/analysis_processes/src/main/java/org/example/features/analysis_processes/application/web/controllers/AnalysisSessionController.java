@@ -102,6 +102,17 @@ public class AnalysisSessionController {
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/analysis-sessions/{sessionId}/steps/{stepId}/execute")
+    public ResponseEntity<ApiResponse<AnalysisSessionResponse>> executeHttpStep(
+        @PathVariable("sessionId") String sessionId,
+        @PathVariable("stepId") String stepId,
+        @RequestBody(required = false) Map<String, Object> payload
+    ) {
+        return orchestrator.executeHttpStep(sessionId, stepId, payload)
+            .map(session -> ResponseEntity.ok(ApiResponse.success(AnalysisSessionResponse.from(session))))
+            .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/analysis-sessions/{sessionId}")
     public ResponseEntity<ApiResponse<AnalysisSessionResponse>> getSession(@PathVariable String sessionId) {
         return sessionService.getSession(sessionId)
