@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../analysis-processes/di/analysis_processes_providers.dart';
+import '../../../features/analysis-processes/di/analysis_processes_providers.dart';
 import '../../analysis-processes/domain/analysis_process.dart';
 
 final processesProvider = FutureProvider<List<AnalysisProcess>>((ref) async {

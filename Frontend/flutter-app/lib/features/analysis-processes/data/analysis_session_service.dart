@@ -72,6 +72,15 @@ class AnalysisSessionService {
     return AnalysisSession.fromJson(data as Map<String, dynamic>);
   }
 
+  Future<AnalysisSession> executeHttpRequests(String sessionId) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/api/analysis-sessions/$sessionId/http-requests'),
+      headers: _jsonHeaders,
+    );
+    final data = _parseResponse(response);
+    return AnalysisSession.fromJson(data as Map<String, dynamic>);
+  }
+
   dynamic _parseResponse(http.Response response) {
     print('Response status: ${response.statusCode}');
     print('Response headers: ${response.headers}');

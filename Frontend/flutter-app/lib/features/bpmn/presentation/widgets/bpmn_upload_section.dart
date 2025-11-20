@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../analysis-processes/di/analysis_processes_providers.dart';
 import '../../di/bpmn_providers.dart';
 import '../../domain/models/bpmn_analysis.dart';
 import 'bpmn_viewer.dart';
@@ -43,6 +44,9 @@ class _BpmnUploadSectionState extends ConsumerState<BpmnUploadSection> {
       setState(() {
         _analysis = analysis;
       });
+      if (widget.processId != null) {
+        ref.invalidate(processDetailProvider(widget.processId!));
+      }
     } catch (error) {
       setState(() {
         _error = error.toString();
@@ -99,6 +103,9 @@ class _BpmnUploadSectionState extends ConsumerState<BpmnUploadSection> {
       setState(() {
         _analysis = analysis;
       });
+      if (widget.processId != null) {
+        ref.invalidate(processDetailProvider(widget.processId!));
+      }
     } catch (error) {
       setState(() {
         _error = error.toString();

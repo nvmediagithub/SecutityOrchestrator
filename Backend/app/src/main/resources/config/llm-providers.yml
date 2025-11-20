@@ -11,5 +11,6 @@ providers:
     displayName: Ollama Local
     mode: local
     baseUrl: http://localhost:11434
-    model: llama3.2:3b
+    # model: "codellama:7b-instruct-q4_0"
+    model: "qwen3-coder:480b-cloud"
     enabled: true

@@ -7,6 +7,7 @@ import org.example.features.analysis_processes.domain.entities.AnalysisProcess;
 import org.example.features.llm.domain.dto.ChatCompletionRequest;
 import org.example.features.llm.domain.dto.ChatCompletionResponse;
 import org.example.features.llm.domain.services.LLMService;
+import org.example.features.analysis_processes.domain.valueobjects.HttpRequestStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -99,7 +100,7 @@ public class ProcessAnalysisPlanner {
             request.setMessages(List.of(
                 new ChatCompletionRequest.Message("system",
                     "You are a security automation expert. "
-                        + "Return JSON with fields plan (markdown), script (JavaScript) and summary (short text)."),
+                        + "Return JSON with fields plan (markdown), httpRequests (array of HTTP steps), summary (short text)."),
                 new ChatCompletionRequest.Message("user", prompt)
             ));
 
@@ -108,28 +109,26 @@ public class ProcessAnalysisPlanner {
                 return Optional.empty();
             }
             String content = response.getChoices().get(0).getMessage().getContent();
-            Map<String, Object> parsed = jsonMapper.readValue(
-                content,
-                new TypeReference<Map<String, Object>>() {}
-            );
+            Map<String, Object> parsed = parseJsonContent(content)
+                .orElseGet(() -> Map.of("plan", content));
             String planText = asText(parsed.getOrDefault("plan", content));
-            String script = asText(parsed.getOrDefault("script", ""));
             String summaryText = asText(parsed.getOrDefault("summary", ""));
-            List<ActionItem> actions = parseActionItems(parsed.get("actions"));
-            if (actions.isEmpty()) {
-                actions = deriveActionItems(planText, defaultEndpoint);
-            }
-            List<TestAssertion> assertions = parseAssertions(parsed.get("assertions"));
-            if (assertions.isEmpty()) {
-                assertions = defaultAssertions(defaultEndpoint);
-            }
-            return Optional.of(new PlanResult(
-                planText,
-                script,
-                summaryText,
-                actions,
-                assertions
-            ));
+        List<ActionItem> actions = parseActionItems(parsed.get("actions"));
+        if (actions.isEmpty()) {
+            actions = deriveActionItems(planText, defaultEndpoint);
+        }
+        List<TestAssertion> assertions = parseAssertions(parsed.get("assertions"));
+        if (assertions.isEmpty()) {
+            assertions = defaultAssertions(defaultEndpoint);
+        }
+        List<HttpRequestStep> httpRequests = parseHttpRequests(parsed.get("httpRequests"), defaultEndpoint);
+        return Optional.of(new PlanResult(
+            planText,
+            summaryText,
+            actions,
+            assertions,
+            httpRequests
+        ));
         } catch (Exception e) {
             LOGGER.warn("LLM plan generation failed, falling back to heuristics: {}", e.getMessage());
             return Optional.empty();
@@ -157,27 +156,6 @@ public class ProcessAnalysisPlanner {
         }
         plan.add("3. Capture the execution result and prepare remediation notes for the security team.");
 
-        String script = """
-        async function runSecuritySmokeTest() {
-          const baseUrl = '%s';
-          const endpoint = '%s';
-          const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer %s'
-          };
-
-          const response = await fetch(`${baseUrl}${endpoint}`, { headers });
-          const text = await response.text();
-          console.log('Response status:', response.status);
-          console.log('Body:', text);
-          return { status: response.status, body: text };
-        }
-
-        runSecuritySmokeTest()
-          .then((result) => console.log('Test finished', result))
-          .catch((error) => console.error('Test failed', error));
-        """.formatted(baseUrl, selectedEndpoint, authToken);
-
         String summaryText = "BPMN snippet: " + truncate(bpmnSnippet, 200)
             + "; OpenAPI endpoints analyzed: " + summary.endpoints().size();
 
@@ -189,8 +167,24 @@ public class ProcessAnalysisPlanner {
             new ActionItem("Prepare smoke payloads", "Reuse supplied auth token to hit " + selectedEndpoint, baseUrl)
         );
         List<TestAssertion> assertions = defaultAssertions(selectedEndpoint);
+        List<HttpRequestStep> httpRequests = List.of(
+            new HttpRequestStep(
+                "Smoke test endpoint",
+                "GET",
+                selectedEndpoint.startsWith("http") ? selectedEndpoint : baseUrl + selectedEndpoint,
+                Map.of("Authorization", "Bearer " + authToken, "Content-Type", "application/json"),
+                null,
+                "Check the primary endpoint reported by the analysis"
+            )
+        );
 
-        return new PlanResult(plan.toString(), script, summaryText, actions, assertions);
+        return new PlanResult(
+            plan.toString(),
+            summaryText,
+            actions,
+            assertions,
+            httpRequests
+        );
     }
 
     private String buildPrompt(
@@ -213,8 +207,9 @@ public class ProcessAnalysisPlanner {
         builder.append("OpenAPI endpoints:\n");
         summary.endpoints().forEach(path -> builder.append("- ").append(path).append("\n"));
 
-        builder.append("\nRequired output: JSON with keys plan (markdown list of actions), script "
-            + "(JavaScript for fetch-based smoke test), summary (short text). Use user inputs in the script.\n");
+        builder.append("\nRequired output: JSON with keys plan (markdown list of actions), httpRequests "
+            + "(array of HTTP steps containing name, method, url, headers, body, description), summary (short text). "
+            + "Use user inputs to populate headers or payloads as needed.\n");
         return builder.toString();
     }
 
@@ -309,10 +304,10 @@ public class ProcessAnalysisPlanner {
 
     public record PlanResult(
         String plan,
-        String script,
         String summary,
         List<ActionItem> actions,
-        List<TestAssertion> assertions
+        List<TestAssertion> assertions,
+        List<HttpRequestStep> httpRequests
     ) {}
 
     public record ActionItem(String title, String detail, String relatedArtifact) {}
@@ -338,6 +333,92 @@ public class ProcessAnalysisPlanner {
             }
         });
         return normalized;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<HttpRequestStep> parseHttpRequests(Object source, String defaultEndpoint) {
+        if (!(source instanceof List<?> list)) {
+            return defaultHttpRequests(defaultEndpoint);
+        }
+        List<HttpRequestStep> steps = new ArrayList<>();
+        for (Object entry : list) {
+            if (entry instanceof Map<?, ?> map) {
+                Map<String, Object> normalized = normalizeRecord(map);
+                String name = asText(normalized.getOrDefault("name", normalized.get("title")));
+                if (!StringUtils.hasText(name)) {
+                    name = "HTTP step " + (steps.size() + 1);
+                }
+                String method = asText(normalized.getOrDefault("method", "get")).toUpperCase();
+                String url = asText(normalized.getOrDefault("url", normalized.get("endpoint")));
+                if (!StringUtils.hasText(url)) {
+                    url = defaultEndpoint;
+                }
+                Map<String, Object> headersRaw = safeCast(normalized.get("headers"));
+                Map<String, String> headers = new java.util.HashMap<>();
+                if (headersRaw != null) {
+                    headersRaw.forEach((k, v) -> {
+                        if (k != null && v != null) {
+                            headers.put(k.toString(), v.toString());
+                        }
+                    });
+                }
+                String body = asText(normalized.get("body"));
+                String description = asText(normalized.get("description"));
+                steps.add(new HttpRequestStep(
+                    name,
+                    method,
+                    url,
+                    headers,
+                    StringUtils.hasText(body) ? body : null,
+                    description
+                ));
+            }
+        }
+        return steps.isEmpty() ? defaultHttpRequests(defaultEndpoint) : steps;
+    }
+
+    private List<HttpRequestStep> defaultHttpRequests(String defaultEndpoint) {
+        if (!StringUtils.hasText(defaultEndpoint)) {
+            return List.of();
+        }
+        return List.of(new HttpRequestStep(
+            "Default endpoint check",
+            "GET",
+            defaultEndpoint,
+            Map.of("Content-Type", "application/json"),
+            null,
+            "Basic connectivity check"
+        ));
+    }
+
+    private Optional<Map<String, Object>> parseJsonContent(String content) {
+        if (!StringUtils.hasText(content)) {
+            return Optional.empty();
+        }
+        Optional<Map<String, Object>> attempt = tryParse(content);
+        if (attempt.isPresent()) {
+            return attempt;
+        }
+        int first = content.indexOf('{');
+        int last = content.lastIndexOf('}');
+        if (first >= 0 && last > first) {
+            return tryParse(content.substring(first, last + 1));
+        }
+        LOGGER.warn("Unable to parse LLM response as JSON: {}", truncate(content, 256));
+        return Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Optional<Map<String, Object>> tryParse(String text) {
+        try {
+            Map<String, Object> parsed = jsonMapper.readValue(
+                text,
+                new TypeReference<Map<String, Object>>() {}
+            );
+            return Optional.of(parsed);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     private List<ActionItem> parseActionItems(Object source) {

@@ -106,6 +106,13 @@ class _AnalysisSessionBody extends ConsumerWidget {
       }
     }
 
+    Future<void> _executeHttpRequests(AnalysisSession session) async {
+      await runSessionAction(
+        () async => sessionService.executeHttpRequests(session.id),
+        'Не удалось выполнить HTTP-запросы',
+      );
+    }
+
     if (session == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,7 +170,10 @@ class _AnalysisSessionBody extends ConsumerWidget {
           currentStepId: session!.currentStepId,
         ),
         const SizedBox(height: 16),
-        _AnalysisContextView(session: session!),
+        _AnalysisContextView(
+          session: session!,
+          onExecuteScript: () => _executeHttpRequests(session!),
+        ),
         const SizedBox(height: 16),
         _AnalysisActions(
           session: session!,
@@ -471,14 +481,17 @@ class _TestExecutionPanelState extends State<_TestExecutionPanel> {
 
 class _AnalysisContextView extends StatelessWidget {
   final AnalysisSession session;
+  final Future<void> Function()? onExecuteScript;
 
-  const _AnalysisContextView({required this.session});
+  const _AnalysisContextView({
+    required this.session,
+    this.onExecuteScript,
+  });
 
   @override
   Widget build(BuildContext context) {
     final llmPlan = session.context['llmPlan'] as String?;
-    final testScript = session.context['testScript'] as String?;
-    final testResult = session.context['testResult'];
+    final httpResults = session.context['httpResults'] as List<dynamic>? ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,44 +502,57 @@ class _AnalysisContextView extends StatelessWidget {
           Text(llmPlan),
           const SizedBox(height: 12),
         ],
-        if (testScript != null) ...[
-          const Text('Сгенерированный скрипт:'),
-          const SizedBox(height: 4),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: SelectableText(
-              testScript,
-              style: const TextStyle(fontFamily: 'monospace'),
-            ),
+        if (onExecuteScript != null) ...[
+          FilledButton(
+            onPressed: onExecuteScript,
+            child: const Text('Выполнить HTTP-запросы'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
         ],
-        if (testResult != null) ...[
-          const Text('Результат теста:'),
-          const SizedBox(height: 4),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: SelectableText(
-              const JsonEncoder.withIndent('  ').convert(testResult),
-              style: const TextStyle(fontFamily: 'monospace'),
-            ),
-          ),
+        if (httpResults.isNotEmpty) ...[
+          const Text('Результаты HTTP-запросов:'),
+          const SizedBox(height: 8),
+          ...httpResults.map((result) => _HttpResultCard(result: result)),
         ],
       ],
     );
   }
 }
+class _HttpResultCard extends StatelessWidget {
+  final Map<String, dynamic> result;
 
+  const _HttpResultCard({required this.result});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.grey.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              result['name']?.toString() ?? 'HTTP step',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text('URL: ${result['url'] ?? 'unknown'}'),
+            Text('Method: ${result['method'] ?? 'GET'}'),
+            Text('Status: ${result['status'] ?? 'n/a'}'),
+            if (result['durationMs'] != null)
+              Text('Duration: ${result['durationMs']} ms'),
+            const SizedBox(height: 4),
+            Text(
+              'Body: ${result['body'] ?? ''}',
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 AnalysisStep? _findCurrentStep(AnalysisSession session) {
   final id = session.currentStepId;
   if (id == null) return null;

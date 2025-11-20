@@ -29,9 +29,18 @@ public class OpenAPISpecificationAnalyzer implements AnalyzeOpenAPISpecUseCase {
     @Override
     public AnalysisResult analyze(OpenAPISpecification specification) {
         try {
-            // Convert domain entity to OpenAPI object for analysis
+            // Check if we already have the raw specification content
+            Map<String, Object> rawSpec = specification.getRawSpecification();
+            if (rawSpec == null || rawSpec.isEmpty()) {
+                log.warn("Raw specification is empty for specification: {}", specification.getId());
+                return new AnalysisResult(Map.of(), 0, 0, Map.of());
+            }
+
+            // Convert the raw specification map back to JSON string
             String content = new com.fasterxml.jackson.databind.ObjectMapper()
-                    .writeValueAsString(specification.getRawSpecification());
+                    .writeValueAsString(rawSpec);
+
+            // Parse the content to get OpenAPI object
             OpenAPI openAPI = parser.parseFromContent(content);
 
             Map<String, Object> metadata = extractMetadata(openAPI);
@@ -44,7 +53,7 @@ public class OpenAPISpecificationAnalyzer implements AnalyzeOpenAPISpecUseCase {
                     operationsByMethod
             );
         } catch (Exception e) {
-            log.error("Error analyzing specification {}", specification.getId(), e);
+            log.error("Error analyzing specification {}: {}", specification.getId(), e.getMessage(), e);
             return new AnalysisResult(Map.of(), 0, 0, Map.of());
         }
     }
@@ -54,19 +63,31 @@ public class OpenAPISpecificationAnalyzer implements AnalyzeOpenAPISpecUseCase {
         Map<String, Map<String, Object>> endpoints = new HashMap<>();
 
         try {
+            // Check if we already have the raw specification content
+            Map<String, Object> rawSpec = specification.getRawSpecification();
+            if (rawSpec == null || rawSpec.isEmpty()) {
+                log.warn("Raw specification is empty for specification: {}", specification.getId());
+                return endpoints;
+            }
+
+            // Convert the raw specification map back to JSON string
             String content = new com.fasterxml.jackson.databind.ObjectMapper()
-                    .writeValueAsString(specification.getRawSpecification());
+                    .writeValueAsString(rawSpec);
+
+            // Parse the content to get OpenAPI object
             OpenAPI openAPI = parser.parseFromContent(content);
 
             if (openAPI.getPaths() != null) {
                 openAPI.getPaths().forEach((path, pathItem) -> {
-                    Map<String, Object> operations = new HashMap<>();
-                    extractOperations(pathItem, operations);
-                    endpoints.put(path, operations);
+                    if (pathItem != null) {
+                        Map<String, Object> operations = new HashMap<>();
+                        extractOperations(pathItem, operations);
+                        endpoints.put(path, operations);
+                    }
                 });
             }
         } catch (Exception e) {
-            log.error("Error extracting endpoints", e);
+            log.error("Error extracting endpoints for specification {}: {}", specification.getId(), e.getMessage(), e);
         }
 
         return endpoints;

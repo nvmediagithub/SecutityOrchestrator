@@ -71,6 +71,9 @@ public class AnalysisSessionController {
     public ResponseEntity<ApiResponse<AnalysisSessionResponse>> generatePlan(
         @PathVariable("sessionId") String sessionId
     ) {
+        // Add diagnostic logging
+        System.out.println("DEBUG: Received request to /analysis-sessions/" + sessionId + "/llm");
+        System.out.println("DEBUG: Request method: POST (confirmed by @PostMapping annotation)");
         try {
             return orchestrator.generatePlan(sessionId)
                 .map(session -> ResponseEntity.ok(ApiResponse.success(AnalysisSessionResponse.from(session))))
@@ -86,6 +89,15 @@ public class AnalysisSessionController {
         @RequestBody Map<String, Object> payload
     ) {
         return orchestrator.completeTestStep(sessionId, payload)
+            .map(session -> ResponseEntity.ok(ApiResponse.success(AnalysisSessionResponse.from(session))))
+            .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/analysis-sessions/{sessionId}/http-requests")
+    public ResponseEntity<ApiResponse<AnalysisSessionResponse>> executeHttpRequests(
+        @PathVariable("sessionId") String sessionId
+    ) {
+        return orchestrator.executeHttpRequests(sessionId)
             .map(session -> ResponseEntity.ok(ApiResponse.success(AnalysisSessionResponse.from(session))))
             .orElseGet(() -> ResponseEntity.notFound().build());
     }

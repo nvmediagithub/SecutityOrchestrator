@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../analysis-processes/di/analysis_processes_providers.dart';
 import '../../di/openapi_providers.dart';
 import '../../domain/models/openapi_analysis.dart';
 
@@ -41,6 +42,9 @@ class _OpenApiUploadSectionState extends ConsumerState<OpenApiUploadSection> {
       final service = ref.read(openApiServiceProvider);
       final analysis = await service.getProcessSpec(widget.processId!);
       setState(() => _analysis = analysis);
+      if (widget.processId != null) {
+        ref.invalidate(processDetailProvider(widget.processId!));
+      }
     } catch (error) {
       setState(() => _error = error.toString());
     } finally {
@@ -83,6 +87,9 @@ class _OpenApiUploadSectionState extends ConsumerState<OpenApiUploadSection> {
         specName: widget.suggestedName,
       );
       setState(() => _analysis = analysis);
+      if (widget.processId != null) {
+        ref.invalidate(processDetailProvider(widget.processId!));
+      }
     } catch (error) {
       setState(() => _error = error.toString());
     } finally {

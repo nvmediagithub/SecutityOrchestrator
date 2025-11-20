@@ -524,4 +524,750 @@
   },
   "createdAt" : "2025-11-19T23:14:59",
   "updatedAt" : "2025-11-19T23:15:36"
+}, {
+  "id" : "b5cf6684-133f-46fe-8881-c35f016f9f46",
+  "processId" : "3a04d1c9-5bb6-4988-b0f2-8e9583471926",
+  "status" : "running",
+  "currentStepId" : "b4c5ca3e-6907-4945-ba68-f32a65ff1553",
+  "steps" : [ {
+    "id" : "8d6052c8-b1be-4c95-9986-3207e7585f10",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "b4c5ca3e-6907-4945-ba68-f32a65ff1553",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "waiting",
+    "metadata" : { }
+  }, {
+    "id" : "46355d00-e682-4239-b77c-9e0acf311927",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "userInputs" : { }
+  },
+  "createdAt" : "2025-11-20T21:15:04",
+  "updatedAt" : "2025-11-20T21:15:13"
+}, {
+  "id" : "22e12b8a-c68f-4ee9-8ae8-2a40f69653cd",
+  "processId" : "407d1d34-0da3-428d-9798-924b89dc41cf",
+  "status" : "running",
+  "currentStepId" : "fc33c3a6-ce6f-4480-a3f7-a75d06131814",
+  "steps" : [ {
+    "id" : "52153648-389e-4ff4-a564-ca98ef7d59eb",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "fc33c3a6-ce6f-4480-a3f7-a75d06131814",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "running",
+    "metadata" : { }
+  }, {
+    "id" : "2ac582a3-864a-41ee-bd2d-eae68a86bbb8",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "userInputs" : { }
+  },
+  "createdAt" : "2025-11-20T22:30:24",
+  "updatedAt" : "2025-11-20T22:30:27"
+}, {
+  "id" : "2ef08e5b-9452-421f-806e-f13d4a7bc796",
+  "processId" : "01200713-fef4-4b9f-a410-83b98662ff19",
+  "status" : "running",
+  "currentStepId" : "86cc43a0-6e0a-49b4-aed6-26c0f7da628d",
+  "steps" : [ {
+    "id" : "ceca1ee1-7e4a-4e00-a9de-1f01c3d2ac78",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "86cc43a0-6e0a-49b4-aed6-26c0f7da628d",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "waiting",
+    "metadata" : { }
+  }, {
+    "id" : "2117a754-92c8-495d-bdec-a851ff7dc21a",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "userInputs" : { }
+  },
+  "createdAt" : "2025-11-20T22:45:16",
+  "updatedAt" : "2025-11-20T22:45:20"
+}, {
+  "id" : "7a75b634-0a1f-45fe-9a3f-b43a191816d4",
+  "processId" : "c70d39bc-5141-4182-bf89-a40c02bb171f",
+  "status" : "waiting_for_test",
+  "currentStepId" : "c7fe6a22-d8ae-499e-9bbd-32d49eeb16d4",
+  "steps" : [ {
+    "id" : "7d48f6ca-3f82-4c82-8765-f0b5fe050246",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "0f6ad57c-4cad-41e6-a1de-20cb91fea5af",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "c7fe6a22-d8ae-499e-9bbd-32d49eeb16d4",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "waiting",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "userInputs" : { },
+    "llmPlan" : "1. Создать лид, отправив данные клиента.\n2. Выполнить аутентификацию для получения токена доступа.\n3. Получить список доступных продуктов.\n4. Подать заявку на выбранный продукт.\n5. Проверить статус поданной заявки.",
+    "testScript" : "async function runSmokeTest() {\n  const baseUrl = 'https://api.example.com'; // Замените на реальный URL\n\n  try {\n    // Шаг 1: Создание лида\n    const leadResponse = await fetch(`${baseUrl}/customer-leads`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ clientName: 'Иван Иванов', phone: '+79998887766' })\n    });\n    console.log('Создание лида:', leadResponse.status);\n\n    // Шаг 2: Аутентификация\n    const authResponse = await fetch(`${baseUrl}/auth/bank-token`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ username: 'test_user', password: 'test_pass' })\n    });\n    const authToken = (await authResponse.json()).token;\n    console.log('Аутентификация:', authResponse.status);\n\n    // Шаг 3: Получение списка продуктов\n    const productsResponse = await fetch(`${baseUrl}/products`, {\n      headers: { Authorization: `Bearer ${authToken}` }\n    });\n    const products = await productsResponse.json();\n    console.log('Получение продуктов:', productsResponse.status);\n\n    // Шаг 4: Подача заявки\n    const productApplicationResponse = await fetch(`${baseUrl}/product-application`, {\n      method: 'POST',\n      headers: {\n        'Authorization': `Bearer ${authToken}`,\n        'Content-Type': 'application/json'\n      },\n      body: JSON.stringify({ productId: products[0].id, leadId: 123 })\n    });\n    console.log('Подача заявки:', productApplicationResponse.status);\n\n    // Шаг 5: Проверка статуса заявки\n    const checkApplicationResponse = await fetch(`${baseUrl}/product-application-status`, {\n      headers: { Authorization: `Bearer ${authToken}` }\n    });\n    console.log('Проверка статуса заявки:', checkApplicationResponse.status);\n  } catch (error) {\n    console.error('Ошибка при выполнении теста:', error);\n  }\n}\n\nrunSmokeTest();",
+    "llmSummary" : "Автоматизированный smoke-тест проверяет основные шаги процесса подачи заявки на кредит: создание лида, аутентификацию, получение продуктов, подачу и проверку заявки.",
+    "llmPlanActions" : [ {
+      "title" : "Создать лид, отправив данные клиента.",
+      "detail" : "Создать лид, отправив данные клиента.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Выполнить аутентификацию для получения токена доступа.",
+      "detail" : "Выполнить аутентификацию для получения токена доступа.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получить список доступных продуктов.",
+      "detail" : "Получить список доступных продуктов.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Подать заявку на выбранный продукт.",
+      "detail" : "Подать заявку на выбранный продукт.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверить статус поданной заявки.",
+      "detail" : "Проверить статус поданной заявки.",
+      "relatedArtifact" : "/cards"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ]
+  },
+  "createdAt" : "2025-11-20T23:05:45",
+  "updatedAt" : "2025-11-20T23:10:49"
+}, {
+  "id" : "0b53d9e5-1cfe-4989-b1ed-eaa40bef5fcf",
+  "processId" : "1f9d1db2-bea3-47cf-967c-caedda1d8151",
+  "status" : "waiting_for_test",
+  "currentStepId" : "e757953f-63ab-4c91-87fc-d9cd17d0d9d0",
+  "steps" : [ {
+    "id" : "e13208e3-b4dd-4453-aed0-66442dfd8653",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "dbd0ebcf-fb87-4f08-b88a-42fbeb6b05d0",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "e757953f-63ab-4c91-87fc-d9cd17d0d9d0",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "waiting",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Smoke-тест проверяет основные шаги процесса оплаты бонусами: аутентификацию, получение счетов, проверку баланса и инициацию платежа.",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация через POST /auth/bank-token с использованием client_id и client_secret.",
+      "detail" : "Аутентификация через POST /auth/bank-token с использованием client_id и client_secret.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение списка счетов через GET /accounts.",
+      "detail" : "Получение списка счетов через GET /accounts.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Поиск бонусного счёта и проверка баланса через GET /accounts/{account_id}/balances.",
+      "detail" : "Поиск бонусного счёта и проверка баланса через GET /accounts/{account_id}/balances.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Инициация тестового платежа через POST /payments.",
+      "detail" : "Инициация тестового платежа через POST /payments.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверка успешного создания платежа.",
+      "detail" : "Проверка успешного создания платежа.",
+      "relatedArtifact" : "/cards"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team134",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    },
+    "llmPlan" : "1. Аутентификация через POST /auth/bank-token с использованием client_id и client_secret.\n2. Получение списка счетов через GET /accounts.\n3. Поиск бонусного счёта и проверка баланса через GET /accounts/{account_id}/balances.\n4. Инициация тестового платежа через POST /payments.\n5. Проверка успешного создания платежа.",
+    "testScript" : "async function runSmokeTest() {\n  const baseUrl = 'https://vbank.open.bankingapi.ru';\n  const clientId = 'team134';\n  const clientSecret = '9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4';\n\n  try {\n    // Step 1: Authentication\n    const authResponse = await fetch(`${baseUrl}/auth/bank-token`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ client_id: clientId, client_secret: clientSecret })\n    });\n    if (!authResponse.ok) throw new Error('Authentication failed');\n    const { access_token } = await authResponse.json();\n    console.log('✅ Authentication successful');\n\n    // Step 2: Get accounts\n    const accountsResponse = await fetch(`${baseUrl}/accounts`, {\n      headers: { Authorization: `Bearer ${access_token}` }\n    });\n    if (!accountsResponse.ok) throw new Error('Failed to get accounts');\n    const accounts = await accountsResponse.json();\n    console.log('✅ Accounts retrieved');\n\n    // Step 3: Check bonus account balance\n    const bonusAccount = accounts.find(acc => acc.type === 'bonus');\n    if (!bonusAccount) throw new Error('Bonus account not found');\n    const balanceResponse = await fetch(`${baseUrl}/accounts/${bonusAccount.id}/balances`, {\n      headers: { Authorization: `Bearer ${access_token}` }\n    });\n    if (!balanceResponse.ok) throw new Error('Failed to get balance');\n    console.log('✅ Bonus balance checked');\n\n    // Step 4: Initiate payment\n    const paymentResponse = await fetch(`${baseUrl}/payments`, {\n      method: 'POST',\n      headers: {\n        'Authorization': `Bearer ${access_token}`,\n        'Content-Type': 'application/json'\n      },\n      body: JSON.stringify({\n        account_id: bonusAccount.id,\n        amount: 100,\n        description: 'Test bonus payment'\n      })\n    });\n    if (!paymentResponse.ok) throw new Error('Payment initiation failed');\n    console.log('✅ Payment initiated successfully');\n\n  } catch (error) {\n    console.error('❌ Smoke test failed:', error.message);\n  }\n}\n\nrunSmokeTest();"
+  },
+  "createdAt" : "2025-11-20T23:16:51",
+  "updatedAt" : "2025-11-20T23:17:33"
+}, {
+  "id" : "ca3996e0-76d6-4843-a6e7-7582351f7ab0",
+  "processId" : "d92b0f8f-d62b-47ea-8167-de9697e60ecd",
+  "status" : "completed",
+  "steps" : [ {
+    "id" : "68c2dba4-e6f0-4a09-85d9-2aa4e6a53579",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "c0de6320-a94a-4ded-b0a0-d665a67226c9",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "3e8d43b8-790b-45d8-b286-5a4fbd10c07f",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "completed",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Smoke-тест имитирует процесс мобильного платежа: аутентификация, получение счетов и инициация платежа.",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация клиента через POST /auth/bank-token с использованием client_id и client_secret.",
+      "detail" : "Аутентификация клиента через POST /auth/bank-token с использованием client_id и client_secret.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Определение провайдера (имитация внешнего вызова).",
+      "detail" : "Определение провайдера (имитация внешнего вызова).",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение реквизитов провайдера.",
+      "detail" : "Получение реквизитов провайдера.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение списка счетов клиента через GET /accounts.",
+      "detail" : "Получение списка счетов клиента через GET /accounts.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Инициация платежа (POST /payment-consents/request) с использованием полученных данных.",
+      "detail" : "Инициация платежа (POST /payment-consents/request) с использованием полученных данных.",
+      "relatedArtifact" : "/cards"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team143",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    },
+    "llmPlan" : "1. Аутентификация клиента через POST /auth/bank-token с использованием client_id и client_secret.\n2. Определение провайдера (имитация внешнего вызова).\n3. Получение реквизитов провайдера.\n4. Получение списка счетов клиента через GET /accounts.\n5. Инициация платежа (POST /payment-consents/request) с использованием полученных данных.",
+    "testScript" : "async function runSmokeTest() {\n  const baseUrl = 'https://vbank.open.bankingapi.ru';\n  const clientId = 'team143';\n  const clientSecret = '9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4';\n\n  try {\n    // Step 1: Authentication\n    const authResponse = await fetch(`${baseUrl}/auth/bank-token`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ client_id: clientId, client_secret: clientSecret })\n    });\n    if (!authResponse.ok) throw new Error('Authentication failed');\n    const authToken = (await authResponse.json()).access_token;\n\n    // Step 2 & 3: Mock external provider identification and details retrieval\n    console.log('Provider identified and details retrieved');\n\n    // Step 4: Get accounts\n    const accountsResponse = await fetch(`${baseUrl}/accounts`, {\n      headers: { 'Authorization': `Bearer ${authToken}` }\n    });\n    if (!accountsResponse.ok) throw new Error('Failed to retrieve accounts');\n    const accounts = await accountsResponse.json();\n    const accountId = accounts[0]?.id;\n    if (!accountId) throw new Error('No account found');\n\n    // Step 5: Initiate payment\n    const paymentResponse = await fetch(`${baseUrl}/payment-consents/request`, {\n      method: 'POST',\n      headers: { \n        'Authorization': `Bearer ${authToken}`,\n        'Content-Type': 'application/json'\n      },\n      body: JSON.stringify({\n        account_id: accountId,\n        amount: 100,\n        provider: 'mobile'\n      })\n    });\n    if (!paymentResponse.ok) throw new Error('Payment initiation failed');\n    \n    console.log('Smoke test passed');\n  } catch (error) {\n    console.error('Smoke test failed:', error.message);\n  }\n}\n\nrunSmokeTest();",
+    "testResult" : {
+      "success" : true,
+      "notes" : "Script executed via UI button",
+      "script" : "async function runSmokeTest() {\n  const baseUrl = 'https://vbank.open.bankingapi.ru';\n  const clientId = 'team143';\n  const clientSecret = '9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4';\n\n  try {\n    // Step 1: Authentication\n    const authResponse = await fetch(`${baseUrl}/auth/bank-token`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ client_id: clientId, client_secret: clientSecret })\n    });\n    if (!authResponse.ok) throw new Error('Authentication failed');\n    const authToken = (await authResponse.json()).access_token;\n\n    // Step 2 & 3: Mock external provider identification and details retrieval\n    console.log('Provider identified and details retrieved');\n\n    // Step 4: Get accounts\n    const accountsResponse = await fetch(`${baseUrl}/accounts`, {\n      headers: { 'Authorization': `Bearer ${authToken}` }\n    });\n    if (!accountsResponse.ok) throw new Error('Failed to retrieve accounts');\n    const accounts = await accountsResponse.json();\n    const accountId = accounts[0]?.id;\n    if (!accountId) throw new Error('No account found');\n\n    // Step 5: Initiate payment\n    const paymentResponse = await fetch(`${baseUrl}/payment-consents/request`, {\n      method: 'POST',\n      headers: { \n        'Authorization': `Bearer ${authToken}`,\n        'Content-Type': 'application/json'\n      },\n      body: JSON.stringify({\n        account_id: accountId,\n        amount: 100,\n        provider: 'mobile'\n      })\n    });\n    if (!paymentResponse.ok) throw new Error('Payment initiation failed');\n    \n    console.log('Smoke test passed');\n  } catch (error) {\n    console.error('Smoke test failed:', error.message);\n  }\n}\n\nrunSmokeTest();",
+      "timestamp" : "2025-11-21T00:00:06.264"
+    }
+  },
+  "createdAt" : "2025-11-20T23:58:32",
+  "updatedAt" : "2025-11-21T00:00:06"
+}, {
+  "id" : "f5fffd6e-96ea-487e-b253-fe5d97a56fff",
+  "processId" : "d92b0f8f-d62b-47ea-8167-de9697e60ecd",
+  "status" : "completed",
+  "steps" : [ {
+    "id" : "24d61709-bb66-4260-8838-1f4a87daf577",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "90469402-38dc-4abc-bb17-a7ebe3b8574a",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "ef733b70-852b-4e13-a8f7-8dae0219e2ff",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "completed",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Smoke-тест проверяет основные шаги процесса мобильного платежа: аутентификацию, получение счетов и имитацию инициации платежа.",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация клиента через POST /auth/bank-token с использованием client_id и client_secret.",
+      "detail" : "Аутентификация клиента через POST /auth/bank-token с использованием client_id и client_secret.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Определение провайдера (имитация внешнего вызова).",
+      "detail" : "Определение провайдера (имитация внешнего вызова).",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение реквизитов провайдера (имитация).",
+      "detail" : "Получение реквизитов провайдера (имитация).",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение списка счетов клиента через GET /accounts.",
+      "detail" : "Получение списка счетов клиента через GET /accounts.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Инициация платежа (имитация).",
+      "detail" : "Инициация платежа (имитация).",
+      "relatedArtifact" : "/cards"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team143",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    },
+    "llmPlan" : "1. Аутентификация клиента через POST /auth/bank-token с использованием client_id и client_secret.\n2. Определение провайдера (имитация внешнего вызова).\n3. Получение реквизитов провайдера (имитация).\n4. Получение списка счетов клиента через GET /accounts.\n5. Инициация платежа (имитация).\n6. Проверка успешности всех шагов и обработка ошибок.",
+    "testScript" : "async function runSmokeTest() {\n  const baseUrl = 'https://vbank.open.bankingapi.ru/';\n  const clientId = 'team143';\n  const clientSecret = '9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4';\n\n  try {\n    // Шаг 1: Аутентификация\n    const authResponse = await fetch(`${baseUrl}auth/bank-token`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ client_id: clientId, client_secret: clientSecret })\n    });\n    if (!authResponse.ok) throw new Error('Аутентификация не удалась');\n    const authToken = (await authResponse.json()).access_token;\n    console.log('Аутентификация успешна');\n\n    // Шаг 2: Определение провайдера (имитация)\n    console.log('Провайдер определен');\n\n    // Шаг 3: Получение реквизитов провайдера (имитация)\n    console.log('Реквизиты провайдера получены');\n\n    // Шаг 4: Получение списка счетов\n    const accountsResponse = await fetch(`${baseUrl}accounts`, {\n      headers: { Authorization: `Bearer ${authToken}` }\n    });\n    if (!accountsResponse.ok) throw new Error('Не удалось получить список счетов');\n    const accounts = await accountsResponse.json();\n    console.log('Счета получены:', accounts);\n\n    // Шаг 5: Инициация платежа (имитация)\n    console.log('Платеж инициирован');\n\n    console.log('Все шаги успешно пройдены');\n  } catch (error) {\n    console.error('Ошибка в ходе теста:', error.message);\n  }\n}\n\nrunSmokeTest();",
+    "testResult" : {
+      "success" : true,
+      "notes" : "Script executed via UI button",
+      "script" : "async function runSmokeTest() {\n  const baseUrl = 'https://vbank.open.bankingapi.ru/';\n  const clientId = 'team143';\n  const clientSecret = '9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4';\n\n  try {\n    // Шаг 1: Аутентификация\n    const authResponse = await fetch(`${baseUrl}auth/bank-token`, {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ client_id: clientId, client_secret: clientSecret })\n    });\n    if (!authResponse.ok) throw new Error('Аутентификация не удалась');\n    const authToken = (await authResponse.json()).access_token;\n    console.log('Аутентификация успешна');\n\n    // Шаг 2: Определение провайдера (имитация)\n    console.log('Провайдер определен');\n\n    // Шаг 3: Получение реквизитов провайдера (имитация)\n    console.log('Реквизиты провайдера получены');\n\n    // Шаг 4: Получение списка счетов\n    const accountsResponse = await fetch(`${baseUrl}accounts`, {\n      headers: { Authorization: `Bearer ${authToken}` }\n    });\n    if (!accountsResponse.ok) throw new Error('Не удалось получить список счетов');\n    const accounts = await accountsResponse.json();\n    console.log('Счета получены:', accounts);\n\n    // Шаг 5: Инициация платежа (имитация)\n    console.log('Платеж инициирован');\n\n    console.log('Все шаги успешно пройдены');\n  } catch (error) {\n    console.error('Ошибка в ходе теста:', error.message);\n  }\n}\n\nrunSmokeTest();",
+      "timestamp" : "2025-11-21T00:11:58.114"
+    }
+  },
+  "createdAt" : "2025-11-21T00:10:28",
+  "updatedAt" : "2025-11-21T00:11:58"
 } ]

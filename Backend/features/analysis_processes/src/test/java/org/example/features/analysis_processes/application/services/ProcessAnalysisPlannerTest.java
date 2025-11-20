@@ -34,7 +34,7 @@ class ProcessAnalysisPlannerTest {
 
         assertFalse(result.actions().isEmpty(), "Fallback plan should create action items");
         assertFalse(result.assertions().isEmpty(), "Fallback plan should create assertions");
-        assertTrue(result.script().contains("https://api.example.local"));
+        assertFalse(result.httpRequests().isEmpty(), "Fallback plan should include HTTP steps");
         assertTrue(result.plan().contains(process.getName()));
     }
 
@@ -66,6 +66,7 @@ class ProcessAnalysisPlannerTest {
         assertEquals("Check login", result.actions().getFirst().title());
         assertEquals(1, result.assertions().size());
         assertEquals("HTTP 200", result.assertions().getFirst().check());
+        assertEquals(1, result.httpRequests().size());
     }
 
     private AnalysisProcess sampleProcess(Path tempDir) throws IOException {
