@@ -1270,4 +1270,180 @@
   },
   "createdAt" : "2025-11-21T00:10:28",
   "updatedAt" : "2025-11-21T00:11:58"
+}, {
+  "id" : "1c414053-2573-4d9e-a243-6f0af65a2687",
+  "processId" : "d92b0f8f-d62b-47ea-8167-de9697e60ecd",
+  "status" : "completed",
+  "steps" : [ {
+    "id" : "406bc968-c8b2-4150-8a3b-5a639c41616b",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "81fa9b53-6217-422e-a434-a8336eae98f5",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "063892c8-74ff-4a55-af2e-6897ac7feb2a",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "completed",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Процесс мобильного платежа включает аутентификацию, получение счетов и инициацию платежа с использованием предоставленных данных.",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация клиента через POST /auth/bank-token с использованием client_id и client_secret.",
+      "detail" : "Аутентификация клиента через POST /auth/bank-token с использованием client_id и client_secret.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Определение провайдера (внешний вызов, не требует HTTP-запроса).",
+      "detail" : "Определение провайдера (внешний вызов, не требует HTTP-запроса).",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение реквизитов провайдера (внешний вызов, не требует HTTP-запроса).",
+      "detail" : "Получение реквизитов провайдера (внешний вызов, не требует HTTP-запроса).",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение списка счетов клиента через GET /accounts.",
+      "detail" : "Получение списка счетов клиента через GET /accounts.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Инициация платежа через POST /payment-consents/request с указанием номера, суммы и выбранного счета.",
+      "detail" : "Инициация платежа через POST /payment-consents/request с указанием номера, суммы и выбранного счета.",
+      "relatedArtifact" : "/cards"
+    } ],
+    "httpRequests" : [ {
+      "name" : "Аутентификация",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "headers" : {
+        "Content-Type" : "application/x-www-form-urlencoded"
+      },
+      "body" : "client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials",
+      "description" : "Получение токена доступа для дальнейших запросов"
+    }, {
+      "name" : "Получение списка счетов",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/accounts",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Получение доступных счетов клиента для выбора источника платежа"
+    }, {
+      "name" : "Инициация платежа",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/payment-consents/request",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}",
+        "Content-Type" : "application/json"
+      },
+      "body" : "{\n  \"amount\": \"{{amount}}\",\n  \"phoneNumber\": \"{{phoneNumber}}\",\n  \"accountId\": \"{{selected_account_id}}\",\n  \"providerId\": \"{{provider_id}}\"\n}",
+      "description" : "Создание запроса на платеж с указанными реквизитами"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "baseUrl" : "http://localhost:8080",
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team134",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    },
+    "llmPlan" : "1. Аутентификация клиента через POST /auth/bank-token с использованием client_id и client_secret.\n2. Определение провайдера (внешний вызов, не требует HTTP-запроса).\n3. Получение реквизитов провайдера (внешний вызов, не требует HTTP-запроса).\n4. Получение списка счетов клиента через GET /accounts.\n5. Инициация платежа через POST /payment-consents/request с указанием номера, суммы и выбранного счета.",
+    "httpResults" : [ {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "body" : "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"client_id\"],\"msg\":\"Field required\",\"input\":null},{\"type\":\"missing\",\"loc\":[\"query\",\"client_secret\"],\"msg\":\"Field required\",\"input\":null}]}",
+      "durationMs" : 749,
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "status" : 422
+    }, {
+      "method" : "GET",
+      "name" : "Получение списка счетов",
+      "body" : "{\"detail\":\"Could not validate credentials\"}",
+      "durationMs" : 129,
+      "url" : "https://vbank.open.bankingapi.ru/accounts",
+      "status" : 401
+    }, {
+      "method" : "POST",
+      "name" : "Инициация платежа",
+      "body" : "{\"detail\":\"Could not validate credentials\"}",
+      "durationMs" : 167,
+      "url" : "https://vbank.open.bankingapi.ru/payment-consents/request",
+      "status" : 401
+    } ],
+    "testResult" : {
+      "success" : true,
+      "notes" : "",
+      "timestamp" : "2025-11-21T00:58:13.418"
+    }
+  },
+  "createdAt" : "2025-11-21T00:49:48",
+  "updatedAt" : "2025-11-21T00:58:13"
 } ]
