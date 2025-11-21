@@ -27,14 +27,14 @@ class AnalysisActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (currentStep == null) {
-      return const Text('����騩 蠣 �� ������.');
+      return const Text('Нет активного шага анализа.');
     }
 
     switch (currentStep!.type) {
       case AnalysisStepType.collectInputs:
         final fields = parseInputFields(currentStep!.metadata['requiredInputs']);
         if (fields.isEmpty) {
-          return const Text('�������⥫�� ����� �� �ॡ�����.');
+          return const Text('Нет требуемых данных для сбора.');
         }
         return _CollectInputsForm(fields: fields, onSubmit: onSubmitInputs);
       case AnalysisStepType.llmAnalysis:
@@ -42,7 +42,7 @@ class AnalysisActions extends StatelessWidget {
             currentStep!.status == AnalysisStepStatus.waiting) {
           return FilledButton(
             onPressed: onCompleteLlm,
-            child: const Text('������஢��� ����'),
+            child: const Text('Завершить шаг LLM'),
           );
         }
         break;
@@ -60,7 +60,7 @@ class AnalysisActions extends StatelessWidget {
         }
         break;
     }
-    return const Text('��� �믮������ ��⮬���᪨...');
+    return const Text('Готово, ожидаю следующего шага...');
   }
 }
 
@@ -99,7 +99,7 @@ class _CollectInputsFormState extends State<_CollectInputsForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('������ �������⥫�� ����� (����� �ய�����):'),
+        const Text('Введите параметры для анализа (обязательные и необязательные):'),
         const SizedBox(height: 8),
         ...widget.fields.map((field) {
           final controller = _controllers[field.name]!;
@@ -118,7 +118,7 @@ class _CollectInputsFormState extends State<_CollectInputsForm> {
                       const Padding(
                         padding: EdgeInsets.only(left: 4),
                         child: Text(
-                          '(optional)',
+                          '(необязательно)',
                           style: TextStyle(color: Colors.grey),
                         ),
                       ),
@@ -151,7 +151,7 @@ class _CollectInputsFormState extends State<_CollectInputsForm> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('��ࠢ���'),
+              : const Text('Отправить'),
         ),
       ],
     );
@@ -205,7 +205,7 @@ class _TestExecutionPanelState extends State<_TestExecutionPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('��ਯ� ��� ���:'),
+        const Text('Тестовый скрипт:'),
         const SizedBox(height: 8),
         Container(
           width: double.infinity,
@@ -218,20 +218,20 @@ class _TestExecutionPanelState extends State<_TestExecutionPanel> {
           child: SelectableText(
             widget.script.isNotEmpty
                 ? widget.script
-                : '// LLM script will appear here',
+                : '// Здесь появится скрипт LLM',
             style: const TextStyle(fontFamily: 'monospace'),
           ),
         ),
         const SizedBox(height: 12),
         SwitchListTile(
-          title: const Text('���� �믮���� �ᯥ譮'),
+          title: const Text('Тест прошёл успешно'),
           value: _success,
           onChanged: (value) => setState(() => _success = value),
         ),
         TextField(
           controller: _notesController,
           decoration: const InputDecoration(
-            labelText: '�������਩',
+            labelText: 'Заметки',
             border: OutlineInputBorder(),
           ),
           maxLines: 4,
@@ -245,7 +245,7 @@ class _TestExecutionPanelState extends State<_TestExecutionPanel> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('��ࠢ��� १����'),
+              : const Text('Отправить результат теста'),
         ),
       ],
     );

@@ -182,16 +182,16 @@ class HttpResultCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              result['name']?.toString() ?? 'HTTP step',
+              result['name']?.toString() ?? 'HTTP шаг',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
-            Text('Status: ${result['status'] ?? 'n/a'}'),
+            Text('Статус: ${result['status'] ?? 'н/д'}'),
             if (result['durationMs'] != null)
-              Text('Duration: ${result['durationMs']} ms'),
+              Text('Длительность: ${result['durationMs']} мс'),
             const SizedBox(height: 4),
             SelectableText(
-              'Body: ${result['body'] ?? ''}',
+              'Тело: ${result['body'] ?? ''}',
               style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
             ),
           ],

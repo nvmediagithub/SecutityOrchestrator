@@ -42,7 +42,7 @@ class _CreateProcessDialogState extends State<CreateProcessDialog> {
       // Show error message
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Failed to create process: $e')));
+      ).showSnackBar(SnackBar(content: Text('Не удалось создать процесс: $e')));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -51,7 +51,7 @@ class _CreateProcessDialogState extends State<CreateProcessDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Create Analysis Process'),
+      title: const Text('Создать процесс анализа'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -61,12 +61,12 @@ class _CreateProcessDialogState extends State<CreateProcessDialog> {
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Process Name',
-                  hintText: 'Enter process name',
+                  labelText: 'Название процесса',
+                  hintText: 'Введите название процесса',
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Process name is required';
+                    return 'Название процесса обязательно';
                   }
                   return null;
                 },
@@ -75,13 +75,13 @@ class _CreateProcessDialogState extends State<CreateProcessDialog> {
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'Enter process description',
+                  labelText: 'Описание',
+                  hintText: 'Введите описание процесса',
                 ),
                 maxLines: 3,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Description is required';
+                    return 'Описание обязательно';
                   }
                   return null;
                 },
@@ -89,7 +89,7 @@ class _CreateProcessDialogState extends State<CreateProcessDialog> {
               const SizedBox(height: 16),
               DropdownButtonFormField<ProcessType>(
                 value: _selectedType,
-                decoration: const InputDecoration(labelText: 'Process Type'),
+                decoration: const InputDecoration(labelText: 'Тип процесса'),
                 items: ProcessType.values.map((type) {
                   return DropdownMenuItem(
                     value: type,
@@ -102,7 +102,7 @@ class _CreateProcessDialogState extends State<CreateProcessDialog> {
                   }
                 },
                 validator: (value) {
-                  if (value == null) return 'Please select a process type';
+                  if (value == null) return 'Выберите тип процесса';
                   return null;
                 },
               ),
@@ -113,7 +113,7 @@ class _CreateProcessDialogState extends State<CreateProcessDialog> {
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: const Text('Отмена'),
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : _submit,
@@ -123,7 +123,7 @@ class _CreateProcessDialogState extends State<CreateProcessDialog> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Create'),
+              : const Text('Создать'),
         ),
       ],
     );

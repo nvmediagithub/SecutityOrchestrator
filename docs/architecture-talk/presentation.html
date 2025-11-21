@@ -84,12 +84,54 @@
       padding: 1rem;
       border: 1px solid #e0e0e0;
     }
+    .image-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .image-row img {
+      flex: 1;
+      min-width: 260px;
+      max-height: 50vh;
+    }
     .screenshot {
       max-width: 100%;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
       margin-top: 1rem;
       border: 1px solid rgba(15, 23, 42, 0.05);
+      max-height: 50vh;
+    }
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 12mm;
+      }
+      body {
+        background: #fff;
+      }
+      .slides {
+        padding: 0;
+      }
+      .slide {
+        min-height: auto;
+        max-width: none;
+        margin: 0 0 1.5rem;
+        padding: 1.5rem;
+        border-radius: 0;
+        box-shadow: none;
+        border: 1px solid #d1d5db;
+        page-break-after: always;
+        break-inside: avoid;
+      }
+      .slide:last-child {
+        page-break-after: auto;
+      }
+      .image-row,
+      .screenshot,
+      .image-row img {
+        page-break-inside: avoid;
+      }
     }
   </style>
 </head>
@@ -104,7 +146,7 @@
       <li>Java backend с feature‑first архитектурой + Flutter‑клиент</li>
       <li>Фокус на онлайн‑демо Swagger/OpenAPI Security Analysis</li>
     </ul>
-    <footer>1 / 15</footer>
+    <footer>1 / 18</footer>
   </section>
 
   <!-- Slide 2 -->
@@ -116,7 +158,7 @@
       <li>Разрозненные инструменты, нет единого сценария и единой картины рисков</li>
       <li>Команде трудно быстро показать бизнесу понятный, визуальный отчёт по безопасности</li>
     </ul>
-    <footer>2 / 15</footer>
+    <footer>2 / 18</footer>
   </section>
 
   <!-- Slide 3 -->
@@ -172,7 +214,7 @@ graph TB
     style API_ANALYSIS fill:#f3e5f5
     style VULN_API fill:#ffe6cc
     </div>
-    <footer>3 / 15</footer>
+    <footer>3 / 18</footer>
   </section>
 
   <!-- Slide 4 -->
@@ -204,7 +246,7 @@ graph TB
     style OPENROUTER fill:#e1f5fe
     style COMMON fill:#e8f5e8
     </div>
-    <footer>4 / 15</footer>
+    <footer>4 / 18</footer>
   </section>
 
   <!-- Slide 5 -->
@@ -228,7 +270,7 @@ sequenceDiagram
     API-->>FE: Security score, issues, рекомендации
     FE-->>User: Визуальный отчёт по безопасности API
     </div>
-    <footer>5 / 15</footer>
+    <footer>5 / 18</footer>
   </section>
 
   <!-- Slide 6 -->
@@ -265,7 +307,7 @@ graph TD
     style PARSER fill:#fff3e0
     style AI_ANALYZER fill:#fce4ec
     </div>
-    <footer>6 / 15</footer>
+    <footer>6 / 18</footer>
   </section>
 
   <!-- Slide 7 -->
@@ -277,7 +319,7 @@ graph TD
       <li>Подсчёт статистики: всего, защищённых, незащищённых, <span class="code">deprecated</span> эндпойнтов</li>
       <li>Формирование нормализованного представления API для последующего AI‑анализа</li>
     </ul>
-    <footer>7 / 15</footer>
+    <footer>7 / 18</footer>
   </section>
 
   <!-- Slide 8 -->
@@ -290,7 +332,7 @@ graph TD
       <li>— конфигурационные проблемы: HTTP, rate limiting, debug‑эндпойнты и т.п.</li>
       <li>Результат: <span class="code">security_score</span> 0–100, список issues и детальные рекомендации</li>
     </ul>
-    <footer>8 / 15</footer>
+    <footer>8 / 18</footer>
   </section>
 
   <!-- Slide 9 -->
@@ -302,7 +344,7 @@ graph TD
       <li><span class="code">ApiAnalysisEntity</span> отражает <span class="code">SwaggerAnalysisResponse</span> бэкенда</li>
       <li><span class="code">ApiAnalysisCard</span> показывает score, проблемы, рекомендации и статистику API</li>
     </ul>
-    <footer>9 / 15</footer>
+    <footer>9 / 18</footer>
   </section>
 
   <!-- Slide 10 -->
@@ -314,7 +356,7 @@ graph TD
       <li>Интеграция с существующей платформой SecurityOrchestrator и BPMN‑оркестрацией</li>
       <li>Бэкенд переведён на feature‑first архитектуру, выделены отдельные Python‑сервисы</li>
     </ul>
-    <footer>10 / 15</footer>
+    <footer>10 / 18</footer>
   </section>
 
   <!-- Slide 11: Главный экран -->
@@ -322,7 +364,7 @@ graph TD
     <h2>Интерфейс: главный экран</h2>
     <p class="subtitle">Общий обзор приложения SecurityOrchestrator</p>
     <img src="screens/main.png" alt="Главный экран приложения" class="screenshot">
-    <footer>11 / 15</footer>
+    <footer>11 / 18</footer>
   </section>
 
   <!-- Slide 12: Экран анализа API -->
@@ -330,26 +372,62 @@ graph TD
     <h2>Интерфейс: модуль API Analysis</h2>
     <p class="subtitle">Ввод URL, запуск анализа и статус выполнения</p>
     <img src="screens/api_analisys.png" alt="Экран анализа API" class="screenshot">
-    <footer>12 / 15</footer>
+    <footer>12 / 18</footer>
   </section>
 
-  <!-- Slide 13: Результаты анализа (1/3) -->
+  <!-- Slide 13: BPMN-оркестрация -->
+  <section class="slide">
+    <h2>Оркестрация BPMN</h2>
+    <p class="subtitle">BPMN описывает шаги бизнес-процесса и координирует вызовы</p>
+    <img src="screens/bpmn.png" alt="Каркас BPMN-бизнес-процесса" class="screenshot">
+    <ul>
+      <li>— Компоновка, переходы и правила принимаются из BPMN-диаграммы</li>
+      <li>— Каждый шаг запускает HTTP-акции и передаёт контекст в аналитические сервисы</li>
+    </ul>
+    <footer>13 / 18</footer>
+  </section>
+
+  <!-- Slide 14: OpenAPI спецификации -->
+  <section class="slide">
+    <h2>OpenAPI спецификации</h2>
+    <p class="subtitle">Контракты описывают структуры запросов/ответов для генерации тестов</p>
+    <img src="screens/openapi.png" alt="Обзор OpenAPI-спецификации" class="screenshot">
+    <ul>
+      <li>— Автоматическое извлечение URL, методов, параметров и схем</li>
+      <li>— На базе спецификации формируются HTTP-запросы и ожидаемые ответы</li>
+    </ul>
+    <footer>14 / 18</footer>
+  </section>
+
+  <!-- Slide 15: Тестирование HTTP-запросов -->
+  <section class="slide">
+    <h2>Тестирование HTTP-запросов</h2>
+    <p class="subtitle">Результаты выполнения шагов и LLM-интерпретация ответов</p>
+    <img src="screens/llm_analisys.png" alt="Результаты тестирования HTTP-запросов" class="screenshot">
+    <ul>
+      <li>— Серия запросов прогоняется прямо в контексте BPMN и OpenAPI</li>
+      <li>— В UI отображаются статусы, длительность и тело ответов</li>
+    </ul>
+    <footer>15 / 18</footer>
+  </section>
+
+  <!-- Slide 16: Результаты анализа (1/3) -->
   <section class="slide">
     <h2>Результаты анализа API (1/3)</h2>
     <p class="subtitle">Общая оценка безопасности и краткий итог</p>
     <img src="screens/result0.png" alt="Результаты анализа API — часть 1" class="screenshot">
-    <footer>13 / 15</footer>
+    <footer>16 / 18</footer>
   </section>
 
-  <!-- Slide 14: Результаты анализа (2/3) -->
+  <!-- Slide 17: Результаты анализа (2/3) -->
   <section class="slide">
     <h2>Результаты анализа API (2/3)</h2>
     <p class="subtitle">Детализация найденных проблем и уровни критичности</p>
     <img src="screens/result1.png" alt="Результаты анализа API — часть 2" class="screenshot">
-    <footer>14 / 15</footer>
+    <footer>17 / 18</footer>
   </section>
 
-  <!-- Slide 15: Результаты анализа (3/3) + итог -->
+  <!-- Slide 18: Результаты анализа (3/3) + итог -->
   <section class="slide">
     <h2>Результаты анализа и планы</h2>
     <p class="subtitle">Что сделали к полуфиналу и что доделаем к финалу</p>
@@ -359,12 +437,14 @@ graph TD
       <li>— Реализован сервис <span class="code">api-analysis-service</span> и интеграция с OpenRouter</li>
       <li>— Поднято уязвимое демо‑API и настроен полный цикл анализа по Swagger URL</li>
       <li>— Интеграция с Flutter‑клиентом и визуализация security score и отчётов</li>
+      <li>— Внедрена работа с BPMN и OpenAPI, бизнес-процессы тестируем через сгенерированные HTTP-запросы</li>
+      <li>— Добавлена локализация интерфейса анализа процессов: формы, статусы, кнопки и карточки результатов теперь на русском</li>
       <li><span class="highlight">До финала планируем:</span></li>
       <li>— Добавить кастомные правила (OWASP, compliance‑чеки) и историю анализов</li>
       <li>— Реализовать отчёты (PDF/HTML) и хранение результатов в платформе</li>
       <li>— Глубже связать Swagger‑анализ с BPMN‑оркестрацией и общим risk‑score процессов</li>
     </ul>
-    <footer>15 / 15</footer>
+    <footer>18 / 18</footer>
   </section>
 </div>
 
@@ -395,4 +475,3 @@ graph TD
 </script>
 </body>
 </html>
-

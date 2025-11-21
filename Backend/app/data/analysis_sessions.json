@@ -1446,4 +1446,394 @@
   },
   "createdAt" : "2025-11-21T00:49:48",
   "updatedAt" : "2025-11-21T00:58:13"
+}, {
+  "id" : "a0f156f5-cd24-463f-9231-bb7bf523b0cc",
+  "processId" : "d92b0f8f-d62b-47ea-8167-de9697e60ecd",
+  "status" : "waiting_for_input",
+  "currentStepId" : "835010bf-7acd-4d1b-ae3d-ce3bdff0c38f",
+  "steps" : [ {
+    "id" : "835010bf-7acd-4d1b-ae3d-ce3bdff0c38f",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "waiting",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "31e7ff20-4e53-448e-a377-81c30ee562ce",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "pending",
+    "metadata" : { }
+  }, {
+    "id" : "073cb790-e351-4baf-91d1-8061d7e4708e",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : { },
+  "createdAt" : "2025-11-21T16:46:00",
+  "updatedAt" : "2025-11-21T16:46:00"
+}, {
+  "id" : "9f200914-151e-44e0-a9bf-27a130b6bcf3",
+  "processId" : "5ce7d131-cecc-4114-812c-af1edaf20cc2",
+  "status" : "completed",
+  "steps" : [ {
+    "id" : "6352faf0-2f11-4d57-ad6f-9fb057679285",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "944099db-ac63-445e-9f8f-18b133cb3012",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "9632d528-ae02-4649-8e9a-85fe93270708",
+    "title" : "Execute HTTP request: Default endpoint check",
+    "description" : "Basic connectivity check",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Default endpoint check",
+        "stepId" : "9632d528-ae02-4649-8e9a-85fe93270708",
+        "method" : "GET",
+        "url" : "/cards",
+        "headers" : {
+          "Content-Type" : "application/json"
+        },
+        "description" : "Basic connectivity check"
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "b4b0f56a-1f36-493c-9547-1a00d0b94d09",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "completed",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "",
+    "httpRequests" : [ {
+      "name" : "Default endpoint check",
+      "stepId" : "9632d528-ae02-4649-8e9a-85fe93270708",
+      "method" : "GET",
+      "url" : "/cards",
+      "headers" : {
+        "Content-Type" : "application/json"
+      },
+      "description" : "Basic connectivity check"
+    } ],
+    "llmPlan" : "This appears to be a specification for an API endpoint that handles payment-related tasks. Here's a breakdown of the key aspects:\n\n**API Endpoints**\n\nThe API has several endpoints that handle different payment-related tasks, such as initiating payments, checking payment status, and requesting consent.\n\n* `/cards`: Retrieves a list of cards.\n* `/account-consents/{consent_id}`: Retrieves account consents for a specific ID.\n* `/payment-consents/request`: Creates a new payment consent request.\n* `/product-agreements`: Retrieves product agreements.\n* `/accounts/{account_id}/transactions`: Retrieves transactions for an account.\n\n**Input/Output Data**\n\nThe API expects the following input/output data:\n\n* `plan` (JSON): A markdown list of actions to be performed, which can include HTTP requests and other payment-related tasks.\n* `httpRequests` (array): An array of HTTP steps containing:\n\t+ `name`: The name of the HTTP request.\n\t+ `method`: The HTTP method (e.g., GET, POST).\n\t+ `url`: The URL to send the request to.\n\t+ `headers`: An object of headers to be sent with the request.\n\t+ `body`: The body of the request payload.\n\t+ `description`: A short text description of the request.\n\n**Example Output**\n\nHere's an example output for one of the endpoints:\n\n```json\n{\n  \"plan\": [\n    {\n      \"name\": \"Initiate Payment\",\n      \"method\": \"POST\",\n      \"url\": \"/payment-consents/request\",\n      \"headers\": {\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"consentId\": 123,\n        \"amount\": 10.99\n      },\n      \"description\": \"Initiate payment for $10.99\"\n    }\n  ],\n  \"httpRequests\": [\n    {\n      \"name\": \"Create Payment Consent Request\",\n      \"method\": \"POST\",\n      \"url\": \"/payment-consents/request\",\n      \"headers\": {\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"consentId\": 123,\n        \"amount\": 10.99\n      },\n      \"description\": \"Create payment consent request for $10.99\"\n    }\n  ]\n}\n```\n\nThis example shows a plan with two actions: initiating a payment and creating a payment consent request. The `httpRequests` array contains an object representing the HTTP request to initiate the payment, including the consent ID and amount.\n\nOverall, this specification provides a clear understanding of how the API handles payment-related tasks, including input/output data and example outputs.",
+    "requiredInputFields" : [ ],
+    "llmRawResponse" : "This appears to be a specification for an API endpoint that handles payment-related tasks. Here's a breakdown of the key aspects:\n\n**API Endpoints**\n\nThe API has several endpoints that handle different payment-related tasks, such as initiating payments, checking payment status, and requesting consent.\n\n* `/cards`: Retrieves a list of cards.\n* `/account-consents/{consent_id}`: Retrieves account consents for a specific ID.\n* `/payment-consents/request`: Creates a new payment consent request.\n* `/product-agreements`: Retrieves product agreements.\n* `/accounts/{account_id}/transactions`: Retrieves transactions for an account.\n\n**Input/Output Data**\n\nThe API expects the following input/output data:\n\n* `plan` (JSON): A markdown list of actions to be performed, which can include HTTP requests and other payment-related tasks.\n* `httpRequests` (array): An array of HTTP steps containing:\n\t+ `name`: The name of the HTTP request.\n\t+ `method`: The HTTP method (e.g., GET, POST).\n\t+ `url`: The URL to send the request to.\n\t+ `headers`: An object of headers to be sent with the request.\n\t+ `body`: The body of the request payload.\n\t+ `description`: A short text description of the request.\n\n**Example Output**\n\nHere's an example output for one of the endpoints:\n\n```json\n{\n  \"plan\": [\n    {\n      \"name\": \"Initiate Payment\",\n      \"method\": \"POST\",\n      \"url\": \"/payment-consents/request\",\n      \"headers\": {\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"consentId\": 123,\n        \"amount\": 10.99\n      },\n      \"description\": \"Initiate payment for $10.99\"\n    }\n  ],\n  \"httpRequests\": [\n    {\n      \"name\": \"Create Payment Consent Request\",\n      \"method\": \"POST\",\n      \"url\": \"/payment-consents/request\",\n      \"headers\": {\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"consentId\": 123,\n        \"amount\": 10.99\n      },\n      \"description\": \"Create payment consent request for $10.99\"\n    }\n  ]\n}\n```\n\nThis example shows a plan with two actions: initiating a payment and creating a payment consent request. The `httpRequests` array contains an object representing the HTTP request to initiate the payment, including the consent ID and amount.\n\nOverall, this specification provides a clear understanding of how the API handles payment-related tasks, including input/output data and example outputs.",
+    "llmPlanActions" : [ {
+      "title" : "This appears to be a specification for an API endpoint that handles payment-related tasks. Here's a breakdown of the key aspects",
+      "detail" : "",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "**API Endpoints**",
+      "detail" : "**API Endpoints**",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "The API has several endpoints that handle different payment-related tasks, such as initiating payments, checking payment status, and requesting consent.",
+      "detail" : "The API has several endpoints that handle different payment-related tasks, such as initiating payments, checking payment status, and requesting consent.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "* `/cards`",
+      "detail" : "Retrieves a list of cards.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "* `/account-consents/{consent_id}`",
+      "detail" : "Retrieves account consents for a specific ID.",
+      "relatedArtifact" : "/cards"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "llmPrompt" : "Process name: 7ролфывлофр\nDescription: 7яисо\nCreated at: 2025-11-21T16:46:34.843\n\nUser inputs:\n- base_url: https://vbank.open.bankingapi.ru/\n- client_secret: 9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4\n- client_id: team143\n\nBPMN excerpt:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\n                  xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\"\n                  xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\"\n                  id=\"Definitions_01\"\n                  targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"Process_01_bonus_payment\" isExecutable=\"false\">\n    <bpmn:startEvent id=\"StartEvent_01\" name=\"Клиент выбирает услугу и решает оплатить бонусами\">\n      <bpmn:outgoing>Flow_01_1</bpmn:outgoing>\n    </bpmn:startEvent>\n    <bpmn:task id=\"Task_01_Auth\" name=\"Аутентификация: POST /auth/bank-token\">\n      <bpmn:incoming>Flow_01_1</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_2</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetAccs\" name=\"Получение списка счетов: GET /accounts\">\n      <bpmn:incoming>Flow_01_2</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_3</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetBal\" name=\"Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances\">\n      <bpmn:incoming>Flow_01_3</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_4</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_InitPay\" name=\"Инициация платежа: POST /payments\">\n      <bpmn:incoming>Flow_01_4</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_5</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_CheckPay\" name...\n\nOpenAPI endpoints:\n- /cards\n- /account-consents/{consent_id}\n- /payment-consents/request\n- /product-agreements\n- /accounts/{account_id}/transactions\n\nRequired output: JSON with keys plan (markdown list of actions), httpRequests (array of HTTP steps containing name, method, url, headers, body, description), summary (short text). Use user inputs to populate headers or payloads as needed.\n",
+    "baseUrl" : "http://localhost:8080",
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team143",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    },
+    "httpResults" : [ {
+      "method" : "GET",
+      "name" : "Default endpoint check",
+      "stepId" : "9632d528-ae02-4649-8e9a-85fe93270708",
+      "body" : null,
+      "durationMs" : 10,
+      "url" : "/cards",
+      "status" : 0
+    } ],
+    "lastHttpResult" : {
+      "method" : "GET",
+      "name" : "Default endpoint check",
+      "stepId" : "9632d528-ae02-4649-8e9a-85fe93270708",
+      "body" : null,
+      "durationMs" : 10,
+      "url" : "/cards",
+      "status" : 0
+    },
+    "testResult" : {
+      "success" : true,
+      "notes" : "",
+      "timestamp" : "2025-11-21T16:51:33.223"
+    },
+    "requiresAdditionalInput" : false
+  },
+  "createdAt" : "2025-11-21T16:48:31",
+  "updatedAt" : "2025-11-21T16:51:33"
+}, {
+  "id" : "6c1cabbf-8438-4338-b56c-509701b96cc7",
+  "processId" : "467dc167-c73b-4ab7-bc87-12eae17fb7d5",
+  "status" : "running",
+  "currentStepId" : "6fdda9fe-aa5a-45da-9832-3b3fa1cd3d4e",
+  "steps" : [ {
+    "id" : "73858b8e-3159-4ae6-b029-52a7a5e51a6a",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "6fdda9fe-aa5a-45da-9832-3b3fa1cd3d4e",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "running",
+    "metadata" : { }
+  }, {
+    "id" : "00719407-31cc-4ca8-ae1e-c1a2ac412805",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team134",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    }
+  },
+  "createdAt" : "2025-11-21T17:22:35",
+  "updatedAt" : "2025-11-21T17:23:14"
+}, {
+  "id" : "f6ee341b-456b-4137-9e6a-28bf671ffa08",
+  "processId" : "2baf005b-2ef6-415d-a77e-ea3723362e7b",
+  "status" : "running",
+  "currentStepId" : "2f70549f-8d2c-4e31-a7bd-98ea758211f6",
+  "steps" : [ {
+    "id" : "ef3c1d45-f660-4a4e-b570-f3ec3b0a6135",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "2f70549f-8d2c-4e31-a7bd-98ea758211f6",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "waiting",
+    "metadata" : { }
+  }, {
+    "id" : "0c76a409-0375-4b02-805d-68e4d079ffc7",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team134",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    }
+  },
+  "createdAt" : "2025-11-21T17:34:11",
+  "updatedAt" : "2025-11-21T17:34:34"
 } ]

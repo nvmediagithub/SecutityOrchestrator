@@ -39,12 +39,12 @@ class ProcessOverviewHeader extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         _DetailSection(
-          title: 'Description',
+          title: 'Описание',
           child: Text(process.description),
         ),
         const SizedBox(height: 16),
         _DetailSection(
-          title: 'Created',
+          title: 'Дата создания',
           child: Text(process.createdAt.toLocal().toString()),
         ),
       ],
@@ -85,7 +85,7 @@ class _ArtifactBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusText = uploaded ? '$label uploaded' : '$label missing';
+    final statusText = uploaded ? '$label загружен' : '$label не загружен';
     final details =
         uploaded && timestamp != null ? timestamp!.toLocal().toString() : null;
 

@@ -18,7 +18,7 @@ class ProcessDetailPage extends ConsumerWidget {
     final processAsync = ref.watch(processDetailProvider(processId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Process Details')),
+      appBar: AppBar(title: const Text('Детали процесса')),
       body: processAsync.when(
         data: (process) => ProcessDetailBody(process: process),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -96,7 +96,7 @@ class _ProcessError extends StatelessWidget {
             const Icon(Icons.error, color: Colors.red, size: 48),
             const SizedBox(height: 16),
             Text(
-              'Failed to load process: $message',
+              'Не удалось загрузить процесс: $message',
               textAlign: TextAlign.center,
             ),
           ],
@@ -117,7 +117,7 @@ class _DeleteProcessButton extends ConsumerWidget {
       icon: const Icon(Icons.delete_outline),
       style: FilledButton.styleFrom(backgroundColor: Colors.red),
       onPressed: () => _confirmDelete(context, ref),
-      label: const Text('Delete Process'),
+      label: const Text('Удалить процесс'),
     );
   }
 
@@ -128,17 +128,17 @@ class _DeleteProcessButton extends ConsumerWidget {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Process'),
-        content: Text('Delete "${process.name}"?'),
+        title: const Text('Удалить процесс'),
+        content: Text('Удалить "${process.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: const Text('Отмена'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: const Text('Удалить'),
           ),
         ],
       ),
@@ -155,7 +155,7 @@ class _DeleteProcessButton extends ConsumerWidget {
     } catch (error) {
       if (!context.mounted) return;
       messenger.showSnackBar(
-        SnackBar(content: Text('Failed to delete process: $error')),
+        SnackBar(content: Text('Не удалось удалить процесс: $error')),
       );
     }
   }

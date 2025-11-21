@@ -104,29 +104,36 @@
   "openapiSpecName" : "openapi_test.json",
   "openapiUploadedAt" : "2025-11-20T23:03:45"
 }, {
-  "id" : "1f9d1db2-bea3-47cf-967c-caedda1d8151",
-  "name" : "783sdgjasd",
-  "description" : "23423",
-  "createdAt" : "2025-11-20T23:14:45",
+  "id" : "5ce7d131-cecc-4114-812c-af1edaf20cc2",
+  "name" : "7ролфывлофр",
+  "description" : "7яисо",
+  "createdAt" : "2025-11-21T16:46:34",
   "status" : "pending",
-  "type" : "securityAnalysis",
-  "bpmnDiagramPath" : "E:\\GitRepositoties\\llm_projects\\SecutityOrchestrator\\Backend\\app\\data\\analysis_processes\\bpmn\\1f9d1db2-bea3-47cf-967c-caedda1d8151.bpmn",
+  "type" : "integrationTest",
+  "bpmnDiagramPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/bpmn/5ce7d131-cecc-4114-812c-af1edaf20cc2.bpmn",
   "bpmnDiagramName" : "01_bonus_payment.bpmn",
-  "bpmnUploadedAt" : "2025-11-20T23:14:51",
-  "openapiSpecPath" : "E:\\GitRepositoties\\llm_projects\\SecutityOrchestrator\\Backend\\app\\data\\analysis_processes\\openapi\\1f9d1db2-bea3-47cf-967c-caedda1d8151-56f32b37-b917-4a50-9e0e-b4a068ab4e43.json",
+  "bpmnUploadedAt" : "2025-11-21T16:48:03",
+  "openapiSpecPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/openapi/5ce7d131-cecc-4114-812c-af1edaf20cc2-b0a797c0-efff-43e6-bd8a-05abbf4a74c1.json",
   "openapiSpecName" : "openapi_test.json",
-  "openapiUploadedAt" : "2025-11-20T23:14:57"
+  "openapiUploadedAt" : "2025-11-21T16:48:12"
 }, {
-  "id" : "d92b0f8f-d62b-47ea-8167-de9697e60ecd",
-  "name" : "8уйцу",
-  "description" : "8ммсм",
-  "createdAt" : "2025-11-20T23:57:18",
+  "id" : "c334a9d1-d04b-47c9-ad24-187a4cca0123",
+  "name" : "Test8",
+  "description" : "Description",
+  "createdAt" : "2025-11-21T17:26:00",
   "status" : "pending",
-  "type" : "securityAnalysis",
-  "bpmnDiagramPath" : "E:\\GitRepositoties\\llm_projects\\SecutityOrchestrator\\Backend\\app\\data\\analysis_processes\\bpmn\\d92b0f8f-d62b-47ea-8167-de9697e60ecd.bpmn",
-  "bpmnDiagramName" : "04_mobile_payment.bpmn",
-  "bpmnUploadedAt" : "2025-11-20T23:57:31",
-  "openapiSpecPath" : "E:\\GitRepositoties\\llm_projects\\SecutityOrchestrator\\Backend\\app\\data\\analysis_processes\\openapi\\d92b0f8f-d62b-47ea-8167-de9697e60ecd-d12d3034-a4c8-4a29-ad1f-d5837eb139e2.json",
+  "type" : "integrationTest"
+}, {
+  "id" : "2baf005b-2ef6-415d-a77e-ea3723362e7b",
+  "name" : "Testttt",
+  "description" : "tttt",
+  "createdAt" : "2025-11-21T17:33:36",
+  "status" : "pending",
+  "type" : "integrationTest",
+  "bpmnDiagramPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/bpmn/2baf005b-2ef6-415d-a77e-ea3723362e7b.bpmn",
+  "bpmnDiagramName" : "01_bonus_payment.bpmn",
+  "bpmnUploadedAt" : "2025-11-21T17:33:45",
+  "openapiSpecPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/openapi/2baf005b-2ef6-415d-a77e-ea3723362e7b-b5ab62f6-59e0-4c1f-9313-c0429b2f4d59.json",
   "openapiSpecName" : "openapi_test.json",
-  "openapiUploadedAt" : "2025-11-20T23:57:38"
+  "openapiUploadedAt" : "2025-11-21T17:33:56"
 } ]

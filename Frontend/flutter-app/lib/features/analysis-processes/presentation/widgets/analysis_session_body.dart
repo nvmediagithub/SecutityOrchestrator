@@ -44,18 +44,18 @@ class AnalysisSessionBody extends ConsumerWidget {
         children: [
           Text(
             canStart
-                ? 'Analysis ready to begin.'
-                : 'Upload both BPMN and OpenAPI before initializing the analysis.',
+                ? 'Анализ готов к запуску.'
+                : 'Загрузите BPMN-диаграмму и OpenAPI-спецификацию перед запуском анализа.',
           ),
           const SizedBox(height: 12),
           FilledButton(
             onPressed: canStart
                 ? () => runSessionAction(
-                      () async => sessionService.startSession(processId),
-                      'Failed to start the analysis session',
+                () async => sessionService.startSession(processId),
+                'Не удалось запустить сеанс анализа',
                     )
                 : null,
-            child: const Text('Start analysis'),
+            child: const Text('Начать анализ'),
           ),
         ],
       );
@@ -82,10 +82,10 @@ class AnalysisSessionBody extends ConsumerWidget {
                 onPressed: canStart
                     ? () => runSessionAction(
                           () async => sessionService.startSession(processId),
-                          'Failed to restart the analysis session',
+                          'Не удалось перезапустить сеанс анализа',
                         )
                     : null,
-                child: const Text('Restart analysis'),
+                child: const Text('Перезапустить анализ'),
               ),
           ],
         ),
@@ -102,19 +102,19 @@ class AnalysisSessionBody extends ConsumerWidget {
           currentStep: currentStep,
           onSubmitInputs: (inputs) => runSessionAction(
             () async => sessionService.provideInputs(session!.id, inputs),
-            'Failed to submit required inputs',
+            'Не удалось передать требуемые данные',
           ),
           onCompleteLlm: () => runSessionAction(
             () async => sessionService.completeLlm(session!.id),
-            'Failed to complete the LLM step',
+            'Не удалось завершить шаг LLM',
           ),
           onSubmitTest: (result) => runSessionAction(
             () async => sessionService.submitTestResult(session!.id, result),
-            'Failed to submit the test result',
+            'Не удалось отправить результат теста',
           ),
           onExecuteHttpStep: (stepId, inputs) => runSessionAction(
             () async => sessionService.executeHttpStep(session!.id, stepId, inputs),
-            'HTTP request execution failed',
+            'Не удалось выполнить HTTP-запрос',
           ),
           onNextStep: () => ref.invalidate(analysisSessionProvider(processId)),
         ),

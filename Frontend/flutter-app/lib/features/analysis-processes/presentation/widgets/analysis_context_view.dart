@@ -17,17 +17,15 @@ class AnalysisContextView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (llmPlan != null) ...[
-          const Text('LLM ����:'),
+          const Text('LLM план:'),
           const SizedBox(height: 4),
           Text(llmPlan),
           const SizedBox(height: 12),
         ],
         if (httpResults.isNotEmpty) ...[
-          const Text('�������� HTTP-����ᮢ:'),
+          const Text('Результаты HTTP-запросов:'),
           const SizedBox(height: 8),
-          ...httpResults.map(
-            (result) => HttpResultCard(result: Map<String, dynamic>.from(result)),
-          ),
+          ...httpResults.map((result) => HttpResultCard(result: Map<String, dynamic>.from(result))),
         ],
       ],
     );

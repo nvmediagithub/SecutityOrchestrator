@@ -5,29 +5,29 @@ import '../../domain/analysis_session.dart';
 String sessionStatusLabel(AnalysisSessionStatus status) {
   switch (status) {
     case AnalysisSessionStatus.waitingForInput:
-      return 'Waiting for input';
+      return 'Ожидание ввода';
     case AnalysisSessionStatus.running:
     case AnalysisSessionStatus.waitingForTest:
-      return 'In progress';
+      return 'В процессе';
     case AnalysisSessionStatus.completed:
-      return 'Completed';
+      return 'Завершено';
     case AnalysisSessionStatus.failed:
-      return 'Failed';
+      return 'Сбой';
   }
 }
 
 String stepStatusLabel(AnalysisStepStatus status) {
   switch (status) {
     case AnalysisStepStatus.pending:
-      return 'Pending';
+      return 'Ожидание';
     case AnalysisStepStatus.waiting:
-      return 'Waiting';
+      return 'Ожидается';
     case AnalysisStepStatus.running:
-      return 'Running';
+      return 'В процессе';
     case AnalysisStepStatus.completed:
-      return 'Completed';
+      return 'Завершен';
     case AnalysisStepStatus.failed:
-      return 'Failed';
+      return 'Сбой';
   }
 }
 

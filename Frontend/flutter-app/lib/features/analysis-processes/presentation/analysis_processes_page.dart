@@ -43,12 +43,12 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
         _loadProcesses();
       });
       messenger.showSnackBar(
-        SnackBar(content: Text('Process "${process.name}" deleted')),
+        SnackBar(content: Text('Процесс "${process.name}" удалён')),
       );
     } catch (e) {
       if (!mounted) return;
       messenger.showSnackBar(
-        SnackBar(content: Text('Failed to delete process: $e')),
+        SnackBar(content: Text('Не удалось удалить процесс: $e')),
       );
     }
   }
@@ -57,17 +57,17 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Process'),
-        content: Text('Delete "${process.name}"?'),
+        title: const Text('Удалить процесс'),
+        content: Text('Удалить "${process.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: const Text('Отмена'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: const Text('Удалить'),
           ),
         ],
       ),
@@ -100,7 +100,7 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analysis Processes'),
+        title: const Text('Процессы анализа'),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
       ),
@@ -116,11 +116,11 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
                 children: [
                   const Icon(Icons.error, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text('Error loading processes: ${snapshot.error}'),
+                  Text('Ошибка загрузки процессов: ${snapshot.error}'),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _loadProcesses,
-                    child: const Text('Retry'),
+                    child: const Text('Повторить'),
                   ),
                 ],
               ),
@@ -132,12 +132,12 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
                 children: [
                   const Icon(Icons.list_alt, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  const Text('No analysis processes found'),
+                  const Text('Аналитические процессы не найдены'),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
                     onPressed: _showCreateProcessDialog,
                     icon: const Icon(Icons.add),
-                    label: const Text('Create First Process'),
+                    label: const Text('Создать первый процесс'),
                   ),
                 ],
               ),
@@ -199,7 +199,7 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
                           IconButton(
                             icon: const Icon(Icons.delete_outline),
                             color: Colors.red.shade400,
-                            tooltip: 'Delete',
+                            tooltip: 'Удалить',
                             onPressed: () => _confirmDeleteProcess(process),
                           ),
                       ],
@@ -224,7 +224,7 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreateProcessDialog,
-        tooltip: 'Create Process',
+        tooltip: 'Создать процесс',
         child: const Icon(Icons.add),
       ),
     );

@@ -6,13 +6,13 @@ extension ProcessStatusExtension on ProcessStatus {
   String get displayName {
     switch (this) {
       case ProcessStatus.pending:
-        return 'Pending';
+        return 'Ожидает';
       case ProcessStatus.running:
-        return 'Running';
+        return 'Выполняется';
       case ProcessStatus.completed:
-        return 'Completed';
+        return 'Завершён';
       case ProcessStatus.failed:
-        return 'Failed';
+        return 'Сбой';
     }
   }
 
@@ -25,13 +25,13 @@ extension ProcessTypeExtension on ProcessType {
   String get displayName {
     switch (this) {
       case ProcessType.securityAnalysis:
-        return 'Security Analysis';
+        return 'Анализ безопасности';
       case ProcessType.performanceTest:
-        return 'Performance Test';
+        return 'Тест производительности';
       case ProcessType.integrationTest:
-        return 'Integration Test';
+        return 'Интеграционный тест';
       case ProcessType.custom:
-        return 'Custom';
+        return 'Пользовательский';
     }
   }
 }

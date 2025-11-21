@@ -29,12 +29,12 @@ class AnalysisSessionSection extends ConsumerWidget {
             Row(
               children: [
                 Text(
-                  'LLM Analysis',
+                  'LLM-анализ',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const Spacer(),
                 IconButton(
-                  tooltip: 'Refresh status',
+                  tooltip: 'Обновить статус',
                   onPressed: () => ref.invalidate(analysisSessionProvider(processId)),
                   icon: const Icon(Icons.refresh),
                 ),
@@ -51,14 +51,14 @@ class AnalysisSessionSection extends ConsumerWidget {
               error: (error, _) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Failed to load analysis session: $error',
-                    style: const TextStyle(color: Colors.red),
-                  ),
+                Text(
+                  'Не удалось загрузить сессию анализа: $error',
+                  style: const TextStyle(color: Colors.red),
+                ),
                   const SizedBox(height: 8),
                   FilledButton(
                     onPressed: () => ref.invalidate(analysisSessionProvider(processId)),
-                    child: const Text('Retry'),
+                    child: const Text('Повторить'),
                   ),
                 ],
               ),
