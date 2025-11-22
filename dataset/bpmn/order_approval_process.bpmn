@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://example.com/bpmn">
+  <process id="OrderApproval" name="Order Approval" isExecutable="true">
+    <startEvent id="StartOrder" name="Заказ получен"/>
+    <sequenceFlow id="flow1" sourceRef="StartOrder" targetRef="CheckCredit"/>
+    <userTask id="CheckCredit" name="Проверить кредитный лимит"/>
+    <sequenceFlow id="flow2" sourceRef="CheckCredit" targetRef="ApproveOrder"/>
+    <exclusiveGateway id="ApprovalGateway" name="Кредит одобрен?"/>
+    <sequenceFlow id="flow3" sourceRef="ApprovalGateway" targetRef="GenerateInvoice">
+      <conditionExpression xsi:type="tFormalExpression">approved</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow4" sourceRef="ApprovalGateway" targetRef="NotifyFailure">
+      <conditionExpression xsi:type="tFormalExpression">declined</conditionExpression>
+    </sequenceFlow>
+    <userTask id="GenerateInvoice" name="Сформировать счёт"/>
+    <sequenceFlow id="flow5" sourceRef="GenerateInvoice" targetRef="EndOrder"/>
+    <endEvent id="EndOrder" name="Завершено"/>
+    <userTask id="NotifyFailure" name="Уведомить клиента о отказе"/>
+    <sequenceFlow id="flow6" sourceRef="NotifyFailure" targetRef="EndOrder"/>
+  </process>
+</definitions>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://example.com/bpmn">
+  <process id="TokenRenewal" name="Token Renewal Flow" isExecutable="true">
+    <startEvent id="StartToken" name="Требуется токен"/>
+    <sequenceFlow id="flow1" sourceRef="StartToken" targetRef="RequestToken"/>
+    <serviceTask id="RequestToken" name="POST /auth/bank-token"/>
+    <sequenceFlow id="flow2" sourceRef="RequestToken" targetRef="ValidateConsent"/>
+    <serviceTask id="ValidateConsent" name="GET /account-consents/request (status)"/>
+    <sequenceFlow id="flow3" sourceRef="ValidateConsent" targetRef="GetBalances"/>
+    <serviceTask id="GetBalances" name="GET /accounts/{id}/balances"/>
+    <sequenceFlow id="flow4" sourceRef="GetBalances" targetRef="CheckBalanceGateway"/>
+    <exclusiveGateway id="CheckBalanceGateway" name="Баланс достаточен?"/>
+    <sequenceFlow id="flow5" sourceRef="CheckBalanceGateway" targetRef="ApproveUse">
+      <conditionExpression xsi:type="tFormalExpression">approved</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow6" sourceRef="CheckBalanceGateway" targetRef="NotifyInsufficient">
+      <conditionExpression xsi:type="tFormalExpression">declined</conditionExpression>
+    </sequenceFlow>
+    <userTask id="ApproveUse" name="Разрешить применение токена"/>
+    <sequenceFlow id="flow7" sourceRef="ApproveUse" targetRef="EndToken"/>
+    <userTask id="NotifyInsufficient" name="Уведомить клиента"/>
+    <sequenceFlow id="flow8" sourceRef="NotifyInsufficient" targetRef="EndToken"/>
+    <endEvent id="EndToken" name="Токен готов"/>
+  </process>
+</definitions>

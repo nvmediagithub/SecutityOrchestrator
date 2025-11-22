@@ -1,464 +1,154 @@
-# Пользовательский интерфейс системы автоматического тестирования
+# SecurityOrchestrator User Interface Specification
 
-## 1. Обзор пользовательского интерфейса
+## 1. User Interface Overview
 
-### 1.1 Архитектура Frontend
+### 1.1 Frontend Architecture
 
-**Технологический стек:**
-- **Flutter Web** - кроссплатформенный UI
-- **flutter_riverpod** - state management
-- **Material Design 3** - современный дизайн
-- **WebSocket** - real-time коммуникация
-- **HTTP Client** - API взаимодействие
+**Technology Stack:**
+- **Flutter Web** - Cross-platform UI framework
+- **Flutter Riverpod** - Modern state management
+- **Material Design 3** - Modern design system
+- **GoRouter** - Declarative routing solution
+- **WebSocket** - Real-time communication
+- **HTTP Client** - API communication
+- **SelectionArea** - Enhanced text selection and accessibility
 
-### 1.2 Основные экраны системы
+### 1.2 Main Application Screens
 
 ```mermaid
 graph TB
-    subgraph "Main Application Flow"
-        LOGIN[Login Screen]
+    subgraph "SecurityOrchestrator Application Flow"
         DASHBOARD[Main Dashboard]
-        PROJECTS[Projects List]
-        PROJECT_DETAIL[Project Details]
-        TEST_CREATOR[Test Creator Wizard]
-        EXEC_MONITOR[Execution Monitor]
-        RESULTS[Results Viewer]
+        PROCESSES[Analysis Processes]
+        PROCESS_DETAIL[Process Details]
+        MONITORING[Real-time Monitoring]
         SETTINGS[Settings & Configuration]
+        LLM_DASHBOARD[LLM Provider Management]
     end
     
-    LOGIN --> DASHBOARD
-    DASHBOARD --> PROJECTS
-    PROJECTS --> PROJECT_DETAIL
-    PROJECT_DETAIL --> TEST_CREATOR
-    TEST_CREATOR --> EXEC_MONITOR
-    EXEC_MONITOR --> RESULTS
+    DASHBOARD --> PROCESSES
+    PROCESSES --> PROCESS_DETAIL
+    PROCESS_DETAIL --> MONITORING
     DASHBOARD --> SETTINGS
+    DASHBOARD --> LLM_DASHBOARD
     
     style DASHBOARD fill:#e1f5fe
-    style TEST_CREATOR fill:#f3e5f5
-    style EXEC_MONITOR fill:#fff3e0
-    style RESULTS fill:#e8f5e8
+    style PROCESSES fill:#f3e5f5
+    style MONITORING fill:#fff3e0
+    style LLM_DASHBOARD fill:#e8f5e8
 ```
 
-## 2. Главная панель управления (Dashboard)
+## 2. Main Dashboard (Home Page)
 
-### 2.1 Layout Dashboard
+### 2.1 Dashboard Layout Implementation
+
 ```dart
-class MainDashboard extends ConsumerWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+class HomePage extends ConsumerWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final projectsState = ref.watch(projectsProvider);
-    final executionState = ref.watch(activeExecutionsProvider);
-    
     return Scaffold(
       appBar: AppBar(
-        title: Text('SecurityOrchestrator - API Testing'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () => Navigator.pushNamed(context, '/settings'),
-          ),
-          UserProfileMenu(),
-        ],
+        title: const Text('Security Orchestrator'),
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
       ),
-      body: Row(
-        children: [
-          NavigationRail(
-            destinations: [
-              NavigationRailDestination(
-                icon: Icon(Icons.dashboard),
-                label: Text('Dashboard'),
+      body: const SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 24),
+            Text(
+              'Security Orchestrator Dashboard',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
-              NavigationRailDestination(
-                icon: Icon(Icons.folder),
-                label: Text('Projects'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.play_arrow),
-                label: Text('Executions'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.analytics),
-                label: Text('Analytics'),
-              ),
-            ],
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (index) => setState(() => _selectedIndex = index),
-          ),
-          Expanded(
-            child: _buildContent(),
-          ),
-        ],
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Monitor and manage your security infrastructure',
+              style: TextStyle(fontSize: 16, color: Colors.black54),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 32),
+            ConnectionStatusCard(),
+            SystemHealthCard(),
+            LlmStatusCard(),
+            MetricsList(),
+            AlertsList(),
+            ProcessesOverviewCard(),
+          ],
+        ),
       ),
     );
   }
 }
 ```
 
-### 2.2 Dashboard Content
+### 2.2 Navigation Implementation
+
+**GoRouter Configuration:**
 ```dart
-Widget _buildContent() {
-  return Padding(
-    padding: EdgeInsets.all(24.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Dashboard',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            ElevatedButton.icon(
-              icon: Icon(Icons.add),
-              label: Text('New Project'),
-              onPressed: () => _showCreateProjectDialog(),
-            ),
-          ],
-        ),
-        SizedBox(height: 24),
-        
-        // Key Metrics
-        Row(
-          children: [
-            Expanded(
-              child: MetricCard(
-                title: 'Total Projects',
-                value: '24',
-                icon: Icons.folder,
-                color: Colors.blue,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: MetricCard(
-                title: 'Active Tests',
-                value: '156',
-                icon: Icons.play_arrow,
-                color: Colors.green,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: MetricCard(
-                title: 'Success Rate',
-                value: '94.2%',
-                icon: Icons.check_circle,
-                color: Colors.orange,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: MetricCard(
-                title: 'Security Score',
-                value: 'A+',
-                icon: Icons.security,
-                color: Colors.purple,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 32),
-        
-        // Recent Projects and Activity
-        Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                child: RecentProjectsCard(),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: SystemActivityCard(),
-              ),
-            ],
-          ),
+import 'package:go_router/go_router.dart';
+import 'features/monitoring/presentation/home_page.dart';
+import 'features/analysis-processes/presentation/analysis_processes_page.dart';
+import 'features/analysis-processes/presentation/process_detail_page.dart';
+
+final _router = GoRouter(
+  initialLocation: '/',
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => SelectionArea(child: const HomePage()),
+    ),
+    GoRoute(
+      path: '/processes',
+      builder: (context, state) =>
+          SelectionArea(child: const AnalysisProcessesPage()),
+      routes: [
+        GoRoute(
+          path: ':id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return SelectionArea(
+              child: ProcessDetailPage(key: state.pageKey, processId: id),
+            );
+          },
         ),
       ],
     ),
-  );
-}
+  ],
+);
 ```
 
-### 2.3 Metric Card Component
+### 2.3 Dashboard Cards
+
+**Connection Status Card:**
 ```dart
-class MetricCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  
-  const MetricCard({
-    Key? key,
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-  }) : super(key: key);
-  
+class ConnectionStatusCard extends ConsumerWidget {
+  const ConnectionStatusCard({super.key});
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final connectivityAsync = ref.watch(connectivityProvider);
+    
     return Card(
-      elevation: 2,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-                Icon(
-                  icon,
-                  color: color,
-                  size: 32,
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-```
-
-## 3. Создание проекта (Test Creation Wizard)
-
-### 3.1 Project Creation Flow
-```dart
-class TestCreationWizard extends StatefulWidget {
-  @override
-  _TestCreationWizardState createState() => _TestCreationWizardState();
-}
-
-class _TestCreationWizardState extends State<TestCreationWizard> {
-  int _currentStep = 0;
-  final PageController _pageController = PageController();
-  
-  final List<WizardStep> _steps = [
-    WizardStep(
-      title: 'Project Setup',
-      widget: ProjectSetupStep(),
-    ),
-    WizardStep(
-      title: 'Specifications',
-      widget: SpecificationsStep(),
-    ),
-    WizardStep(
-      title: 'LLM Analysis',
-      widget: LLMAnalysisStep(),
-    ),
-    WizardStep(
-      title: 'Test Configuration',
-      widget: TestConfigurationStep(),
-    ),
-    WizardStep(
-      title: 'Review & Generate',
-      widget: ReviewAndGenerateStep(),
-    ),
-  ];
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Create Test Project'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.help),
-            onPressed: () => _showHelp(),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Progress Indicator
-          LinearProgressIndicator(
-            value: (_currentStep + 1) / _steps.length,
-            backgroundColor: Colors.grey[300],
-          ),
-          
-          // Step Navigation
-          Stepper(
-            type: StepperType.horizontal,
-            currentStep: _currentStep,
-            onStepTapped: (step) {
-              setState(() => _currentStep = step);
-              _pageController.animateToPage(
-                step,
-                duration: Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            },
-            onStepContinue: () {
-              if (_currentStep < _steps.length - 1) {
-                setState(() => _currentStep++);
-                _pageController.nextPage(
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
-              }
-            },
-            onStepCancel: () {
-              if (_currentStep > 0) {
-                setState(() => _currentStep--);
-                _pageController.previousPage(
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
-              }
-            },
-            steps: _steps.map((step) => Step(
-              title: Text(step.title),
-              isActive: _currentStep >= _steps.indexOf(step),
-              content: SizedBox.shrink(),
-            )).toList(),
-          ),
-          
-          // Step Content
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() => _currentStep = index);
-              },
-              children: _steps.map((step) => step.widget).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-```
-
-### 3.2 Specifications Upload Step
-```dart
-class SpecificationsStep extends ConsumerStatefulWidget {
-  @override
-  _SpecificationsStepState createState() => _SpecificationsStepState();
-}
-
-class _SpecificationsStepState extends ConsumerState<SpecificationsStep> {
-  List<File> _selectedFiles = [];
-  List<SpecificationUploadItem> _uploads = [];
-  
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Upload Specifications',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Upload OpenAPI/Swagger specifications and BPMN process diagrams to analyze and generate tests.',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          SizedBox(height: 24),
-          
-          // File Upload Areas
-          Row(
-            children: [
-              Expanded(
-                child: _buildUploadCard(
-                  title: 'OpenAPI/Swagger',
-                  subtitle: 'API specifications (JSON, YAML)',
-                  icon: Icons.api,
-                  onTap: () => _pickFiles(['json', 'yaml', 'yml']),
-                ),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: _buildUploadCard(
-                  title: 'BPMN Process',
-                  subtitle: 'Business process diagrams (XML)',
-                  icon: Icons.account_tree,
-                  onTap: () => _pickFiles(['bpmn', 'xml']),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 24),
-          
-          // Uploaded Files List
-          if (_uploads.isNotEmpty) ...[
-            Text(
-              'Uploaded Specifications',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _uploads.length,
-                itemBuilder: (context, index) {
-                  final upload = _uploads[index];
-                  return _buildUploadItem(upload);
-                },
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildUploadCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          height: 150,
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 48,
-                color: Theme.of(context).primaryColor,
-              ),
-              SizedBox(height: 16),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 8),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-            ],
+        padding: const EdgeInsets.all(16),
+        child: connectivityAsync.when(
+          data: (status) => _ConnectionStatusDetails(status: status),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Text(
+            'Failed to check connection: $error',
+            style: const TextStyle(color: Colors.redAccent),
           ),
         ),
       ),
@@ -467,760 +157,715 @@ class _SpecificationsStepState extends ConsumerState<SpecificationsStep> {
 }
 ```
 
-### 3.3 LLM Analysis Step
+**System Health Card:**
 ```dart
-class LLMAnalysisStep extends ConsumerStatefulWidget {
-  @override
-  _LLMAnalysisStepState createState() => _LLMAnalysisStepState();
-}
+class SystemHealthCard extends ConsumerWidget {
+  const SystemHealthCard({super.key});
 
-class _LLMAnalysisStepState extends ConsumerState<LLMAnalysisStep> {
-  bool _isAnalyzing = false;
-  List<AnalysisResult> _results = [];
-  
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'LLM Analysis',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  Text(
-                    'AI-powered analysis of specifications',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-              ElevatedButton.icon(
-                icon: _isAnalyzing 
-                    ? SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(Icons.psychology),
-                label: Text(_isAnalyzing ? 'Analyzing...' : 'Start Analysis'),
-                onPressed: _isAnalyzing ? null : _startAnalysis,
-              ),
-            ],
-          ),
-          SizedBox(height: 24),
-          
-          // Analysis Progress
-          if (_isAnalyzing) _buildAnalysisProgress(),
-          
-          // Analysis Results
-          if (!_isAnalyzing && _results.isNotEmpty) _buildAnalysisResults(),
-          
-          // Empty State
-          if (!_isAnalyzing && _results.isEmpty) _buildEmptyState(),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildAnalysisProgress() {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final systemHealthAsync = ref.watch(systemHealthProvider);
+
     return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Analyzing specifications...',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'LLM is processing OpenAPI and BPMN content',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+        padding: const EdgeInsets.all(16),
+        child: systemHealthAsync.when(
+          data: (systemHealth) =>
+              _SystemHealthDetails(systemHealth: systemHealth),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              'Failed to load system health: $error',
+              style: const TextStyle(color: Colors.redAccent),
             ),
-            SizedBox(height: 16),
-            LinearProgressIndicator(),
-            SizedBox(height: 8),
-            Text(
-              'This may take a few minutes depending on specification size',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
-  
-  Widget _buildAnalysisResults() {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: _results.length,
-        itemBuilder: (context, index) {
-          final result = _results[index];
-          return _buildAnalysisResultCard(result);
-        },
-      ),
-    );
-  }
-  
-  Widget _buildAnalysisResultCard(AnalysisResult result) {
+}
+```
+
+**LLM Status Card:**
+```dart
+class LlmStatusCard extends ConsumerWidget {
+  const LlmStatusCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analyticsAsync = ref.watch(llmAnalyticsProvider);
+
     return Card(
-      margin: EdgeInsets.only(bottom: 16),
-      child: ExpansionTile(
-        title: Text(result.title),
-        subtitle: Text(result.type),
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
+      margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: analyticsAsync.when(
+          data: (analytics) {
+            final active = analytics.providers.firstWhere(
+              (provider) => provider.active,
+              orElse: () => analytics.providers.isNotEmpty
+                  ? analytics.providers.first
+                  : LlmProviderStatus(
+                      id: 'unknown',
+                      displayName: 'Not configured',
+                      mode: 'n/a',
+                      baseUrl: '',
+                      available: false,
+                      requiresApiKey: false,
+                    ),
+            );
+
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Description:',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                SizedBox(height: 8),
-                Text(result.description),
-                SizedBox(height: 16),
-                if (result.recommendations.isNotEmpty) ...[
-                  Text(
-                    'Recommendations:',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  SizedBox(height: 8),
-                  ...result.recommendations.map((rec) => 
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.lightbulb, color: Colors.amber, size: 16),
-                          SizedBox(width: 8),
-                          Expanded(child: Text(rec)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-```
-
-## 4. Мониторинг выполнения тестов
-
-### 4.1 Execution Monitor Screen
-```dart
-class ExecutionMonitor extends ConsumerStatefulWidget {
-  final String executionId;
-  
-  const ExecutionMonitor({Key? key, required this.executionId}) : super(key: key);
-  
-  @override
-  _ExecutionMonitorState createState() => _ExecutionMonitorState();
-}
-
-class _ExecutionMonitorState extends ConsumerState<ExecutionMonitor> {
-  late WebSocketService _webSocketService;
-  ExecutionState? _executionState;
-  List<ExecutionLog> _logs = [];
-  
-  @override
-  void initState() {
-    super.initState();
-    _webSocketService = ref.read(webSocketServiceProvider);
-    _startMonitoring();
-  }
-  
-  void _startMonitoring() {
-    _webSocketService.connectToExecution(widget.executionId);
-    _webSocketService.listenToUpdates(
-      onProgress: (progress) {
-        setState(() {
-          _executionState = progress;
-        });
-      },
-      onLog: (log) {
-        setState(() {
-          _logs.add(log);
-        });
-      },
-      onComplete: (result) {
-        setState(() {
-          _executionState = result;
-        });
-      },
-    );
-  }
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Execution Monitor'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.pause),
-            onPressed: _executionState?.status == ExecutionStatus.RUNNING 
-                ? _pauseExecution 
-                : _resumeExecution,
-          ),
-          IconButton(
-            icon: Icon(Icons.stop),
-            onPressed: _stopExecution,
-          ),
-        ],
-      ),
-      body: Row(
-        children: [
-          // Progress Panel
-          Container(
-            width: 300,
-            padding: EdgeInsets.all(16),
-            child: _buildProgressPanel(),
-          ),
-          
-          // Main Content
-          Expanded(
-            child: Column(
-              children: [
-                // Timeline
-                _buildExecutionTimeline(),
-                
-                // Tabs for Logs/Results/Analysis
-                Expanded(
-                  child: _buildTabbedContent(),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildProgressPanel() {
-    if (_executionState == null) {
-      return Center(child: CircularProgressIndicator());
-    }
-    
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Execution Progress',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            SizedBox(height: 16),
-            
-            // Overall Progress
-            LinearProgressIndicator(
-              value: _executionState!.overallProgress,
-            ),
-            SizedBox(height: 8),
-            Text(
-              '${(_executionState!.overallProgress * 100).toInt()}% Complete',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            SizedBox(height: 16),
-            
-            // Current Step
-            Text(
-              'Current Step:',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            SizedBox(height: 4),
-            Text(_executionState!.currentStep?.name ?? 'Waiting...'),
-            SizedBox(height: 8),
-            
-            // Status
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: _getStatusColor(_executionState!.status),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                _executionState!.status.name.toUpperCase(),
-                style: TextStyle(color: Colors.white, fontSize: 12),
-              ),
-            ),
-            SizedBox(height: 16),
-            
-            // Timing
-            if (_executionState!.startTime != null) ...[
-              Text(
-                'Start Time:',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              SizedBox(height: 4),
-              Text(_formatTime(_executionState!.startTime!)),
-            ],
-            if (_executionState!.estimatedEndTime != null) ...[
-              SizedBox(height: 8),
-              Text(
-                'ETA:',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              SizedBox(height: 4),
-              Text(_formatTime(_executionState!.estimatedEndTime!)),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildExecutionTimeline() {
-    if (_executionState?.steps == null) return SizedBox.shrink();
-    
-    return Container(
-      height: 80,
-      padding: EdgeInsets.all(16),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _executionState!.steps.length,
-        itemBuilder: (context, index) {
-          final step = _executionState!.steps[index];
-          return _buildTimelineStep(step, index);
-        },
-      ),
-    );
-  }
-  
-  Widget _buildTimelineStep(ExecutionStep step, int index) {
-    return Container(
-      width: 200,
-      margin: EdgeInsets.only(right: 8),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _getStepStatusColor(step.status),
-                  border: Border.all(
-                    color: step.status == ExecutionStepStatus.CURRENT 
-                        ? Theme.of(context).primaryColor 
-                        : Colors.grey,
-                    width: 2,
-                  ),
-                ),
-                child: step.status == ExecutionStepStatus.CURRENT
-                    ? Center(
-                        child: SizedBox(
-                          width: 12,
-                          height: 12,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        ),
-                      )
-                    : step.status == ExecutionStepStatus.COMPLETED
-                        ? Icon(Icons.check, size: 16, color: Colors.white)
-                        : step.status == ExecutionStepStatus.FAILED
-                            ? Icon(Icons.error, size: 16, color: Colors.white)
-                            : null,
-              ),
-              Expanded(
-                child: Divider(
-                  color: index < _executionState!.steps.length - 1
-                      ? step.status == ExecutionStepStatus.COMPLETED
-                          ? Colors.green
-                          : Colors.grey
-                      : Colors.transparent,
-                  thickness: 2,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Text(
-            step.name,
-            style: Theme.of(context).textTheme.bodySmall,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (step.status == ExecutionStepStatus.COMPLETED || 
-              step.status == ExecutionStepStatus.FAILED)
-            Text(
-              _formatDuration(step.executionTime),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-        ],
-      ),
-    );
-  }
-}
-```
-
-## 5. Просмотр результатов
-
-### 5.1 Results Dashboard
-```dart
-class ResultsDashboard extends ConsumerStatefulWidget {
-  final String executionId;
-  
-  const ResultsDashboard({Key? key, required this.executionId}) : super(key: key);
-  
-  @override
-  _ResultsDashboardState createState() => _ResultsDashboardState();
-}
-
-class _ResultsDashboardState extends ConsumerState<ResultsDashboard> {
-  late Future<ExecutionResults> _results;
-  int _selectedTabIndex = 0;
-  
-  @override
-  void initState() {
-    super.initState();
-    _results = ref.read(resultsProvider).getExecutionResults(widget.executionId);
-  }
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Test Results'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.download),
-            onPressed: _exportResults,
-          ),
-          IconButton(
-            icon: Icon(Icons.share),
-            onPressed: _shareResults,
-          ),
-        ],
-      ),
-      body: FutureBuilder<ExecutionResults>(
-        future: _results,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return _buildResultsContent(snapshot.data!);
-          } else if (snapshot.hasError) {
-            return _buildErrorState(snapshot.error);
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-    );
-  }
-  
-  Widget _buildResultsContent(ExecutionResults results) {
-    return Column(
-      children: [
-        // Summary Cards
-        _buildResultsSummary(results),
-        
-        // Tabs
-        DefaultTabController(
-          length: 4,
-          child: Column(
-            children: [
-              TabBar(
-                labelColor: Theme.of(context).primaryColor,
-                unselectedLabelColor: Colors.grey,
-                tabs: [
-                  Tab(icon: Icon(Icons.list), text: 'Test Cases'),
-                  Tab(icon: Icon(Icons.security), text: 'Security'),
-                  Tab(icon: Icon(Icons.analytics), text: 'Performance'),
-                  Tab(icon: Icon(Icons.bug_report), text: 'Issues'),
-                ],
-              ),
-              Expanded(
-                child: TabBarView(
+                Row(
                   children: [
-                    _buildTestCasesTab(results),
-                    _buildSecurityTab(results),
-                    _buildPerformanceTab(results),
-                    _buildIssuesTab(results),
+                    Text(
+                      'LLM Analytics',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(width: 12),
+                    _ModeChip(mode: active.mode),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: 'Check connection',
+                      icon: const Icon(Icons.wifi_tethering),
+                      onPressed: () => _checkConnection(context, ref),
+                    ),
+                    PopupMenuButton<LlmProviderStatus>(
+                      tooltip: 'Switch provider',
+                      onSelected: (provider) =>
+                          _switchProvider(provider.id, ref),
+                      itemBuilder: (context) => analytics.providers
+                          .where((provider) => !provider.active)
+                          .map(
+                            (provider) => PopupMenuItem(
+                              value: provider,
+                              child: Text(provider.displayName),
+                            ),
+                          )
+                          .toList(),
+                      child: const Icon(Icons.swap_horiz),
+                    ),
                   ],
                 ),
-              ),
-            ],
+                // ... additional LLM status content
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Text(
+            'Failed to load LLM analytics: $error',
+            style: const TextStyle(color: Colors.red),
           ),
         ),
-      ],
-    );
-  }
-  
-  Widget _buildResultsSummary(ExecutionResults results) {
-    return Padding(
-      padding: EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildSummaryCard(
-              'Total Tests',
-              results.totalTests.toString(),
-              Icons.list,
-              Colors.blue,
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: _buildSummaryCard(
-              'Passed',
-              results.passedTests.toString(),
-              Icons.check_circle,
-              Colors.green,
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: _buildSummaryCard(
-              'Failed',
-              results.failedTests.toString(),
-              Icons.error,
-              Colors.red,
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: _buildSummaryCard(
-              'Success Rate',
-              '${(results.successRate * 100).toStringAsFixed(1)}%',
-              Icons.trending_up,
-              results.successRate > 0.8 ? Colors.green : Colors.orange,
-            ),
-          ),
-        ],
       ),
     );
   }
-  
-  Widget _buildTestCasesTab(ExecutionResults results) {
-    return ListView.builder(
-      itemCount: results.testCases.length,
-      itemBuilder: (context, index) {
-        final testCase = results.testCases[index];
-        return _buildTestCaseCard(testCase);
-      },
+}
+```
+
+## 3. Analysis Processes Management
+
+### 3.1 Processes List Implementation
+
+```dart
+class AnalysisProcessesPage extends ConsumerWidget {
+  const AnalysisProcessesPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final processesAsync = ref.watch(analysisProcessesProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Analysis Processes'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _showCreateProcessDialog(context),
+          ),
+        ],
+      ),
+      body: processesAsync.when(
+        data: (processes) => processes.isNotEmpty
+            ? ListView.builder(
+                itemCount: processes.length,
+                itemBuilder: (context, index) {
+                  final process = processes[index];
+                  return _ProcessCard(process: process);
+                },
+              )
+            : const Center(child: Text('No processes available')),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(
+          child: Text('Error loading processes: $error'),
+        ),
+      ),
     );
   }
-  
-  Widget _buildTestCaseCard(TestCaseResult testCase) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ExpansionTile(
-        title: Row(
+}
+```
+
+### 3.2 Process Detail Implementation
+
+```dart
+class ProcessDetailPage extends ConsumerStatefulWidget {
+  final String processId;
+
+  const ProcessDetailPage({super.key, required this.processId});
+
+  @override
+  ConsumerState<ProcessDetailPage> createState() => _ProcessDetailPageState();
+}
+
+class _ProcessDetailPageState extends ConsumerState<ProcessDetailPage> {
+  @override
+  Widget build(BuildContext context) {
+    final processAsync = ref.watch(processDetailProvider(widget.processId));
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Process Details'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert),
+            onPressed: () => _showProcessMenu(context),
+          ),
+        ],
+      ),
+      body: processAsync.when(
+        data: (process) => Column(
           children: [
-            Icon(
-              testCase.status == TestStatus.PASSED 
-                  ? Icons.check_circle
-                  : testCase.status == TestStatus.FAILED
-                      ? Icons.error
-                      : Icons.warning,
-              color: testCase.status == TestStatus.PASSED 
-                  ? Colors.green
-                  : testCase.status == TestStatus.FAILED
-                      ? Colors.red
-                      : Colors.orange,
-            ),
-            SizedBox(width: 8),
+            ProcessOverviewHeader(process: process),
             Expanded(
-              child: Text(testCase.name),
+              child: TabBarView(
+                children: [
+                  OpenApiUploadSection(
+                    suggestedName: process.name,
+                    processId: widget.processId,
+                  ),
+                  BpmnUploadSection(
+                    suggestedName: process.name,
+                    processId: widget.processId,
+                  ),
+                  AnalysisSessionBody(session: process.currentSession),
+                ],
+              ),
             ),
           ],
         ),
-        subtitle: Text(testCase.endpoint),
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Request Details
-                Text(
-                  'Request:',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                SizedBox(height: 8),
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    testCase.request,
-                    style: TextStyle(fontFamily: 'monospace'),
-                  ),
-                ),
-                SizedBox(height: 16),
-                
-                // Response Details
-                Text(
-                  'Response:',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                SizedBox(height: 8),
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: testCase.status == TestStatus.PASSED 
-                        ? Colors.green[50]
-                        : Colors.red[50],
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Status: ${testCase.responseCode}',
-                        style: TextStyle(fontFamily: 'monospace'),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        testCase.responseBody,
-                        style: TextStyle(fontFamily: 'monospace'),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                // Validation Errors
-                if (testCase.validationErrors.isNotEmpty) ...[
-                  SizedBox(height: 16),
-                  Text(
-                    'Validation Errors:',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  SizedBox(height: 8),
-                  ...testCase.validationErrors.map((error) => Padding(
-                    padding: EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      children: [
-                        Icon(Icons.error, color: Colors.red, size: 16),
-                        SizedBox(width: 8),
-                        Expanded(child: Text(error)),
-                      ],
-                    ),
-                  )),
-                ],
-              ],
-            ),
-          ),
-        ],
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(
+          child: Text('Error loading process: $error'),
+        ),
       ),
     );
   }
 }
 ```
 
-## 6. Навигация и маршрутизация
+## 4. Real-time Monitoring
 
-### 6.1 App Router Configuration
+### 4.1 Metrics Implementation
+
 ```dart
-class AppRouter {
-  static Route<dynamic> generateRoute(RouteSettings settings) {
-    switch (settings.name) {
-      case '/':
-        return MaterialPageRoute(
-          builder: (_) => MainDashboard(),
-        );
-      case '/projects':
-        return MaterialPageRoute(
-          builder: (_) => ProjectsListScreen(),
-        );
-      case '/project/:id':
-        final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(
-          builder: (_) => ProjectDetailScreen(
-            projectId: args['id'],
-          ),
-        );
-      case '/create-project':
-        return MaterialPageRoute(
-          builder: (_) => TestCreationWizard(),
-        );
-      case '/execution/:id':
-        final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(
-          builder: (_) => ExecutionMonitor(
-            executionId: args['id'],
-          ),
-        );
-      case '/results/:id':
-        final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(
-          builder: (_) => ResultsDashboard(
-            executionId: args['id'],
-          ),
-        );
-      default:
-        return MaterialPageRoute(
-          builder: (_) => Scaffold(
-            body: Center(
-              child: Text('Route not found'),
+class MetricsList extends ConsumerWidget {
+  const MetricsList({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final metricsAsync = ref.watch(metricsProvider);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Key Metrics', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 16),
+            metricsAsync.when(
+              data: (metrics) => metrics.isNotEmpty
+                  ? Column(children: metrics.map(_buildMetricItem).toList())
+                  : const Text(
+                      'No metrics available',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Text(
+                'Failed to load metrics: $error',
+                style: const TextStyle(color: Colors.redAccent),
+              ),
             ),
-          ),
-        );
-    }
+          ],
+        ),
+      ),
+    );
   }
 }
 ```
 
-## 7. Респонсивный дизайн
+### 4.2 Alerts Management
 
-### 7.1 Responsive Breakpoints
+```dart
+class AlertsList extends ConsumerWidget {
+  const AlertsList({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final alertsAsync = ref.watch(alertsProvider);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('System Alerts', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 16),
+            alertsAsync.when(
+              data: (alerts) => alerts.isNotEmpty
+                  ? Column(children: alerts.map(_buildAlertItem).toList())
+                  : const Text(
+                      'No active alerts',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Text(
+                'Failed to load alerts: $error',
+                style: const TextStyle(color: Colors.redAccent),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+## 5. Specification Upload and Analysis
+
+### 5.1 OpenAPI Upload Implementation
+
+```dart
+class OpenApiUploadSection extends ConsumerStatefulWidget {
+  final String? suggestedName;
+  final String? processId;
+
+  const OpenApiUploadSection({super.key, this.suggestedName, this.processId});
+
+  @override
+  ConsumerState<OpenApiUploadSection> createState() =>
+      _OpenApiUploadSectionState();
+}
+
+class _OpenApiUploadSectionState extends ConsumerState<OpenApiUploadSection> {
+  OpenApiAnalysis? _analysis;
+  List<OpenApiAnalysis>? _examples;
+  bool _isLoading = false;
+  String? _error;
+
+  Future<void> _pickAndAnalyze() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['json', 'yaml', 'yml'],
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return;
+
+    final file = result.files.single;
+    final bytes = file.bytes;
+    if (bytes == null) {
+      setState(() => _error = 'Unable to read file contents');
+      return;
+    }
+
+    if (widget.processId != null) {
+      await _uploadForProcess(bytes, file.name);
+    } else {
+      await _analyze(bytes, file.name);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 24),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'OpenAPI Specification',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const Spacer(),
+                FilledButton.tonalIcon(
+                  onPressed: _isLoading ? null : _loadExample,
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text('Load example'),
+                ),
+                const SizedBox(width: 12),
+                FilledButton.icon(
+                  onPressed: _isLoading ? null : _pickAndAnalyze,
+                  icon: const Icon(Icons.upload_file),
+                  label: Text(
+                    widget.processId != null
+                        ? 'Upload OpenAPI'
+                        : 'Analyze OpenAPI',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (_isLoading) const LinearProgressIndicator(),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              ),
+            if (_analysis != null) ...[
+              const SizedBox(height: 12),
+              _OpenApiAnalysisSummary(analysis: _analysis!),
+            ] else if (!_isLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  'Upload an OpenAPI file to run validation and security heuristics.',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+### 5.2 BPMN Upload Implementation
+
+```dart
+class BpmnUploadSection extends ConsumerStatefulWidget {
+  final String? suggestedName;
+  final String? processId;
+
+  const BpmnUploadSection({super.key, this.suggestedName, this.processId});
+
+  @override
+  ConsumerState<BpmnUploadSection> createState() => _BpmnUploadSectionState();
+}
+
+class _BpmnUploadSectionState extends ConsumerState<BpmnUploadSection> {
+  BpmnAnalysis? _analysis;
+  List<BpmnAnalysis>? _examples;
+  bool _isLoading = false;
+  String? _error;
+
+  Future<void> _pickAndAnalyze() async {
+    final selection = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['bpmn', 'xml'],
+      withData: true,
+    );
+
+    if (selection == null || selection.files.isEmpty) return;
+
+    final file = selection.files.single;
+    final bytes = file.bytes;
+    if (bytes == null) {
+      setState(() => _error = 'Unable to read file contents');
+      return;
+    }
+
+    if (widget.processId != null) {
+      await _uploadForProcess(bytes, file.name);
+    } else {
+      await _analyze(bytes, file.name);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 24),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'BPMN Analysis',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const Spacer(),
+                FilledButton.tonalIcon(
+                  onPressed: _isLoading ? null : _loadExample,
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text('Example from dataset'),
+                ),
+                const SizedBox(width: 12),
+                FilledButton.icon(
+                  onPressed: _isLoading ? null : _pickAndAnalyze,
+                  icon: const Icon(Icons.upload_file),
+                  label: const Text('Upload BPMN'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (_isLoading) const LinearProgressIndicator(),
+            if (_error != null)
+              Text(_error!, style: const TextStyle(color: Colors.red)),
+            if (_analysis != null) ...[
+              const SizedBox(height: 16),
+              _BpmnAnalysisSummary(analysis: _analysis!),
+              const SizedBox(height: 16),
+              Text('Diagram', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              BpmnViewer(bpmnXml: _analysis!.bpmnContent),
+            ] else if (!_isLoading)
+              const Text(
+                'Upload a BPMN diagram to get a preliminary analysis or use a ready-made example.',
+                style: TextStyle(color: Colors.grey),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+## 6. Navigation and Routing
+
+### 6.1 GoRouter Configuration for Microservices
+
+**Production Router Configuration:**
+```dart
+import 'package:go_router/go_router.dart';
+import 'features/monitoring/presentation/home_page.dart';
+import 'features/analysis-processes/presentation/analysis_processes_page.dart';
+import 'features/analysis-processes/presentation/process_detail_page.dart';
+
+class AppRouter {
+  static final _router = GoRouter(
+    initialLocation: '/',
+    routes: [
+      // Main dashboard
+      GoRoute(
+        path: '/',
+        builder: (context, state) => SelectionArea(
+          child: const HomePage(),
+        ),
+      ),
+      
+      // Analysis processes with nested routes
+      GoRoute(
+        path: '/processes',
+        builder: (context, state) => SelectionArea(
+          child: const AnalysisProcessesPage(),
+        ),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return SelectionArea(
+                child: ProcessDetailPage(
+                  key: state.pageKey,
+                  processId: id,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ],
+    
+    // Error handling
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Text('Route not found: ${state.matchedLocation}'),
+      ),
+    ),
+    
+    // Refresh handling
+    refreshListenable: GoRouterRefreshStream(Stream.value(null)),
+  );
+
+  static RouterConfig<Object> get config => _router;
+}
+```
+
+### 6.2 Microservice Integration Points
+
+**API Service Layer:**
+```dart
+class MonitoringApiService {
+  final String baseUrl;
+  final http.Client client;
+
+  MonitoringApiService({required this.baseUrl, http.Client? client})
+      : client = client ?? http.Client();
+
+  Future<SystemHealth> getSystemHealth() async {
+    final response = await client.get(
+      Uri.parse('$baseUrl/api/monitoring/system-health'),
+      headers: {'Content-Type': 'application/json'},
+    );
+    
+    if (response.statusCode != 200) {
+      throw Exception('Failed to fetch system health: ${response.statusCode}');
+    }
+    
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return SystemHealth.fromJson(data);
+  }
+
+  Future<LlmAnalytics> getLlmAnalytics() async {
+    final response = await client.get(
+      Uri.parse('$baseUrl/api/monitoring/llm-analytics'),
+      headers: {'Content-Type': 'application/json'},
+    );
+    
+    if (response.statusCode != 200) {
+      throw Exception('Failed to fetch LLM analytics: ${response.statusCode}');
+    }
+    
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return LlmAnalytics.fromJson(data);
+  }
+}
+```
+
+## 7. Responsive Design
+
+### 7.1 Responsive Layout System
+
 ```dart
 class ResponsiveLayout extends StatelessWidget {
   final Widget mobile;
   final Widget? tablet;
   final Widget? desktop;
-  
+  final double? mobileBreakpoint;
+  final double? tabletBreakpoint;
+
   const ResponsiveLayout({
     Key? key,
     required this.mobile,
     this.tablet,
-    required this.desktop,
+    this.desktop,
+    this.mobileBreakpoint,
+    this.tabletBreakpoint,
   }) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 768) {
-          return mobile;
-        } else if (constraints.maxWidth < 1200) {
+        final mobileBp = mobileBreakpoint ?? 600;
+        final tabletBp = tabletBreakpoint ?? 1200;
+
+        if (constraints.maxWidth >= tabletBp) {
+          return desktop ?? tablet ?? mobile;
+        } else if (constraints.maxWidth >= mobileBp) {
           return tablet ?? mobile;
         } else {
-          return desktop ?? tablet ?? mobile;
+          return mobile;
+        }
+      },
+    );
+  }
+}
+```
+
+### 7.2 Adaptive Components
+
+**Responsive Dashboard Card:**
+```dart
+class ResponsiveDashboardCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsets? mobilePadding;
+  final EdgeInsets? tabletPadding;
+  final EdgeInsets? desktopPadding;
+
+  const ResponsiveDashboardCard({
+    Key? key,
+    required this.child,
+    this.mobilePadding,
+    this.tabletPadding,
+    this.desktopPadding,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        EdgeInsets padding;
+        
+        if (constraints.maxWidth >= 1200) {
+          padding = desktopPadding ?? const EdgeInsets.all(24);
+        } else if (constraints.maxWidth >= 600) {
+          padding = tabletPadding ?? const EdgeInsets.all(16);
+        } else {
+          padding = mobilePadding ?? const EdgeInsets.all(12);
+        }
+
+        return Card(
+          margin: EdgeInsets.symmetric(
+            horizontal: padding.horizontal / 2,
+            vertical: padding.vertical / 4,
+          ),
+          child: Padding(
+            padding: padding,
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+}
+```
+
+**Responsive Navigation:**
+```dart
+class ResponsiveNavigation extends StatelessWidget {
+  final Widget desktopNav;
+  final Widget mobileNav;
+
+  const ResponsiveNavigation({
+    Key? key,
+    required this.desktopNav,
+    required this.mobileNav,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth >= 768) {
+          return Row(
+            children: [
+              SizedBox(
+                width: 240,
+                child: desktopNav,
+              ),
+              Expanded(child: Container()), // Spacer
+            ],
+          );
+        } else {
+          return mobileNav;
         }
       },
     );
@@ -1230,22 +875,33 @@ class ResponsiveLayout extends StatelessWidget {
 
 ## 8. Accessibility (a11y) Support
 
-### 8.1 Accessibility Features
+### 8.1 Accessibility Implementation
+
+**Accessible Theme Configuration:**
 ```dart
-// Theme with accessibility support
-ThemeData buildAccessibleTheme() {
+ThemeData buildAccessibleTheme(BuildContext context) {
   return ThemeData(
     // High contrast support
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.blue,
       brightness: Brightness.light,
+      contrastLevel: 1.0,
     ),
     
     // Large text support
-    textTheme: TextTheme(
-      bodyLarge: TextStyle(fontSize: 18),
-      bodyMedium: TextStyle(fontSize: 16),
-      bodySmall: TextStyle(fontSize: 14),
+    textTheme: const TextTheme(
+      displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+      displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+      displaySmall: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      headlineLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+      headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+      headlineSmall: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      titleLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      titleMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+      titleSmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+      bodyLarge: TextStyle(fontSize: 16),
+      bodyMedium: TextStyle(fontSize: 14),
+      bodySmall: TextStyle(fontSize: 12),
     ),
     
     // Focus indicators
@@ -1253,27 +909,276 @@ ThemeData buildAccessibleTheme() {
     
     // Color-blind friendly colors
     visualDensity: VisualDensity.adaptivePlatformDensity,
-  );
-}
-
-// Semantic labels for screen readers
-Widget buildAccessibleButton(String text, VoidCallback onPressed) {
-  return Semantics(
-    label: 'Button: $text',
-    button: true,
-    enabled: true,
-    child: ElevatedButton(
-      onPressed: onPressed,
-      child: Text(text),
+    
+    // Enhanced button accessibility
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(48, 48), // Touch target size
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
     ),
   );
 }
 ```
 
-Этот пользовательский интерфейс обеспечивает:
-- **Интуитивность** для тестировщиков и аналитиков
-- **Real-time обновления** через WebSocket
-- **Мобильную поддержку** благодаря Flutter
-- **Accessibility** для пользователей с ограниченными возможностями
-- **Респонсивный дизайн** для различных устройств
-- **Полную интеграцию** с backend API
+**Semantic Widget Factory:**
+```dart
+class AccessibleWidgets {
+  // Accessible button with proper semantics
+  static Widget buildAccessibleButton({
+    required String text,
+    required VoidCallback onPressed,
+    IconData? icon,
+    String? tooltip,
+  }) {
+    return Semantics(
+      label: tooltip ?? text,
+      button: true,
+      enabled: true,
+      child: Tooltip(
+        message: tooltip ?? '',
+        child: ElevatedButton.icon(
+          onPressed: onPressed,
+          icon: icon != null ? Icon(icon) : const SizedBox.shrink(),
+          label: Text(text),
+        ),
+      ),
+    );
+  }
+
+  // Accessible card with proper semantics
+  static Widget buildAccessibleCard({
+    required Widget child,
+    String? label,
+    String? hint,
+  }) {
+    return Semantics(
+      label: label,
+      hint: hint,
+      container: true,
+      child: Card(
+        child: child,
+      ),
+    );
+  }
+
+  // Accessible list item
+  static Widget buildAccessibleListTile({
+    required Widget title,
+    Widget? subtitle,
+    Widget? leading,
+    Widget? trailing,
+    VoidCallback? onTap,
+    String? label,
+    String? hint,
+  }) {
+    return Semantics(
+      label: label,
+      hint: hint,
+      button: onTap != null,
+      child: ListTile(
+        title: title,
+        subtitle: subtitle,
+        leading: leading,
+        trailing: trailing,
+        onTap: onTap,
+      ),
+    );
+  }
+
+  // Accessible input field
+  static Widget buildAccessibleTextField({
+    required String label,
+    required String hint,
+    required TextEditingController controller,
+    String? helperText,
+    String? errorText,
+    bool enabled = true,
+  }) {
+    return Semantics(
+      label: label,
+      hint: hint,
+      textField: true,
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          helperText: helperText,
+          errorText: errorText,
+          enabled: enabled,
+        ),
+      ),
+    );
+  }
+}
+```
+
+**Screen Reader Support:**
+```dart
+class ScreenReaderAnnouncements {
+  static void announceAnalysisStart(BuildContext context, String specType) {
+    SemanticsService.announce(
+      context,
+      'Starting $specType analysis',
+      SemanticsHint.announce,
+    );
+  }
+
+  static void announceAnalysisComplete(BuildContext context, int issuesFound) {
+    SemanticsService.announce(
+      context,
+      'Analysis complete. $issuesFound issues found.',
+      SemanticsHint.announce,
+    );
+  }
+
+  static void announceConnectionStatus(BuildContext context, bool connected) {
+    final message = connected 
+        ? 'Connection to backend established' 
+        : 'Connection to backend lost';
+    SemanticsService.announce(context, message, SemanticsHint.announce);
+  }
+}
+```
+
+### 8.2 Keyboard Navigation
+
+**Keyboard Navigation Implementation:**
+```dart
+class KeyboardNavigation {
+  static const Set<LogicalKeySet> shortcutKeys = {
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyN): 'new_process',
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS): 'save',
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyR): 'refresh',
+    LogicalKeySet(LogicalKeyboardKey.escape): 'close_dialog',
+  };
+
+  static Widget withKeyboardShortcuts({
+    required Widget child,
+    required Map<LogicalKeySet, String> shortcuts,
+    required Function(String) onShortcut,
+  }) {
+    return Shortcuts(
+      shortcuts: shortcuts,
+      child: Actions(
+        actions: shortcuts.map((key, action) => MapEntry(
+          action,
+          CallbackAction<String>(onInvoke: (intent) => onShortcut(intent)),
+        )),
+        child: Focus(
+          autofocus: true,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+```
+
+## 9. Performance Optimization
+
+### 9.1 Flutter Performance Best Practices
+
+**Widget Optimization:**
+```dart
+class OptimizedDashboard extends ConsumerWidget {
+  const OptimizedDashboard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Use const constructors where possible
+    return const Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            expandedHeight: 120,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text('Security Orchestrator'),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                ConnectionStatusCard(),
+                SystemHealthCard(),
+                LlmStatusCard(),
+                MetricsList(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+**State Management Optimization:**
+```dart
+// Efficient provider configuration
+final systemHealthProvider = StreamProvider<SystemHealth>(
+  (ref) async* {
+    // Stream with proper error handling and retry logic
+    while (true) {
+      try {
+        final health = await ref.read(monitoringApiService).getSystemHealth();
+        yield health;
+      } catch (e) {
+        // Implement exponential backoff
+        await Future.delayed(Duration(seconds: 5));
+      }
+      await Future.delayed(Duration(seconds: 30)); // Update every 30 seconds
+    }
+  },
+);
+```
+
+### 9.2 Memory Management
+
+**Widget Disposal:**
+```dart
+class MemoryEfficientWidget extends StatefulWidget {
+  const MemoryEfficientWidget({super.key});
+
+  @override
+  State<MemoryEfficientWidget> createState() => _MemoryEfficientWidgetState();
+}
+
+class _MemoryEfficientWidgetState extends State<MemoryEfficientWidget> {
+  final ScrollController _scrollController = ScrollController();
+  final List<Metric> _metrics = [];
+  
+  @override
+  void dispose() {
+    _scrollController.dispose(); // Important: dispose controllers
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: _metrics.length,
+      itemBuilder: (context, index) {
+        return MetricCard(metric: _metrics[index]);
+      },
+    );
+  }
+}
+```
+
+This user interface provides:
+
+- **Intuitive Design** for analysts and security professionals
+- **Real-time Updates** via WebSocket and Stream Providers
+- **Mobile Support** through Flutter's responsive framework
+- **Accessibility** following WCAG 2.1 guidelines
+- **Responsive Design** for various device sizes
+- **Full Integration** with microservices architecture
+- **Performance Optimization** for enterprise-scale operations
+- **Keyboard Navigation** and screen reader support
+- **Material Design 3** implementation with modern aesthetics
+
+The interface seamlessly integrates with the backend microservices while providing a modern, accessible, and performant user experience across all platforms.

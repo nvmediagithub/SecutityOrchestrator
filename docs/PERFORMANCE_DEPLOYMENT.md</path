@@ -1,0 +1,1599 @@
+# SecurityOrchestrator - Руководство по производительности и развертыванию
+
+## Исполнительное резюме
+
+**Дата**: 2025-11-21  
+**Версия**: 1.0.0  
+**Цель**: Оптимизация производительности и настройка масштабирования  
+**Платформа**: SecurityOrchestrator - Система автоматического тестирования безопасности  
+
+---
+
+## 1. Обзор производительности
+
+### 1.1 Цели оптимизации
+
+Данное руководство направлено на оптимизацию производительности SecurityOrchestrator в production среде:
+
+- **Высокая производительность**: Оптимизация отклика API и обработки LLM запросов
+- **Масштабируемость**: Возможность горизонтального и вертикального масштабирования
+- **Эффективное использование ресурсов**: Оптимизация CPU, Memory, Network, Storage
+- **Мониторинг производительности**: Real-time мониторинг и alerting
+- **Load balancing**: Распределение нагрузки между инстансами
+
+### 1.2 Архитектурные принципы производительности
+
+```mermaid
+graph TB
+    subgraph "Performance Architecture"
+        LOAD_BALANCER[Load Balancer]
+        APP_INSTANCES[Application Instances]
+        CACHE[Redis Cache]
+        DATABASE[Database Cluster]
+        LLM_CLUSTER[LLM Service Cluster]
+        MONITORING[Monitoring Stack]
+    end
+    
+    LOAD_BALANCER --> APP_INSTANCES
+    APP_INSTANCES --> CACHE
+    APP_INSTANCES --> DATABASE
+    APP_INSTANCES --> LLM_CLUSTER
+    APP_INSTANCES --> MONITORING
+    
+    style LOAD_BALANCER fill:#e1f5fe
+    style APP_INSTANCES fill:#f3e5f5
+    style CACHE fill:#e8f5e8
+    style DATABASE fill:#fff3e0
+    style LLM_CLUSTER fill:#fce4ec
+    style MONITORING fill:#f1f8e9
+```
+
+---
+
+## 2. JVM Tuning для Spring Boot
+
+### 2.1 Оптимальные параметры JVM для SecurityOrchestrator
+
+#### Для малых и средних нагрузок (4-8 CPU cores, 8-16GB RAM)
+```bash
+# Production JVM settings
+JAVA_OPTS="
+  -Xms4g -Xmx8g                              # Heap size
+  -XX:NewRatio=1                             # Young/Old generation ratio
+  -XX:SurvivorRatio=8                        # Eden/Survivor ratio
+  -XX:+UseG1GC                               # Garbage First collector
+  -XX:+UseStringDeduplication               # String deduplication
+  -XX:+OptimizeStringConcat                 # String concatenation optimization
+  -XX:+UnlockExperimentalVMOptions
+  -XX:+UseStringCache
+  -XX:+UseCompressedOops                    # Use compressed pointers
+  -XX:+UseCompressedClassPointers
+  -XX:+UseNUMA                              # NUMA-aware memory allocation
+  -XX:+UseParallelGC                        # Parallel GC for young generation
+  -XX:MaxGCPauseMillis=200                  # Max GC pause time
+  -XX:G1HeapRegionSize=32m                  # G1 heap region size
+  -XX:+G1UseAdaptiveIHOP                    # Adaptive Initial Heap Occupancy
+  -XX:G1ReservePercent=10                   # Reserve percentage for G1
+  -XX:G1HeapWastePercent=5                  # Heap waste percentage
+  -Djava.security.egd=file:/dev/./urandom   # Secure random generator
+  -Duser.timezone=UTC                       # UTC timezone
+  -Dfile.encoding=UTF-8                     # UTF-8 encoding
+  -Djava.awt.headless=true                  # Headless mode
+  -XX:+UseContainerSupport                  # Docker container support
+  -XX:MaxRAMPercentage=75.0                 # Use 75% of container RAM
+"
+```
+
+#### Для больших нагрузок (16+ CPU cores, 32GB+ RAM)
+```bash
+# High-performance JVM settings
+JAVA_OPTS="
+  -Xms16g -Xmx32g                            # Larger heap for high throughput
+  -XX:NewRatio=1                             # 50% young, 50% old generation
+  -XX:SurvivorRatio=6                        # Smaller survivor space
+  -XX:+UseZGC                               # Z Garbage Collector (Java 11+)
+  -XX:+UnlockExperimentalVMOptions
+  -XX:+UseTransparentHugePages              # Transparent huge pages
+  -XX:+UseNUMA                              # NUMA-aware allocation
+  -XX:+UseParallelOldGC                     # Parallel old generation GC
+  -XX:MaxGCPauseMillis=100                  # Stricter GC pause target
+  -XX:+UseStringDeduplication               # Reduce memory footprint
+  -XX:+OptimizeStringConcat                 # String optimization
+  -XX:+AggressiveOpts                       # Aggressive optimizations
+  -XX:+UseCompressedOops
+  -XX:+UseCompressedClassPointers
+  -Djava.security.egd=file:/dev/./urandom
+  -Duser.timezone=UTC
+  -Dfile.encoding=UTF-8
+  -Djava.awt.headless=true
+  -XX:+UseContainerSupport
+  -XX:MaxRAMPercentage=80.0                 # Use 80% of container RAM
+  -XX:ActiveProcessorCount=auto             # Use container CPU count
+"
+```
+
+### 2.2 Spring Boot оптимизации
+
+#### application-production.properties
+```properties
+# Server Performance
+server.tomcat.max-threads=200              # Worker threads
+server.tomcat.min-spare-threads=10         # Min spare threads
+server.tomcat.max-connections=8192         # Max connections
+server.tomcat.accept-count=100             # Accept queue size
+server.tomcat.connection-timeout=20000     # Connection timeout
+server.tomcat.keep-alive-timeout=60000     # Keep-alive timeout
+server.tomcat.max-keep-alive-requests=100  # Max keep-alive requests
+
+# Connection Pool Settings
+spring.datasource.hikari.maximum-pool-size=50
+spring.datasource.hikari.minimum-idle=10
+spring.datasource.hikari.idle-timeout=600000
+spring.datasource.hikari.max-lifetime=1800000
+spring.datasource.hikari.connection-timeout=20000
+spring.datasource.hikari.leak-detection-threshold=60000
+
+# Redis Connection Pool
+spring.redis.jedis.pool.max-active=50
+spring.redis.jedis.pool.max-idle=20
+spring.redis.jedis.pool.min-idle=5
+spring.redis.jedis.pool.max-wait=-1
+
+# Actuator Performance
+management.endpoints.web.exposure.include=health,info,metrics,prometheus
+management.endpoint.health.show-details=never
+management.metrics.export.prometheus.enabled=true
+management.metrics.export.prometheus.step=10s
+management.metrics.distribution.percentiles-histogram.http.server.requests=true
+management.metrics.distribution.sla.http.server.requests=1ms,2ms,5ms,10ms,20ms,50ms,100ms
+
+# JPA Performance
+spring.jpa.open-in-view=false              # Disable OSIV
+spring.jpa.properties.hibernate.jdbc.batch_size=50
+spring.jpa.properties.hibernate.order_inserts=true
+spring.jpa.properties.hibernate.order_updates=true
+spring.jpa.properties.hibernate.cache.use_second_level_cache=true
+spring.jpa.properties.hibernate.cache.use_query_cache=true
+spring.jpa.properties.hibernate.generate_statistics=true
+
+# Async Processing
+spring.task.execution.pool.core-size=10
+spring.task.execution.pool.max-size=50
+spring.task.execution.pool.queue-capacity=100
+spring.task.execution.thread-name-prefix=Async-
+
+# Jackson Performance
+spring.jackson.serialization.indent_output=false
+spring.jackson.default-property-inclusion=NON_NULL
+spring.jackson.deserialization.fail_on_unknown_properties=false
+spring.jackson.parser.allow_unquoted_control_chars=true
+
+# File Upload Performance
+spring.servlet.multipart.max-file-size=100MB
+spring.servlet.multipart.max-request-size=100MB
+spring.servlet.multipart.resolve-lazily=true
+
+# HTTP Client Performance
+spring.http.client.connection-pool.max-total=100
+spring.http.client.connection-pool.max-per-route=20
+spring.http.client.connection-pool.validate-after-inactivity=5000
+```
+
+### 2.3 JVM Monitoring и диагностика
+
+```bash
+# JVM Monitoring Scripts
+cat > jvm-monitor.sh << 'EOF'
+#!/bin/bash
+
+PID=$(pgrep -f "SecurityOrchestratorApplication")
+
+echo "=== JVM Performance Monitoring ==="
+echo "PID: $PID"
+echo "Date: $(date)"
+echo
+
+# Memory Usage
+echo "=== Memory Usage ==="
+jstat -gc $PID | head -2
+jstat -gc $PID | tail -1
+
+# GC Statistics
+echo
+echo "=== GC Statistics ==="
+jstat -gcutil $PID 1 5
+
+# Thread Dump
+echo
+echo "=== Thread Information ==="
+jstack $PID | grep -E "BLOCKED|WAITING|TIMED_WAITING|RUNNABLE" | sort | uniq -c
+
+# Heap Analysis
+echo
+echo "=== Heap Usage ==="
+jstat -heap $PID | grep -E "used|total"
+
+# Performance Counters
+echo
+echo "=== Performance Counters ==="
+jstat -class $PID
+jstat -compiler $PID
+
+EOF
+
+chmod +x jvm-monitor.sh
+
+# Auto-run every 30 seconds
+echo "*/1 * * * * /path/to/jvm-monitor.sh >> /var/log/jvm-monitoring.log 2>&1" | crontab -
+```
+
+---
+
+## 3. Resource Allocation Guidelines
+
+### 3.1 Рекомендации по размерам инстансов
+
+#### Development Environment
+```yaml
+Environment: Development
+Instances: 1
+CPU: 2 cores
+Memory: 4GB
+Storage: 20GB SSD
+Network: 1Gbps
+Database: Shared PostgreSQL
+Cache: Not required
+```
+
+#### Staging Environment
+```yaml
+Environment: Staging  
+Instances: 2
+CPU: 4 cores each (8 cores total)
+Memory: 8GB each (16GB total)
+Storage: 50GB SSD each
+Network: 1Gbps
+Database: Dedicated PostgreSQL (4GB)
+Cache: Redis (2GB)
+LLM: Local Ollama (shared)
+```
+
+#### Production Environment - Small
+```yaml
+Environment: Production
+Instances: 3
+CPU: 4 cores each (12 cores total)
+Memory: 16GB each (48GB total)
+Storage: 100GB NVMe SSD each
+Network: 10Gbps
+Database: PostgreSQL Cluster (16GB)
+Cache: Redis Cluster (8GB)
+Load Balancer: NGINX/HAProxy
+Monitoring: Prometheus + Grafana
+```
+
+#### Production Environment - Medium
+```yaml
+Environment: Production
+Instances: 5
+CPU: 8 cores each (40 cores total)
+Memory: 32GB each (160GB total)
+Storage: 200GB NVMe SSD each
+Network: 10Gbps
+Database: PostgreSQL Cluster (32GB)
+Cache: Redis Cluster (16GB)
+LLM: Ollama Cluster (dedicated nodes)
+Load Balancer: AWS ALB/NGINX
+CDN: CloudFlare
+Monitoring: Full observability stack
+```
+
+#### Production Environment - Large
+```yaml
+Environment: Production
+Instances: 10+
+CPU: 16 cores each (160+ cores total)
+Memory: 64GB each (640GB+ total)
+Storage: 500GB NVMe SSD each
+Network: 25Gbps
+Database: PostgreSQL with read replicas
+Cache: Redis Enterprise Cluster
+LLM: Dedicated LLM infrastructure
+Load Balancer: Enterprise load balancer
+CDN: Multi-CDN
+Monitoring: Enterprise observability
+```
+
+### 3.2 Автоматическое масштабирование
+
+#### Kubernetes HPA Configuration
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: security-orchestrator-hpa
+  namespace: security-orchestrator
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: security-orchestrator
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Pods
+    pods:
+      metric:
+        name: http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: "100"
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+      - type: Pods
+        value: 2
+        periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+```
+
+#### Docker Compose Scale Configuration
+```yaml
+# docker-compose.scale.yml
+version: '3.8'
+
+services:
+  security-orchestrator:
+    image: security-orchestrator:latest
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+        max_failure_ratio: 0.3
+
+  # Auto-scaling script
+  scale-controller:
+    image: alpine:latest
+    command: sh -c "apk add --no-cache curl bash && while true; do do scale; sleep 60; done"
+    volumes:
+      - ./scale.sh:/scale.sh:ro
+    environment:
+      - DOCKER_API_VERSION=1.41
+    depends_on:
+      - security-orchestrator
+```
+
+### 3.3 Vertical Pod Autoscaler (VPA)
+
+```yaml
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: security-orchestrator-vpa
+  namespace: security-orchestrator
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: security-orchestrator
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: security-orchestrator
+      minAllowed:
+        cpu: 500m
+        memory: 1Gi
+      maxAllowed:
+        cpu: 4
+        memory: 8Gi
+      controlledResources: ["cpu", "memory"]
+      controlledValues: RequestsAndLimits
+```
+
+---
+
+## 4. Monitoring и Optimization
+
+### 4.1 Мониторинг производительности приложения
+
+#### Custom Metrics Configuration
+```java
+@Component
+public class PerformanceMetrics {
+    
+    private final MeterRegistry meterRegistry;
+    private final Timer requestTimer;
+    private final Counter errorCounter;
+    private final Timer llmProcessingTimer;
+    private final Gauge activeConnectionsGauge;
+    private final Timer dbQueryTimer;
+    
+    public PerformanceMetrics(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+        
+        this.requestTimer = Timer.builder("app.request.duration")
+            .description("Application request processing time")
+            .register(meterRegistry);
+            
+        this.errorCounter = Counter.builder("app.errors.total")
+            .description("Total application errors")
+            .register(meterRegistry);
+            
+        this.llmProcessingTimer = Timer.builder("llm.processing.duration")
+            .description("LLM processing time")
+            .register(meterRegistry);
+            
+        this.dbQueryTimer = Timer.builder("db.query.duration")
+            .description("Database query execution time")
+            .register(meterRegistry);
+            
+        // Custom gauge for active connections
+        this.activeConnectionsGauge = Gauge.builder("app.connections.active")
+            .description("Active application connections")
+            .register(meterRegistry, this, PerformanceMetrics::getActiveConnections);
+    }
+    
+    @EventListener
+    public void handleRequestEvent(RequestEvent event) {
+        Timer.Sample sample = Timer.start(meterRegistry);
+        
+        try {
+            sample.stop(requestTimer);
+        } catch (Exception e) {
+            errorCounter.increment();
+        }
+    }
+    
+    @EventListener
+    public void handleLLMEvent(LLMProcessingEvent event) {
+        llmProcessingTimer.record(event.getDuration(), TimeUnit.MILLISECONDS);
+    }
+    
+    @EventListener
+    public void handleDBEvent(DBQueryEvent event) {
+        if (event.isCompleted()) {
+            dbQueryTimer.record(event.getDuration(), TimeUnit.MILLISECONDS);
+        } else {
+            errorCounter.increment();
+        }
+    }
+}
+```
+
+#### Performance Health Checks
+```java
+@Component
+public class PerformanceHealthIndicator implements HealthIndicator {
+    
+    private final MeterRegistry meterRegistry;
+    private final PerformanceMetrics performanceMetrics;
+    
+    @Override
+    public Health health() {
+        Health.Builder builder = Health.up();
+        
+        try {
+            // Check response time
+            Timer responseTime = performanceMetrics.getRequestTimer();
+            double avgResponseTime = responseTime.takeSnapshot().mean() / 1_000_000.0; // Convert to ms
+            
+            if (avgResponseTime > 1000) { // More than 1 second
+                builder.down()
+                    .withDetail("response_time", String.format("%.2f ms", avgResponseTime))
+                    .withDetail("status", "SLOW");
+            } else {
+                builder.up()
+                    .withDetail("response_time", String.format("%.2f ms", avgResponseTime))
+                    .withDetail("status", "HEALTHY");
+            }
+            
+            // Check error rate
+            Counter errorCounter = performanceMetrics.getErrorCounter();
+            double errorRate = errorCounter.count() / getTotalRequests() * 100;
+            
+            builder.withDetail("error_rate", String.format("%.2f%%", errorRate));
+            
+            if (errorRate > 5.0) {
+                builder.down().withDetail("error_status", "HIGH_ERROR_RATE");
+            }
+            
+            // Check memory usage
+            MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+            long usedMemory = memoryBean.getHeapMemoryUsage().getUsed();
+            long maxMemory = memoryBean.getHeapMemoryUsage().getMax();
+            double memoryUsage = (double) usedMemory / maxMemory * 100;
+            
+            builder.withDetail("memory_usage", String.format("%.2f%%", memoryUsage));
+            
+            if (memoryUsage > 90) {
+                builder.down().withDetail("memory_status", "HIGH_MEMORY_USAGE");
+            }
+            
+        } catch (Exception e) {
+            builder.down()
+                .withDetail("error", e.getMessage())
+                .withException(e);
+        }
+        
+        return builder.build();
+    }
+}
+```
+
+### 4.2 Database Performance Optimization
+
+#### PostgreSQL Configuration for High Performance
+```sql
+-- postgresql.conf optimizations
+# Memory Settings
+shared_buffers = 4GB                    # 25% of total RAM
+effective_cache_size = 12GB            # 75% of total RAM
+work_mem = 64MB                        # Per operation memory
+maintenance_work_mem = 512MB           # Maintenance operations
+autovacuum_work_mem = 256MB            # Autovacuum operations
+
+# WAL Settings
+wal_level = replica
+fsync = on
+synchronous_commit = on
+wal_buffers = 64MB
+checkpoint_completion_target = 0.9
+max_wal_size = 8GB
+min_wal_size = 2GB
+
+# Query Planner
+random_page_cost = 1.1                 # For SSD storage
+effective_io_concurrency = 200         # For SSD storage
+default_statistics_target = 1000       # Increased statistics
+
+# Connection Settings
+max_connections = 200
+superuser_reserved_connections = 3
+
+# Logging
+log_statement = 'mod'                  # Log DDL and DML
+log_duration = on
+log_min_duration_statement = 1000      # Log slow queries
+log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+
+# Performance Monitoring
+shared_preload_libraries = 'pg_stat_statements'
+pg_stat_statements.max = 10000
+pg_stat_statements.track = all
+```
+
+#### Database Indexing Strategy
+```sql
+-- Performance indexes for SecurityOrchestrator
+CREATE INDEX CONCURRENTLY idx_projects_owner_created 
+ON projects (owner_id, created_at DESC);
+
+CREATE INDEX CONCURRENTLY idx_analysis_results_project_status 
+ON analysis_results (project_id, status) 
+WHERE status IN ('RUNNING', 'PENDING');
+
+CREATE INDEX CONCURRENTLY idx_test_scenarios_project_priority 
+ON test_scenarios (test_project_id, priority) 
+INCLUDE (name, description);
+
+-- Full-text search indexes
+CREATE INDEX CONCURRENTLY idx_projects_search 
+ON projects USING gin(to_tsvector('english', name || ' ' || COALESCE(description, '')));
+
+CREATE INDEX CONCURRENTLY idx_specifications_content_search 
+ON test_specifications USING gin(to_tsvector('english', file_content));
+
+-- Composite indexes for common queries
+CREATE INDEX CONCURRENTLY idx_executions_scenario_status_time 
+ON test_executions (scenario_id, status, started_at DESC);
+
+-- Partial indexes for performance
+CREATE INDEX CONCURRENTLY idx_llm_requests_pending 
+ON llm_requests (created_at) 
+WHERE status = 'PENDING';
+
+-- JSONB indexes for metadata queries
+CREATE INDEX CONCURRENTLY idx_projects_metadata 
+ON projects USING gin (metadata);
+
+-- Partitioning for large tables (monthly partitions)
+CREATE TABLE analysis_results_2025_11 PARTITION OF analysis_results
+FOR VALUES FROM ('2025-11-01') TO ('2025-12-01');
+```
+
+### 4.3 Redis Performance Optimization
+
+#### Redis Configuration
+```conf
+# redis.conf optimizations
+
+# Memory Management
+maxmemory 8gb
+maxmemory-policy allkeys-lru
+maxmemory-samples 10
+
+# Persistence
+save 900 1           # Save after 900 sec if at least 1 key changed
+save 300 10          # Save after 300 sec if at least 10 keys changed
+save 60 10000        # Save after 60 sec if at least 10000 keys changed
+stop-writes-on-bgsave-error yes
+rdbcompression yes
+rdbchecksum yes
+dbfilename dump.rdb
+
+# Networking
+timeout 300
+tcp-keepalive 60
+tcp-backlog 511
+
+# Performance
+hash-max-ziplist-entries 512
+hash-max-ziplist-value 64
+list-max-ziplist-size -2
+list-compress-depth 0
+set-max-intset-entries 512
+zset-max-ziplist-entries 128
+zset-max-ziplist-value 64
+
+# Logging
+loglevel notice
+logfile "/var/log/redis/redis-server.log"
+syslog-enabled yes
+syslog-ident redis
+
+# Security
+rename-command FLUSHDB ""
+rename-command FLUSHALL ""
+rename-command KEYS ""
+rename-command CONFIG "CONFIG_b4a7d5c9"
+
+# Slow Log
+slowlog-log-slower-than 10000
+slowlog-max-len 1000
+
+# Monitoring
+latency-monitor-threshold 100
+```
+
+---
+
+## 5. Load Balancing Configuration
+
+### 5.1 NGINX Load Balancer Configuration
+
+#### Upstream Configuration
+```nginx
+# /etc/nginx/sites-available/security-orchestrator-upstream
+upstream security_orchestrator_backend {
+    least_conn;
+    
+    # Primary backend servers
+    server 10.0.1.10:8090 weight=3 max_fails=3 fail_timeout=30s;
+    server 10.0.1.11:8090 weight=3 max_fails=3 fail_timeout=30s;
+    server 10.0.1.12:8090 weight=3 max_fails=3 fail_timeout=30s;
+    
+    # Backup servers for disaster recovery
+    server 10.0.2.10:8090 weight=1 max_fails=3 fail_timeout=60s backup;
+    server 10.0.2.11:8090 weight=1 max_fails=3 fail_timeout=60s backup;
+    
+    keepalive 64;
+    keepalive_requests 100;
+    keepalive_timeout 60s;
+}
+
+# Health check endpoint
+upstream security_orchestrator_health {
+    server 10.0.1.10:8090;
+    server 10.0.1.11:8090;
+    server 10.0.1.12:8090;
+    keepalive 8;
+}
+```
+
+#### Main Server Configuration
+```nginx
+# /etc/nginx/sites-available/security-orchestrator
+server {
+    listen 80;
+    server_name api.securityorchestrator.com;
+    
+    # Redirect to HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name api.securityorchestrator.com;
+    
+    # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/api.securityorchestrator.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.securityorchestrator.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:50m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+    
+    # OCSP Stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    resolver 8.8.8.8 8.8.4.4 valid=300s;
+    resolver_timeout 5s;
+    
+    # Rate Limiting
+    limit_req_zone $binary_remote_addr zone=api:10m rate=100r/s;
+    limit_req_zone $binary_remote_addr zone=upload:10m rate=10r/s;
+    limit_req_zone $binary_remote_addr zone=llm:10m rate=5r/s;
+    
+    # Connection Limiting
+    limit_conn_zone $binary_remote_addr zone=conn_limit_per_ip:10m;
+    limit_conn_zone $server_name zone=conn_limit_per_server:10m;
+    
+    # Client Configuration
+    client_max_body_size 100M;
+    client_body_buffer_size 128k;
+    client_header_buffer_size 1k;
+    client_header_timeout 60s;
+    client_body_timeout 60s;
+    send_timeout 60s;
+    
+    # Proxy Configuration
+    proxy_connect_timeout 10s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+    proxy_buffering on;
+    proxy_buffer_size 4k;
+    proxy_buffers 8 4k;
+    proxy_busy_buffers_size 8k;
+    
+    # Health Check Endpoint
+    location /health {
+        access_log off;
+        proxy_pass http://security_orchestrator_health/actuator/health;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Health check specific settings
+        proxy_connect_timeout 3s;
+        proxy_read_timeout 3s;
+        proxy_send_timeout 3s;
+        
+        # Allow health checks without rate limiting
+        limit_req zone=api burst=50 nodelay;
+    }
+    
+    # API Endpoints with Load Balancing
+    location /api/ {
+        # Rate limiting for API
+        limit_req zone=api burst=20 nodelay;
+        limit_conn conn_limit_per_ip 10;
+        limit_conn conn_limit_per_server 1000;
+        
+        proxy_pass http://security_orchestrator_backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        
+        # Enable HTTP/1.1 for proxy
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        
+        # Cache static responses
+        location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+            proxy_pass http://security_orchestrator_backend;
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+            add_header Vary Accept-Encoding;
+        }
+    }
+    
+    # LLM Processing Endpoints
+    location /api/v1/llm/ {
+        # Stricter rate limiting for LLM
+        limit_req zone=llm burst=5 nodelay;
+        limit_conn conn_limit_per_ip 2;
+        
+        proxy_pass http://security_orchestrator_backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Extended timeouts for LLM processing
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+        
+        # Disable buffering for LLM requests
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+    
+    # File Upload Endpoints
+    location /api/v1/upload/ {
+        # Limited rate for uploads
+        limit_req zone=upload burst=2 nodelay;
+        limit_conn conn_limit_per_ip 1;
+        
+        proxy_pass http://security_orchestrator_backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Extended timeouts for file uploads
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+    }
+    
+    # WebSocket Endpoints
+    location /ws/ {
+        proxy_pass http://security_orchestrator_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # WebSocket specific timeouts
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_connect_timeout 10s;
+        
+        # No rate limiting for WebSocket
+    }
+    
+    # Security Headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # Block access to sensitive files
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    
+    location ~ ~$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    
+    # Logging
+    access_log /var/log/nginx/security_orchestrator_access.log combined buffer=32k flush=5s;
+    error_log /var/log/nginx/security_orchestrator_error.log warn;
+}
+```
+
+### 5.2 HAProxy Load Balancer Configuration
+
+```haproxy
+# /etc/haproxy/haproxy.cfg
+global
+    daemon
+    maxconn 50000
+    log stdout local0
+    ssl-default-bind-ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256
+    ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
+    
+defaults
+    mode http
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+    option httplog
+    option dontlognull
+    option redispatch
+    retries 3
+    balance roundrobin
+    
+    # Compression
+    compression algo gzip
+    compression type text/plain text/html text/css application/json
+    
+frontend security_orchestrator_frontend
+    bind *:80
+    bind *:443 ssl crt /etc/ssl/certs/security-orchestrator.pem
+    
+    # Redirect HTTP to HTTPS
+    redirect scheme https if !{ ssl_fc }
+    
+    # Rate limiting
+    stick-table type ip size 100k expire 30s store http_req_rate(10s)
+    http-request track-sc0 src
+    http-request deny if { sc_http_req_rate(0) gt 20 }
+    
+    # Health check path
+    acl is_health_check path /health
+    use_backend health_backend if is_health_check
+    
+    # API routing
+    default_backend security_orchestrator_backend
+    
+backend security_orchestrator_backend
+    option httpchk GET /actuator/health
+    http-check expect status 200
+    
+    server app1 10.0.1.10:8090 check inter 5s rise 2 fall 3
+    server app2 10.0.1.11:8090 check inter 5s rise 2 fall 3
+    server app3 10.0.1.12:8090 check inter 5s rise 2 fall 3
+    
+    # Backup servers
+    server backup1 10.0.2.10:8090 check inter 10s rise 1 fall 5 backup
+    server backup2 10.0.2.11:8090 check inter 10s rise 1 fall 5 backup
+
+backend health_backend
+    server health1 10.0.1.10:8090 check inter 2s
+    server health2 10.0.1.11:8090 check inter 2s
+    server health3 10.0.1.12:8090 check inter 2s
+```
+
+---
+
+## 6. Database Performance Optimization
+
+### 6.1 Connection Pooling Configuration
+
+#### HikariCP Optimization
+```java
+@Configuration
+public class DatabasePerformanceConfig {
+    
+    @Bean
+    @Primary
+    @ConfigurationProperties("spring.datasource.hikari")
+    public HikariDataSource dataSource() {
+        HikariConfig config = new HikariConfig();
+        
+        // Pool sizing based on CPU cores and expected load
+        int cpuCores = Runtime.getRuntime().availableProcessors();
+        int poolSize = Math.min(cpuCores * 2 + 10, 50);
+        
+        config.setMaximumPoolSize(poolSize);
+        config.setMinimumIdle(Math.max(poolSize / 4, 5));
+        
+        // Connection timeout settings
+        config.setConnectionTimeout(20000);      // 20 seconds
+        config.setIdleTimeout(600000);           // 10 minutes
+        config.setMaxLifetime(1800000);          // 30 minutes
+        config.setValidationTimeout(5000);       // 5 seconds
+        
+        // Leak detection
+        config.setLeakDetectionThreshold(60000); // 60 seconds
+        
+        // Connection testing
+        config.setConnectionTestQuery("SELECT 1");
+        config.setConnectionInitSql("SET TIME ZONE 'UTC'");
+        
+        // Performance optimizations
+        config.setAutoCommit(false);             // Better performance for batch operations
+        config.setPrepStmtCacheSize(250);        // Prepared statement cache
+        config.setPrepStmtCacheSqlLimit(2048);   // Max SQL cache size
+        config.setUseServerPrepStmts(true);      // Use server-side prepared statements
+        config.setCachePrepStmts(true);          // Cache prepared statements
+        
+        return new HikariDataSource(config);
+    }
+    
+    @Bean
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        jdbcTemplate.setQueryTimeout(30);
+        jdbcTemplate.setFetchSize(1000);
+        jdbcTemplate.setMaxRows(10000);
+        return jdbcTemplate;
+    }
+}
+```
+
+### 6.2 Query Optimization
+
+#### Repository Pattern with Performance
+```java
+@Repository
+public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
+    
+    private final JdbcTemplate jdbcTemplate;
+    
+    @Override
+    public List<ProjectSummary> findProjectSummariesWithMetrics(
+            Pageable pageable) {
+        
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT p.id, p.name, p.description, p.created_at, ")
+           .append("       COUNT(DISTINCT ar.id) as analysis_count, ")
+           .append("       COUNT(DISTINCT ts.id) as scenario_count, ")
+           .append("       MAX(ar.completed_at) as last_analysis_date ")
+           .append("FROM projects p ")
+           .append("LEFT JOIN analysis_results ar ON p.id = ar.project_id ")
+           .append("LEFT JOIN test_scenarios ts ON p.id = ts.test_project_id ")
+           .append("GROUP BY p.id, p.name, p.description, p.created_at ")
+           .append("ORDER BY p.created_at DESC ")
+           .append("LIMIT ? OFFSET ?");
+        
+        return jdbcTemplate.query(sql.toString(), 
+            new Object[]{pageable.getPageSize(), pageable.getOffset()},
+            new ProjectSummaryRowMapper());
+    }
+    
+    @Override
+    @Async
+    public CompletableFuture<ProjectStatistics> getProjectStatistics(Long projectId) {
+        
+        // Parallel queries for better performance
+        CompletableFuture<Integer> analysisCount = CompletableFuture
+            .supplyAsync(() -> jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM analysis_results WHERE project_id = ?",
+                Integer.class, projectId));
+            
+        CompletableFuture<Integer> scenarioCount = CompletableFuture
+            .supplyAsync(() -> jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM test_scenarios WHERE test_project_id = ?",
+                Integer.class, projectId));
+            
+        CompletableFuture<Long> avgExecutionTime = CompletableFuture
+            .supplyAsync(() -> jdbcTemplate.queryForObject(
+                "SELECT AVG(total_duration_ms) FROM test_executions te "
+                + "JOIN test_scenarios ts ON te.scenario_id = ts.id "
+                + "WHERE ts.test_project_id = ? AND te.status = 'COMPLETED'",
+                Long.class, projectId));
+            
+        return CompletableFuture.allOf(analysisCount, scenarioCount, avgExecutionTime)
+            .thenApply(v -> {
+                try {
+                    return new ProjectStatistics(
+                        projectId,
+                        analysisCount.get(),
+                        scenarioCount.get(),
+                        avgExecutionTime.orElse(0L)
+                    );
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to get project statistics", e);
+                }
+            });
+    }
+}
+```
+
+---
+
+## 7. Caching Strategy
+
+### 7.1 Multi-Level Caching
+
+#### Redis Cache Configuration
+```java
+@Configuration
+@EnableCaching
+public class CacheConfig {
+    
+    @Bean
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        RedisCacheManager.Builder builder = RedisCacheManager
+            .RedisCacheManagerBuilder
+            .fromConnectionFactory(connectionFactory)
+            .cacheDefaults(getCacheConfiguration(Duration.ofMinutes(5)));
+        
+        // Configure specific caches with different TTLs
+        builder.withCacheConfiguration("projects",
+            RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(30)));
+                
+        builder.withCacheConfiguration("analysis_results",
+            RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(2)));
+                
+        builder.withCacheConfiguration("llm_responses",
+            RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(10))
+                .serializeKeysWith(RedisSerializationContext.SerializationPair
+                    .fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair
+                    .fromSerializer(new GenericJackson2JsonRedisSerializer())));
+        
+        return builder.build();
+    }
+    
+    private RedisCacheConfiguration getCacheConfiguration(Duration ttl) {
+        return RedisCacheConfiguration
+            .defaultCacheConfig()
+            .entryTtl(ttl)
+            .disableCachingNullValues()
+            .serializeKeysWith(RedisSerializationContext.SerializationPair
+                .fromSerializer(new StringRedisSerializer()))
+            .serializeValuesWith(RedisSerializationContext.SerializationPair
+                .fromSerializer(new GenericJackson2JsonRedisSerializer()));
+    }
+}
+```
+
+#### Application-Level Caching
+```java
+@Service
+public class CachedProjectService {
+    
+    private final ProjectRepository projectRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final CacheManager cacheManager;
+    
+    // Cache key prefixes
+    private static final String PROJECT_CACHE_PREFIX = "project:";
+    private static final String ANALYSES_CACHE_PREFIX = "analyses:";
+    private static final String STATS_CACHE_PREFIX = "stats:";
+    
+    public Project findByIdWithCache(Long id) {
+        String cacheKey = PROJECT_CACHE_PREFIX + id;
+        
+        // Try cache first
+        Project cached = (Project) redisTemplate.opsForValue().get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+        
+        // Load from database
+        Project project = projectRepository.findById(id)
+            .orElseThrow(() -> new ProjectNotFoundException(id));
+            
+        // Cache for 30 minutes
+        redisTemplate.opsForValue().set(cacheKey, project, Duration.ofMinutes(30));
+        
+        return project;
+    }
+    
+    @CacheEvict(value = {"projects", "analyses"}, key = "#id")
+    public void invalidateProjectCache(Long id) {
+        // Manual cache invalidation
+        redisTemplate.delete(PROJECT_CACHE_PREFIX + id);
+        redisTemplate.delete(ANALYSES_CACHE_PREFIX + id);
+        redisTemplate.delete(STATS_CACHE_PREFIX + id);
+    }
+    
+    @Cacheable(value = "analysis_results", key = "#projectId + ':' + #specificationType")
+    public List<AnalysisResult> getCachedAnalysisResults(Long projectId, String specificationType) {
+        return projectRepository.findAnalysisResults(projectId, specificationType);
+    }
+}
+```
+
+---
+
+## 8. Performance Testing
+
+### 8.1 Load Testing Configuration
+
+#### JMeter Test Plan
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2">
+  <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="SecurityOrchestrator Load Test">
+    <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="API Load Test">
+      <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+      <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
+        <boolProp name="LoopController.continue_forever">false</boolProp>
+        <stringProp name="LoopController.loops">1000</stringProp>
+      </elementProp>
+      
+      <!-- Ramp-up settings -->
+      <stringProp name="ThreadGroup.num_threads">50</stringProp>
+      <stringProp name="ThreadGroup.ramp_time">300</stringProp>
+      <longProp name="ThreadGroup.start_time">1640995200000</longProp>
+      <longProp name="ThreadGroup.end_time">1640995200000</longProp>
+      <boolProp name="ThreadGroup.scheduler">true</boolProp>
+      <stringProp name="ThreadGroup.duration">1800</stringProp>
+      <stringProp name="ThreadGroup.delay">0</stringProp>
+      
+      <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="API Health Check">
+        <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+          <collectionProp name="Arguments.arguments"/>
+        </elementProp>
+        <stringProp name="HTTPSampler.domain">api.securityorchestrator.com</stringProp>
+        <stringProp name="HTTPSampler.port">443</stringProp>
+        <stringProp name="HTTPSampler.protocol">https</stringProp>
+        <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+        <stringProp name="HTTPSampler.path">/health</stringProp>
+        <stringProp name="HTTPSampler.method">GET</stringProp>
+        <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+        <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+        <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+        <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+        <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+        <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+        <stringProp name="HTTPSampler.response_timeout"></stringProp>
+      </HTTPSamplerProxy>
+      
+      <!-- Add assertions -->
+      <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Code Assertion">
+        <collectionProp name="Asserion.test_strings">
+          <stringProp name="224106">200</stringProp>
+        </collectionProp>
+        <stringProp name="Assertion.custom_message"></stringProp>
+        <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+        <boolProp name="Assertion.assume_success">false</boolProp>
+        <intProp name="Assertion.test_type">2</intProp>
+      </ResponseAssertion>
+      
+      <!-- Response time assertion -->
+      <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Response Time Assertion">
+        <stringProp name="DurationAssertion.duration">5000</stringProp>
+      </DurationAssertion>
+    </ThreadGroup>
+  </TestPlan>
+</jmeterTestPlan>
+```
+
+### 8.2 Performance Monitoring Script
+
+```bash
+#!/bin/bash
+# performance-monitor.sh
+
+API_BASE_URL="https://api.securityorchestrator.com"
+CONCURRENT_USERS=50
+TEST_DURATION=1800  # 30 minutes
+REPORT_FILE="/var/log/performance-test-$(date +%Y%m%d_%H%M%S).log"
+
+echo "Starting SecurityOrchestrator Performance Test"
+echo "API Base URL: $API_BASE_URL"
+echo "Concurrent Users: $CONCURRENT_USERS"
+echo "Test Duration: $TEST_DURATION seconds"
+echo "Report File: $REPORT_FILE"
+
+# Create report file
+cat > "$REPORT_FILE" << EOF
+SecurityOrchestrator Performance Test Report
+=============================================
+Test Date: $(date)
+API Base URL: $API_BASE_URL
+Concurrent Users: $CONCURRENT_USERS
+Test Duration: $TEST_DURATION seconds
+
+=== System Information ===
+Hostname: $(hostname)
+CPU Cores: $(nproc)
+Memory: $(free -h | grep '^Mem:' | awk '{print $2}')
+Disk: $(df -h / | tail -1 | awk '{print $4}')
+
+=== Test Results ===
+EOF
+
+# Function to make API call and measure response time
+api_test() {
+    local endpoint=$1
+    local method=${2:-GET}
+    local data=$3
+    
+    start_time=$(date +%s.%N)
+    
+    if [ "$method" = "POST" ]; then
+        response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "$data" \
+            -w "@-" \
+            "$API_BASE_URL$endpoint" <<< "time_namelookup: %{time_namelookup}\ntime_connect: %{time_connect}\ntime_appconnect: %{time_appconnect}\ntime_pretransfer: %{time_pretransfer}\ntime_redirect: %{time_redirect}\ntime_starttransfer: %{time_starttransfer}\ntime_total: %{time_total}")
+    else
+        response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET \
+            -w "@-" \
+            "$API_BASE_URL$endpoint" <<< "time_namelookup: %{time_namelookup}\ntime_connect: %{time_connect}\ntime_appconnect: %{time_appconnect}\ntime_pretransfer: %{time_pretransfer}\ntime_redirect: %{time_redirect}\ntime_starttransfer: %{time_starttransfer}\ntime_total: %{time_total}")
+    fi
+    
+    end_time=$(date +%s.%N)
+    response_time=$(echo "$end_time - $start_time" | bc -l)
+    
+    echo "$response_time|$response"
+}
+
+# Test endpoints
+endpoints=(
+    "/health"
+    "/api/v1/projects"
+    "/api/v1/llm/generate"
+    "/actuator/metrics"
+)
+
+# Start monitoring system resources
+top -b -d5 > /tmp/top.log &
+TOP_PID=$!
+
+# Run load test
+for endpoint in "${endpoints[@]}"; do
+    echo "Testing endpoint: $endpoint"
+    
+    for i in $(seq 1 $CONCURRENT_USERS); do
+        case $endpoint in
+            "/api/v1/llm/generate")
+                data='{"prompt": "Test security analysis", "provider": "ollama"}'
+                result=$(api_test "$endpoint" "POST" "$data")
+                ;;
+            *)
+                result=$(api_test "$endpoint")
+                ;;
+        esac
+        
+        response_time=$(echo $result | cut -d'|' -f1)
+        status_code=$(echo $result | cut -d'|' -f2)
+        
+        echo "$(date): $endpoint - Response Time: ${response_time}s, Status: $status_code" >> "$REPORT_FILE"
+        
+        # Small delay between requests
+        sleep 0.1
+    done
+    
+    echo "Completed testing $endpoint"
+    sleep 5
+done
+
+# Stop system monitoring
+kill $TOP_PID
+
+# Generate summary
+cat >> "$REPORT_FILE" << EOF
+
+=== Performance Summary ===
+$(grep "Response Time:" "$REPORT_FILE" | awk -F': ' '{print $3}' | sort -n | awk '
+    { times[NR] = $1; sum += $1 }
+    END {
+        print "Total Requests: " NR
+        print "Average Response Time: " sum/NR " seconds"
+        print "Min Response Time: " times[1] " seconds"
+        print "Max Response Time: " times[NR] " seconds"
+        print "95th Percentile: " times[int(NR*0.95)] " seconds"
+    }'
+)
+
+=== Test Complete ===
+End Time: $(date)
+EOF
+
+echo "Performance test completed. Report saved to: $REPORT_FILE"
+
+# Send report via email (if configured)
+if command -v mail &> /dev/null; then
+    mail -s "SecurityOrchestrator Performance Test Report" admin@company.com < "$REPORT_FILE"
+fi
+```
+
+---
+
+## 9. Troubleshooting Performance Issues
+
+### 9.1 Performance Diagnostic Tools
+
+```bash
+#!/bin/bash
+# performance-diagnostics.sh
+
+echo "=== SecurityOrchestrator Performance Diagnostics ==="
+echo "Date: $(date)"
+echo "Hostname: $(hostname)"
+echo
+
+# System Information
+echo "=== System Information ==="
+echo "CPU Cores: $(nproc)"
+echo "Memory: $(free -h)"
+echo "Disk Usage: $(df -h)"
+echo "Load Average: $(uptime | awk '{print $10 $11 $12}')"
+echo
+
+# Application Status
+echo "=== Application Status ==="
+pgrep -f "SecurityOrchestratorApplication" && echo "Application is running" || echo "Application is not running"
+echo "Application PID: $(pgrep -f 'SecurityOrchestratorApplication')"
+echo
+
+# JVM Information
+echo "=== JVM Information ==="
+PID=$(pgrep -f "SecurityOrchestratorApplication")
+if [ -n "$PID" ]; then
+    echo "JVM Memory Usage:"
+    jstat -gc $PID | head -2
+    jstat -gc $PID | tail -1
+    echo
+    echo "JVM Heap Usage:"
+    jstat -heap $PID | grep -E "used|total"
+    echo
+    echo "JVM GC Statistics:"
+    jstat -gcutil $PID 1 5
+else
+    echo "No JVM process found"
+fi
+echo
+
+# Database Connections
+echo "=== Database Connection Pool Status ==="
+curl -s http://localhost:8090/actuator/metrics/hikaricp.connections.active | jq '.' 2>/dev/null || echo "Cannot connect to actuator"
+echo
+
+# Database Performance
+echo "=== Database Performance ==="
+sudo -u postgres psql -d security_orchestrator -c "
+SELECT query, calls, total_time, mean_time, rows 
+FROM pg_stat_statements 
+ORDER BY mean_time DESC 
+LIMIT 10;" 2>/dev/null || echo "Cannot query pg_stat_statements"
+echo
+
+# Redis Performance
+echo "=== Redis Performance ==="
+redis-cli info stats | grep -E "total_commands_processed|total_connections_received|connected_clients" 2>/dev/null || echo "Redis not accessible"
+echo
+
+# Nginx Status
+echo "=== Load Balancer Status ==="
+curl -s http://localhost/health | jq '.' 2>/dev/null || echo "Load balancer health check failed"
+echo
+
+# Network Performance
+echo "=== Network Performance ==="
+echo "Active Connections: $(ss -s | grep established)"
+echo "Listening Ports: $(ss -tuln | grep LISTEN)"
+echo
+
+# Disk I/O Performance
+echo "=== Disk I/O Performance ==="
+iostat -x 1 3 2>/dev/null | tail -10 || echo "iostat not available"
+echo
+
+# Top Processes
+echo "=== Top CPU Processes ==="
+ps aux --sort=-%cpu | head -10
+echo
+echo "=== Top Memory Processes ==="
+ps aux --sort=-%mem | head -10
+echo
+
+# Generate recommendations
+echo "=== Performance Recommendations ==="
+if [ -n "$PID" ]; then
+    MEMORY_USAGE=$(jstat -heap $PID 2>/dev/null | grep "used" | awk '{print $4}' | head -1)
+    if (( $(echo "$MEMORY_USAGE > 0.8" | bc -l) )); then
+        echo "- High memory usage detected. Consider increasing heap size or optimizing memory usage."
+    fi
+    
+    GC_TIME=$(jstat -gcutil $PID 2>/dev/null | tail -1 | awk '{print $10}')
+    if (( $(echo "$GC_TIME > 10" | bc -l) )); then
+        echo "- High GC time detected. Consider tuning GC parameters."
+    fi
+fi
+
+echo "=== Diagnostics Complete ==="
+```
+
+### 9.2 Common Performance Issues and Solutions
+
+#### High Response Times
+```bash
+# Check for slow database queries
+sudo -u postgres psql -d security_orchestrator -c "
+SELECT query, calls, total_time, mean_time 
+FROM pg_stat_statements 
+WHERE mean_time > 1000 
+ORDER BY mean_time DESC 
+LIMIT 10;"
+
+# Check for N+1 queries in application logs
+grep -E "(SELECT.*FROM|Executing query)" /var/log/security-orchestrator/application.log | 
+awk '{print $NF}' | sort | uniq -c | sort -nr | head -10
+
+# Monitor API response times
+curl -s -o /dev/null -w "%{time_total}" https://api.securityorchestrator.com/health
+```
+
+#### Memory Leaks
+```bash
+# Monitor memory usage over time
+while true; do
+    echo "$(date): $(jstat -heap $(pgrep -f SecurityOrchestratorApplication) | grep 'used' | awk '{print $4}')"
+    sleep 60
+done
+
+# Generate heap dump for analysis
+sudo -u security-orchestrator jmap -dump:format=b,file=heap-dump.hprof $(pgrep -f SecurityOrchestratorApplication)
+
+# Analyze heap dump with jhat or MAT
+jhat heap-dump.hprof
+```
+
+#### Database Connection Pool Exhaustion
+```bash
+# Check current connection count
+sudo -u postgres psql -d security_orchestrator -c "
+SELECT count(*) as current_connections, 
+       state, 
+       count(*) as count_by_state 
+FROM pg_stat_activity 
+GROUP BY state;"
+
+# Check HikariCP metrics
+curl -s http://localhost:8090/actuator/metrics/hikaricp.connections | jq '.'
+```
+
+---
+
+## 10. Заключение
+
+Данное руководство предоставляет комплексную информацию по оптимизации производительности SecurityOrchestrator для production среды.
+
+### Ключевые моменты:
+
+1. **JVM Tuning**: Оптимальные настройки для различных нагрузок
+2. **Resource Allocation**: Рекомендации по масштабированию инстансов
+3. **Database Optimization**: PostgreSQL и connection pool tuning
+4. **Caching Strategy**: Multi-level caching с Redis
+5. **Load Balancing**: NGINX и HAProxy конфигурации
+6. **Performance Monitoring**: Real-time мониторинг и alerting
+7. **Performance Testing**: Load testing и диагностика
+
+### Рекомендации по эксплуатации:
+
+- Регулярно мониторьте производительность с помощью actuator endpoints
+- Настройте alerting для критических метрик (response time, error rate, memory usage)
+- Проводите нагрузочное тестирование перед production развертыванием
+- Используйте профилирование для выявления bottlenecks
+- Оптимизируйте database queries и добавляйте соответствующие индексы
+- Внедрите circuit breaker pattern для защиты от cascade failures
+
+### Performance Targets:
+
+- **API Response Time**: < 500ms for 95th percentile
+- **Database Query Time**: < 100ms for simple queries, < 1s for complex
+- **LLM Processing Time**: < 30s for standard analysis
+- **Memory Usage**: < 80% of allocated heap
+- **CPU Usage**: < 70% under normal load
+- **Error Rate**: < 1% under normal operation
+
+**Статус**: Готово к оптимизации производительности  
+**Дата**: 2025-11-21  
+**Версия**: 1.0.0

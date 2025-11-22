@@ -1,16 +1,30 @@
-# Руководство по интеграции системы автоматического тестирования
+# SecurityOrchestrator - Полное руководство по интеграциям
+
+## Исполнительное резюме
+
+**Дата**: 2025-11-22
+**Версия**: 3.0.0
+**Цель**: Комплексная интеграция с внешними системами, enterprise сервисами и мобильными приложениями
+**Платформа**: SecurityOrchestrator - Платформа оркестрации безопасности и автоматического тестирования
+
+---
 
 ## 1. Обзор интеграции
 
 ### 1.1 Цели интеграции
 
-Интеграция системы автоматического тестирования с существующей архитектурой SecurityOrchestrator направлена на:
+Интеграция SecurityOrchestrator с внешними системами направлена на:
 
 - **Максимальное переиспользование** существующих компонентов
 - **Минимальные изменения** в текущей архитектуре
 - **Сохранение** существующей функциональности
 - **Плавное внедрение** новых возможностей
 - **Совместимость** с текущими API и интерфейсами
+- **Enterprise-ready решения** для корпоративной среды
+- **Реалтайм интеграции** с webhooks и событиями
+- **Мобильная поддержка** через Flutter и React Native
+- **Современные API паттерны** (REST, GraphQL, gRPC, WebSocket)
+- **Безопасная интеграция** с enterprise SSO/SAML
 
 ### 1.2 Принципы интеграции
 
@@ -265,7 +279,7 @@ securityorchestrator.testing.owasp.enabled=true
 securityorchestrator.testing.bpmn.enabled=true
 securityorchestrator.testing.websocket.enabled=true
 securityorchestrator.testing.execution.parallel-workers=5
-securityorchestrator.testing.execution.timeout-seconds=300
+securityorchestrator.testing.execution.timeout-seconds=90
 ```
 
 #### 1.3 Добавление модуля в build.gradle
@@ -934,9 +948,421 @@ public class RollbackConfiguration {
 }
 ```
 
-Это руководство по интеграции обеспечивает:
-- **Плавную интеграцию** с минимальными изменениями
-- **Сохранение** существующей функциональности
-- **Поэтапное развертывание** с возможностью отката
-- **Полную совместимость** с текущей системой
-- **Мониторинг** и метрики для отслеживания интеграции
+---
+
+## 10. Расширенные Enterprise интеграции
+
+### 10.1 Real-time Integration Patterns
+
+#### WebSocket Integration для реалтайм обновлений
+
+```java
+@Component
+public class RealTimeIntegrationService {
+    
+    private final SimpMessagingTemplate messagingTemplate;
+    private final IntegrationEventPublisher eventPublisher;
+    
+    @EventListener
+    public void handleSecurityEvent(SecurityEvent event) {
+        // Создаем real-time сообщение
+        RealtimeMessage message = RealtimeMessage.builder()
+            .type(event.getType())
+            .data(event.getData())
+            .timestamp(Instant.now())
+            .correlationId(event.getCorrelationId())
+            .build();
+        
+        // Отправляем подписанным клиентам
+        messagingTemplate.convertAndSend("/topic/security/" + event.getProjectId(), message);
+        
+        // Публикуем событие для других систем
+        eventPublisher.publishEvent(event);
+    }
+}
+
+// Frontend WebSocket подписка
+class SecurityWebSocketService {
+  void connectToSecurityUpdates(String projectId) {
+    final StompSessionHandler sessionHandler = new StompSessionHandlerAdapter() {
+      @Override
+      public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+        // Подписываемся на обновления безопасности
+        session.subscribe("/topic/security/" + projectId, new StompFrameHandler() {
+          @Override
+          public Type getPayloadType(StompHeaders headers) {
+            return RealtimeMessage.class;
+          }
+          
+          @Override
+          public void handleFrame(StompHeaders headers, Object payload) {
+            RealtimeMessage message = (RealtimeMessage) payload;
+            handleSecurityUpdate(message);
+          }
+        });
+      }
+    };
+    
+    webSocketClient.connect(wsUrl, sessionHandler);
+  }
+}
+```
+
+#### Event-Driven Architecture с Apache Kafka
+
+```java
+@Configuration
+@EnableKafka
+public class KafkaIntegrationConfig {
+    
+    @Bean
+    public ProducerFactory<String, Object> producerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+    
+    @Bean
+    public KafkaTemplate<String, Object> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+}
+
+@Service
+public class EventDrivenSecurityOrchestrator {
+    
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    
+    @Async("eventProcessorExecutor")
+    public CompletableFuture<Void> processSecurityAnalysis(SecurityAnalysisRequest request) {
+        try {
+            // 1. Публикуем событие начала анализа
+            SecurityAnalysisStartedEvent startedEvent = SecurityAnalysisStartedEvent.builder()
+                .analysisId(request.getAnalysisId())
+                .projectId(request.getProjectId())
+                .timestamp(Instant.now())
+                .build();
+            
+            kafkaTemplate.send("security.analysis.started", startedEvent);
+            
+            // 2. Выполняем анализ
+            SecurityAnalysisResult result = performAnalysis(request);
+            
+            // 3. Публикуем результат
+            SecurityAnalysisCompletedEvent completedEvent = SecurityAnalysisCompletedEvent.builder()
+                .analysisId(request.getAnalysisId())
+                .projectId(request.getProjectId())
+                .result(result)
+                .timestamp(Instant.now())
+                .build();
+            
+            kafkaTemplate.send("security.analysis.completed", completedEvent);
+            
+        } catch (Exception e) {
+            // 4. Публикуем ошибку
+            SecurityAnalysisFailedEvent failedEvent = SecurityAnalysisFailedEvent.builder()
+                .analysisId(request.getAnalysisId())
+                .projectId(request.getProjectId())
+                .error(e.getMessage())
+                .timestamp(Instant.now())
+                .build();
+            
+            kafkaTemplate.send("security.analysis.failed", failedEvent);
+        }
+        
+        return CompletableFuture.completedFuture(null);
+    }
+}
+```
+
+### 10.2 Enterprise Security Integration
+
+#### SSO/SAML Integration для Enterprise Authentication
+
+```java
+@Configuration
+@EnableWebSecurity
+public class EnterpriseSecurityConfig {
+    
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+            .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/enterprise/**").hasAnyRole("ENTERPRISE_USER", "ADMIN")
+                .anyRequest().authenticated()
+            )
+            .saml2Login(saml2 -> saml2
+                .loginPage("/saml2/login")
+                .failureUrl("/saml2/login-failure")
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/oauth2/authorization")
+                .defaultSuccessUrl("/dashboard", true)
+            )
+            .sessionManagement(session -> session
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(true)
+            )
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/api/webhooks/**", "/api/public/**")
+            )
+            .build();
+    }
+}
+
+@Service
+public class EnterpriseUserService {
+    
+    @Autowired
+    private Saml2UserDetailsService saml2UserDetailsService;
+    
+    public UserPrincipal loadEnterpriseUser(String username, String domain) {
+        // Интеграция с Active Directory
+        AdUser adUser = activeDirectoryService.findUser(username, domain);
+        
+        // Проверяем группы доступа
+        List<String> groups = adUser.getMemberOf().stream()
+            .map(this::mapToSecurityGroup)
+            .collect(Collectors.toList());
+        
+        // Создаем principal с enterprise данными
+        return UserPrincipal.builder()
+            .username(username)
+            .domain(domain)
+            .email(adUser.getEmail())
+            .displayName(adUser.getDisplayName())
+            .groups(groups)
+            .department(adUser.getDepartment())
+            .manager(adUser.getManager())
+            .ssoProvider("SAML2")
+            .build();
+    }
+}
+```
+
+#### API Gateway Integration с Enterprise Patterns
+
+```java
+@Component
+public class ApiGatewayIntegration {
+    
+    @Value("${securityorchestrator.api.gateway.url}")
+    private String apiGatewayUrl;
+    
+    public CompletableFuture<GatewayResponse> routeToEnterpriseService(
+            IntegrationRequest request) {
+        
+        // Добавляем enterprise headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Correlation-ID", generateCorrelationId());
+        headers.set("X-Tenant-ID", request.getTenantId());
+        headers.set("X-Request-ID", UUID.randomUUID().toString());
+        headers.set("X-Client-ID", "SecurityOrchestrator");
+        
+        // Добавляем enterprise auth token
+        if (request.getEnterpriseToken() != null) {
+            headers.setBearerAuth(request.getEnterpriseToken());
+        }
+        
+        HttpEntity<IntegrationRequest> entity = new HttpEntity<>(request, headers);
+        
+        // Используем circuit breaker для enterprise сервисов
+        return circuitBreaker.executeSupplier(() ->
+            restTemplate.postForEntity(
+                apiGatewayUrl + "/enterprise/integrations/security",
+                entity,
+                GatewayResponse.class
+            )
+        ).thenApply(ResponseEntity::getBody);
+    }
+}
+```
+
+### 10.3 Performance и Scalability для Enterprise
+
+#### Rate Limiting для Enterprise APIs
+
+```java
+@Configuration
+public class EnterpriseRateLimitConfig {
+    
+    @Bean
+    public RateLimiter enterpriseApiRateLimiter() {
+        return RateLimiter.create("enterprise-api")
+            .withLimit(1000) // requests per minute
+            .withBurst(50)   // burst capacity
+            .withRefreshPeriod(Duration.ofMinutes(1));
+    }
+    
+    @Bean
+    public RateLimiter webhookRateLimiter() {
+        return RateLimiter.create("webhook")
+            .withLimit(100)  // requests per minute
+            .withBurst(10)   // burst capacity
+            .withRefreshPeriod(Duration.ofMinutes(1));
+    }
+}
+
+@RestController
+@RequestMapping("/api/enterprise")
+public class EnterpriseIntegrationController {
+    
+    @Autowired
+    private RateLimiter enterpriseApiRateLimiter;
+    
+    @PostMapping("/integrations/{service}")
+    public CompletableFuture<ResponseEntity<ApiResponse<IntegrationResult>>>
+            integrateWithEnterpriseService(
+                @PathVariable String service,
+                @RequestBody EnterpriseIntegrationRequest request) {
+        
+        // Проверяем rate limit
+        if (!enterpriseApiRateLimiter.tryAcquire()) {
+            return CompletableFuture.completedFuture(
+                ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(ApiResponse.error("Rate limit exceeded"))
+            );
+        }
+        
+        return integrationService.integrateWithEnterprise(service, request);
+    }
+}
+```
+
+#### Caching Strategy для Performance
+
+```java
+@Service
+@CacheConfig(cacheNames = "enterprise-integrations")
+public class CachedEnterpriseIntegrationService {
+    
+    @Cacheable(key = "#projectId + '_' + #service")
+    public EnterpriseIntegrationConfig getIntegrationConfig(
+            String projectId, String service) {
+        return enterpriseService.findConfiguration(projectId, service);
+    }
+    
+    @CachePut(key = "#projectId + '_' + #service")
+    public EnterpriseIntegrationConfig updateIntegrationConfig(
+            String projectId, String service, EnterpriseIntegrationConfig config) {
+        return enterpriseService.saveConfiguration(projectId, service, config);
+    }
+    
+    @CacheEvict(key = "#projectId + '_' + #service")
+    public void evictIntegrationConfig(String projectId, String service) {
+        // Cache eviction logic
+    }
+}
+```
+
+### 10.4 Integration Testing Strategies
+
+#### Contract Testing с Pact
+
+```java
+@ExtendWith(MockitoExtension.class)
+class EnterpriseIntegrationContractTest {
+    
+    @Rule
+    public PactVerificationRule pactVerificationRule = new PactVerificationRule(
+        "enterprise-service",
+        port -> new DefaultTestTarget(new URL("http://localhost:" + port))
+    );
+    
+    @Pact(consumer = "security-orchestrator", provider = "enterprise-service")
+    public PactFragment createEnterpriseServicePact(PactDslWithProvider builder) {
+        return builder
+            .uponReceiving("Enterprise integration request")
+                .path("/api/enterprise/security/analyze")
+                .method("POST")
+                .body("{\"projectId\":\"test-123\",\"analysisType\":\"SECURITY\"}")
+            .willRespondWith()
+                .status(200)
+                .body("{\"status\":\"SUCCESS\",\"analysisId\":\"analysis-456\"}");
+    }
+    
+    @Test
+    @PactVerification
+    public void testEnterpriseIntegrationContract() {
+        EnterpriseAnalysisRequest request = EnterpriseAnalysisRequest.builder()
+            .projectId("test-123")
+            .analysisType("SECURITY")
+            .build();
+            
+        CompletableFuture<EnterpriseAnalysisResponse> result =
+            enterpriseIntegrationService.analyzeSecurity(request);
+            
+        assertThat(result).isCompleted();
+        assertThat(result.join().getStatus()).isEqualTo("SUCCESS");
+    }
+}
+```
+
+#### Load Testing для Enterprise Integrations
+
+```java
+@Component
+public class EnterpriseLoadTestRunner {
+    
+    public void runLoadTest(String serviceName, int concurrentUsers, Duration duration) {
+        ExecutorService executor = Executors.newFixedThreadPool(concurrentUsers);
+        List<Future<LoadTestResult>> futures = new ArrayList<>();
+        
+        for (int i = 0; i < concurrentUsers; i++) {
+            futures.add(executor.submit(() -> runLoadTestScenario(serviceName, duration)));
+        }
+        
+        List<LoadTestResult> results = futures.stream()
+            .map(fut -> {
+                try {
+                    return fut.get();
+                } catch (Exception e) {
+                    return LoadTestResult.error(e.getMessage());
+                }
+            })
+            .collect(Collectors.toList());
+        
+        analyzeLoadTestResults(results);
+    }
+}
+```
+
+## 11. Заключение
+
+Данное руководство по интеграции предоставляет комплексную информацию по интеграции SecurityOrchestrator с внешними LLM провайдерами и third-party сервисами.
+
+### Ключевые моменты:
+
+1. **Плавная интеграция**: Минимальные изменения в существующей архитектуре
+2. **Внешние LLM провайдеры**: Поддержка Ollama Cloud, OpenRouter, Hugging Face, Azure OpenAI
+3. **Webhook интеграция**: Настройка уведомлений от внешних сервисов
+4. **Third-party интеграции**: Slack, Jira, PagerDuty для мониторинга и уведомлений
+5. **Circuit breaker pattern**: Защита от отказов внешних сервисов
+6. **Rate limiting**: Контроль нагрузки на внешние API
+7. **Обратная совместимость**: Сохранение существующего функционала
+
+### Рекомендации по эксплуатации:
+
+- Регулярно мониторьте доступность внешних LLM провайдеров
+- Настройте fallback стратегии для критических процессов
+- Используйте circuit breaker для защиты от cascade failures
+- Отслеживайте usage limits внешних сервисов
+- Тестируйте webhook endpoints на безопасность
+
+### Поддерживаемые интеграции:
+
+- ✅ **Ollama Cloud** с qwen3-coder:480b-cloud моделью
+- ✅ **OpenRouter** для доступа к различным LLM моделям
+- ✅ **Hugging Face** для open-source моделей
+- ✅ **Azure OpenAI** для enterprise решений
+- ✅ **Slack** для командных уведомлений
+- ✅ **Jira** для автоматического создания задач
+- ✅ **PagerDuty** для критических алертов
+
+**Статус**: Готово к интеграции с внешними сервисами
+**Дата**: 2025-11-21
+**Версия**: 2.0.0

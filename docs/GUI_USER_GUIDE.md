@@ -2,10 +2,10 @@
 
 ## 🎯 Overview
 
-SecurityOrchestrator is a comprehensive web-based platform for end-to-end security testing of business processes and APIs. This guide will help you navigate and effectively use all features of the web interface.
+SecurityOrchestrator is a comprehensive Flutter Web-based platform for end-to-end security testing of business processes and APIs. This guide will help you navigate and effectively use all features of the modern web interface.
 
 **System Access:**
-- Web Interface: `http://localhost:3000`
+- Flutter Web Interface: `http://localhost:3000` (or port specified in Flutter configuration)
 - Backend API: `http://localhost:8080`
 - Health Check: `http://localhost:8080/api/health`
 
@@ -16,41 +16,87 @@ SecurityOrchestrator is a comprehensive web-based platform for end-to-end securi
 ### 1. System Requirements
 
 **Minimum Requirements:**
-- Modern web browser (Chrome, Firefox, Safari, Edge)
+- Modern web browser (Chrome 88+, Firefox 85+, Safari 14+, Edge 88+)
 - Java 21+ installed for backend
-- Flutter Web for frontend
-- 8GB RAM recommended
+- Flutter Web runtime (auto-loaded in browser)
+- 4GB RAM minimum, 8GB recommended
+- Internet connection for initial setup
+
+**Modern UI Features:**
+- Material Design 3 implementation
+- Responsive design for desktop, tablet, and mobile
+- Dark/Light theme support
+- Real-time updates via WebSocket
+- Accessible design following WCAG 2.1 guidelines
 
 **Access the System:**
 1. Open your web browser
 2. Navigate to `http://localhost:3000`
-3. The main dashboard will load automatically
+3. The Flutter web app will load automatically
+4. Allow browser permissions for optimal performance
 
 ### 2. First Steps
 
-Upon accessing the system, you'll see the **Home Screen** with:
-- Search functionality for processes
-- Filter options (All, Active, Inactive, Archived)
-- Quick access to create new processes or workflows
-- LLM Dashboard access
+Upon accessing the system, you'll see the **Main Dashboard** with:
+- **Dashboard Cards**: Connection status, system health, LLM status
+- **Real-time Metrics**: System performance and monitoring data
+- **Navigation**: Easy access to different features via GoRouter
+- **Quick Actions**: Create new analysis processes
+- **Alerts Panel**: System notifications and warnings
+- **Responsive Layout**: Optimized for your screen size
 
 ---
 
 ## 📊 Main Dashboard Features
 
-### Home Screen Navigation
+### Dashboard Navigation
 
-**Core Actions Available:**
-- **Refresh**: Update the process list
-- **Search**: Find specific processes by name
-- **Filter by Status**: Sort processes by their current state
-- **Create New**: Add new processes or workflows
+The main dashboard uses Flutter's GoRouter for seamless navigation between different features:
 
-**Process Management:**
-- View all available BPMN processes
-- Monitor process status in real-time
-- Access process details and execution history
-- Archive or activate processes as needed
+**Navigation Routes:**
+- `/` - Main Dashboard
+- `/processes` - Analysis Processes
+- `/processes/:id` - Process Details
+
+**Core Dashboard Cards:**
+
+1. **Connection Status Card**
+   - Real-time backend connectivity
+   - API health monitoring
+   - Connection diagnostics
+
+2. **System Health Card**
+   - CPU, memory, and disk usage
+   - Performance metrics
+   - System alerts and warnings
+
+3. **LLM Status Card**
+   - LLM provider configuration
+   - Model availability
+   - Provider health status
+
+4. **Metrics List**
+   - Key performance indicators
+   - Historical trends
+   - Real-time monitoring
+
+5. **Alerts List**
+   - System notifications
+   - Warning indicators
+   - Action items
+
+6. **Processes Overview Card**
+   - Active analysis processes
+   - Process status summary
+   - Quick access to detailed views
+
+**Flutter UI Features:**
+- **Material Design 3**: Modern, accessible design
+- **Riverpod State Management**: Efficient state handling
+- **Responsive Layout**: Adapts to screen size
+- **Real-time Updates**: WebSocket integration
+- **SelectionArea Support**: Keyboard navigation
+- **Theme Support**: Light/dark mode
 
 ---
 
@@ -524,6 +570,129 @@ ps aux | grep java
 - "Invalid API key": Authentication failure
 - "File format error": Unsupported file type
 - "Network error": Connectivity issues
+
+## ⌨️ Keyboard Shortcuts and Productivity Tips
+
+### Global Keyboard Shortcuts
+
+**Navigation:**
+- `Ctrl+/` (Cmd+/ on Mac) - Toggle search
+- `F5` - Refresh current view
+- `Ctrl+R` (Cmd+R on Mac) - Browser refresh
+- `Escape` - Close dialogs/modals
+- `Tab` - Navigate between UI elements
+- `Shift+Tab` - Navigate backwards
+
+**Common Actions:**
+- `Enter` - Confirm/Execute primary action
+- `Space` - Activate buttons/selections
+- `Ctrl+S` (Cmd+S on Mac) - Save data
+- `Ctrl+N` (Cmd+N on Mac) - Create new item
+- `Ctrl+O` (Cmd+O on Mac) - Open file/dialog
+
+### Productivity Tips
+
+**Dashboard Navigation:**
+1. **Quick Access**: Use browser bookmarks for frequently accessed routes
+2. **Tab Management**: Open monitoring and analysis in separate tabs
+3. **Responsive Design**: Resize browser window to test mobile view
+4. **Theme Switching**: Use browser dev tools to test light/dark themes
+
+**Efficient Workflows:**
+1. **Batch Processing**: Upload multiple specifications simultaneously
+2. **State Persistence**: Let Flutter's state management handle session data
+3. **Real-time Updates**: Monitor progress without page refreshes
+4. **Responsive Cards**: Each dashboard card can be viewed independently
+
+**Browser Optimization:**
+1. **Enable Hardware Acceleration**: Better Flutter performance
+2. **Clear Cache**: Regularly clear browser cache for updates
+3. **DevTools**: Use browser dev tools for debugging
+4. **Extensions**: Disable ad blockers that might interfere with WebSocket
+
+**Mobile Usage:**
+1. **Touch Navigation**: Tap and swipe gestures supported
+2. **Responsive Cards**: Cards stack vertically on smaller screens
+3. **Mobile Keyboard**: Optimized for mobile keyboards
+4. **Offline Support**: Basic functionality works offline
+
+### Common User Issues and Quick Fixes
+
+#### Flutter Web Specific Issues
+
+**Problem**: White screen or loading spinner
+**Solutions:**
+- Check browser compatibility (Chrome 88+, Firefox 85+, Safari 14+)
+- Clear browser cache and reload
+- Disable browser extensions temporarily
+- Check browser console for JavaScript errors
+
+**Problem**: Slow performance
+**Solutions:**
+- Enable hardware acceleration in browser settings
+- Close unused browser tabs
+- Check system resources (RAM, CPU)
+- Use incognito/private browsing mode
+
+**Problem**: WebSocket connection issues
+**Solutions:**
+- Verify firewall settings allow WebSocket connections
+- Check if behind corporate proxy
+- Try different browser
+- Restart backend services
+
+**Problem**: File upload not working
+**Solutions:**
+- Check file size limits (usually 10MB per file)
+- Verify supported file formats (.json, .yaml, .xml, .bpmn)
+- Disable browser extensions that interfere with uploads
+- Try drag-and-drop instead of file browser
+
+#### Interface Responsiveness
+
+**Problem**: Layout breaks on mobile
+**Solutions:**
+- Use landscape orientation for better tablet experience
+- Zoom out to see full interface
+- Use Chrome DevTools device simulation
+- Report responsive design issues
+
+**Problem**: Text too small/large
+**Solutions:**
+- Use browser zoom (Ctrl/Cmd + +/-)
+- Adjust browser font settings
+- Enable browser accessibility features
+- Use high contrast mode if needed
+
+#### Data and State Management
+
+**Problem**: Lost data after refresh
+**Solutions:**
+- Use Flutter's auto-save features
+- Export important results regularly
+- Note that some session data is temporary
+- Use browser bookmarks to save analysis URLs
+
+**Problem**: Inconsistent state across tabs
+**Solutions:**
+- Use separate browser profiles if needed
+- Log out and log back in to reset state
+- Be aware that each tab maintains separate state
+- Refresh entire application if needed
+
+### Performance Optimization Tips
+
+**System Performance:**
+1. **Resource Monitoring**: Use the built-in system health cards
+2. **Concurrent Operations**: Limit to 3-5 simultaneous analyses
+3. **Memory Management**: Close completed analyses regularly
+4. **Network Optimization**: Use stable internet connection
+
+**Browser Performance:**
+1. **Hardware Acceleration**: Enable in browser settings
+2. **Extension Management**: Disable non-essential extensions
+3. **Cache Management**: Clear cache weekly for optimal performance
+4. **Memory Usage**: Monitor browser memory consumption
 
 ---
 

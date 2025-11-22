@@ -60,6 +60,10 @@ class _HttpRequestPanelState extends State<HttpRequestPanel> {
     final request = widget.step.metadata['httpRequest'];
     final requestMap =
         request is Map ? Map<String, dynamic>.from(request) : const {};
+    final headers = requestMap['headers'] is Map
+        ? Map<String, dynamic>.from(requestMap['headers'] as Map)
+        : <String, dynamic>{};
+    final body = requestMap['body']?.toString() ?? '';
     final results = _httpResultsForStep(widget.session, widget.step.id);
     final statusLabel = stepStatusLabel(widget.step.status);
 
@@ -82,6 +86,36 @@ class _HttpRequestPanelState extends State<HttpRequestPanel> {
         const SizedBox(height: 8),
         KeyValueRow(label: 'Метод', value: requestMap['method'] ?? 'GET'),
         KeyValueRow(label: 'URL', value: requestMap['url'] ?? '-'),
+        if (headers.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          const Text('Сгенерированные заголовки:',
+              style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 4),
+          ...headers.entries
+              .map((entry) => KeyValueRow(
+                    label: entry.key,
+                    value: entry.value?.toString() ?? '',
+                  ))
+              .toList(),
+        ],
+        if (body.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          const Text('Сгенерированное тело:',
+              style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 4),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: SelectableText(
+              body,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+            ),
+          ),
+        ],
         if (requestMap['description'] != null) ...[
           const SizedBox(height: 8),
           Text(requestMap['description'].toString()),

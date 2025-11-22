@@ -42,7 +42,7 @@ public class HttpLlmService implements LLMService {
 
     public HttpLlmService(
         LlmProviderRegistry registry,
-        @Value("${llm.service.timeout-seconds:30}") long timeoutSeconds
+        @Value("${llm.service.timeout-seconds:190}") long timeoutSeconds
     ) {
         this.registry = registry;
         this.requestTimeout = Duration.ofSeconds(Math.max(5, timeoutSeconds));

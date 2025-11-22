@@ -202,61 +202,87 @@ class _OpenApiAnalysisSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final endpoints = analysis.endpoints.entries.take(5);
+    final endpoints = analysis.endpoints.entries.take(4);
     final securityIssues = analysis.securityIssues;
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '${analysis.specificationName} (${analysis.version ?? 'v?.?'})',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          children: [
-            Chip(
-              avatar: Icon(
-                analysis.valid ? Icons.check_circle : Icons.error_outline,
-                color: analysis.valid ? Colors.green : Colors.red,
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.15),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
-              label: Text(analysis.valid ? 'Valid spec' : 'Validation errors'),
-              backgroundColor: analysis.valid
-                  ? Colors.green.withOpacity(0.1)
-                  : Colors.red.withOpacity(0.1),
-            ),
-            Chip(
-              avatar: const Icon(Icons.alt_route),
-              label: Text('${analysis.endpointCount} endpoints'),
-            ),
-            Chip(
-              avatar: const Icon(Icons.account_tree),
-              label: Text('${analysis.schemaCount} schemas'),
-            ),
-          ],
-        ),
-        if (analysis.validationSummary != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            'Validation: ${analysis.validationSummary!.passedChecks}/'
-            '${analysis.validationSummary!.totalChecks} passed',
+            ],
           ),
-        ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${analysis.specificationName} (${analysis.version ?? 'v?.?'})',
+                style: theme.textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                analysis.description ?? 'OpenAPI specification overview',
+                style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  _StatusChip(
+                    label: analysis.valid ? 'Valid spec' : 'Validation issues',
+                    icon: analysis.valid ? Icons.check_circle : Icons.error_outline,
+                    color: analysis.valid ? Colors.green : Colors.red,
+                  ),
+                  _StatusChip(
+                    label: '${analysis.endpointCount} endpoints',
+                    icon: Icons.alt_route,
+                    color: Colors.blueGrey,
+                  ),
+                  _StatusChip(
+                    label: '${analysis.schemaCount} schemas',
+                    icon: Icons.account_tree,
+                    color: Colors.deepPurple,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (analysis.validationSummary != null)
+          Text(
+            'Validation: ${analysis.validationSummary!.passedChecks}/${analysis.validationSummary!.totalChecks} checks passed',
+            style: theme.textTheme.bodyMedium,
+          ),
         if (analysis.recommendations.isNotEmpty) ...[
           const SizedBox(height: 12),
           Text(
             'Recommendations',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: theme.textTheme.titleSmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           ...analysis.recommendations
               .map(
-                (rec) => ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.arrow_right),
-                  title: Text(rec),
+                (rec) => Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(rec),
                 ),
               )
               .toList(),
@@ -265,9 +291,9 @@ class _OpenApiAnalysisSummary extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'Security Issues',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: theme.textTheme.titleSmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           ...securityIssues.map(
             (issue) => ListTile(
               dense: true,
@@ -282,17 +308,16 @@ class _OpenApiAnalysisSummary extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'Endpoints preview',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: theme.textTheme.titleSmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           ...endpoints.map((entry) {
             final operations = entry.value as Map<String, dynamic>? ?? {};
-            final methods = operations.keys
-                .map((m) => m.toUpperCase())
-                .join(', ');
+            final methods = operations.keys.map((m) => m.toUpperCase()).join(', ');
             return ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.chevron_right),
               title: Text(entry.key),
               subtitle: Text(
                 methods.isEmpty ? 'No operations documented' : methods,
@@ -300,24 +325,98 @@ class _OpenApiAnalysisSummary extends StatelessWidget {
             );
           }),
         ],
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
+        _RawSpecViewer(content: analysis.openapiContent),
+      ],
+    );
+  }
+}
+
+
+class _StatusChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  const _StatusChip({
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      avatar: Icon(icon, color: color),
+      label: Text(label),
+      backgroundColor: color.withOpacity(0.1),
+    );
+  }
+}
+
+
+class _RawSpecViewer extends StatefulWidget {
+  final String content;
+
+  const _RawSpecViewer({required this.content});
+
+  @override
+  State<_RawSpecViewer> createState() => _RawSpecViewerState();
+}
+
+
+class _RawSpecViewerState extends State<_RawSpecViewer> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final preview = widget.content.split('\n').take(6).join('\n');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
           'Raw specification',
           style: Theme.of(context).textTheme.titleSmall,
         ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          constraints: const BoxConstraints(maxHeight: 200),
-          child: SingleChildScrollView(
-            child: SelectableText(
-              analysis.openapiContent,
+        const SizedBox(height: 8),
+        AnimatedCrossFade(
+          duration: const Duration(milliseconds: 200),
+          crossFadeState: _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          firstChild: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Text(
+              '$preview\n...',
               style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
             ),
+          ),
+          secondChild: Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(maxHeight: 220),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: SingleChildScrollView(
+              child: SelectableText(
+                widget.content,
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+              ),
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: () => setState(() => _expanded = !_expanded),
+            child: Text(_expanded ? 'Collapse JSON' : 'Show raw JSON'),
           ),
         ),
       ],

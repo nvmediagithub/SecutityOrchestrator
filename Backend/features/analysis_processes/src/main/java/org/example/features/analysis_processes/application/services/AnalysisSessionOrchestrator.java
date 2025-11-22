@@ -15,9 +15,12 @@ import org.example.features.analysis_processes.domain.valueobjects.InputRequirem
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -141,15 +144,19 @@ public class AnalysisSessionOrchestrator {
         }
         step.setStatus(AnalysisStepStatus.RUNNING);
         session.setStatus(AnalysisSessionStatus.RUNNING);
-        if (additionalInputs != null && !additionalInputs.isEmpty()) {
-            session.getContext().put("httpStepInputs:" + step.getId(), additionalInputs);
-        }
         HttpRequestStep request = extractHttpRequest(step);
         if (request == null) {
             step.setStatus(AnalysisStepStatus.FAILED);
             return sessionService.updateSession(session);
         }
         request.setStepId(step.getId());
+        Map<String, String> normalizedInputs = normalizeAdditionalInputs(additionalInputs);
+        if (normalizedInputs.isEmpty()) {
+            normalizedInputs = loadHttpStepInputs(session, step.getId());
+        } else {
+            session.getContext().put("httpStepInputs:" + step.getId(), normalizedInputs);
+        }
+        request = applyInputsToRequest(request, normalizedInputs);
         if (hasResultForStep(session, step.getId())) {
             step.setStatus(AnalysisStepStatus.COMPLETED);
             advanceAfterHttpStep(session, step);
@@ -346,5 +353,74 @@ public class AnalysisSessionOrchestrator {
         }
         String text = value.toString();
         return text.isBlank() ? fallback : text;
+    }
+
+    private HttpRequestStep applyInputsToRequest(HttpRequestStep request, Map<String, String> inputs) {
+        if (request == null || inputs == null || inputs.isEmpty()) {
+            return request;
+        }
+        String updatedUrl = appendQueryParameters(request.getUrl(), inputs);
+        request.setUrl(updatedUrl);
+        return request;
+    }
+
+    private Map<String, String> normalizeAdditionalInputs(Map<String, Object> source) {
+        Map<String, String> normalized = new LinkedHashMap<>();
+        if (source == null || source.isEmpty()) {
+            return normalized;
+        }
+        source.forEach((key, value) -> {
+            if (key == null) {
+                return;
+            }
+            String text = value == null ? "" : value.toString().trim();
+            if (text.isEmpty()) {
+                return;
+            }
+            normalized.put(key.toString(), text);
+        });
+        return normalized;
+    }
+
+    private Map<String, String> loadHttpStepInputs(AnalysisSession session, String stepId) {
+        Object raw = session.getContext().get("httpStepInputs:" + stepId);
+        if (raw instanceof Map<?, ?> rawMap) {
+            Map<String, String> normalized = new LinkedHashMap<>();
+            rawMap.forEach((key, value) -> {
+                if (key == null) {
+                    return;
+                }
+                String text = value == null ? "" : value.toString().trim();
+                if (text.isEmpty()) {
+                    return;
+                }
+                normalized.put(key.toString(), text);
+            });
+            return normalized;
+        }
+        return Collections.emptyMap();
+    }
+
+    private String appendQueryParameters(String url, Map<String, String> params) {
+        if (params.isEmpty()) {
+            return url;
+        }
+        String encodedParams = params.entrySet().stream()
+            .map(entry -> URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8)
+                + "="
+                + URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
+            .collect(Collectors.joining("&"));
+        String base = url == null ? "" : url;
+        String separator;
+        if (base.contains("?")) {
+            if (base.endsWith("?") || base.endsWith("&")) {
+                separator = "";
+            } else {
+                separator = "&";
+            }
+        } else {
+            separator = "?";
+        }
+        return base + separator + encodedParams;
     }
 }

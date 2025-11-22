@@ -24,6 +24,7 @@ mixin _$OpenApiAnalysis {
   String get specificationName => throw _privateConstructorUsedError;
   String? get version => throw _privateConstructorUsedError;
   bool get valid => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
   Map<String, dynamic> get metadata => throw _privateConstructorUsedError;
   OpenApiValidationSummary? get validationSummary =>
       throw _privateConstructorUsedError;
@@ -61,6 +62,7 @@ abstract class $OpenApiAnalysisCopyWith<$Res> {
     String specificationName,
     String? version,
     bool valid,
+    String? description,
     Map<String, dynamic> metadata,
     OpenApiValidationSummary? validationSummary,
     List<OpenApiValidationIssue> validationErrors,
@@ -96,6 +98,7 @@ class _$OpenApiAnalysisCopyWithImpl<$Res, $Val extends OpenApiAnalysis>
     Object? specificationName = null,
     Object? version = freezed,
     Object? valid = null,
+    Object? description = freezed,
     Object? metadata = null,
     Object? validationSummary = freezed,
     Object? validationErrors = null,
@@ -123,6 +126,10 @@ class _$OpenApiAnalysisCopyWithImpl<$Res, $Val extends OpenApiAnalysis>
                 ? _value.valid
                 : valid // ignore: cast_nullable_to_non_nullable
                       as bool,
+            description: freezed == description
+                ? _value.description
+                : description // ignore: cast_nullable_to_non_nullable
+                      as String?,
             metadata: null == metadata
                 ? _value.metadata
                 : metadata // ignore: cast_nullable_to_non_nullable
@@ -206,6 +213,7 @@ abstract class _$$OpenApiAnalysisImplCopyWith<$Res>
     String specificationName,
     String? version,
     bool valid,
+    String? description,
     Map<String, dynamic> metadata,
     OpenApiValidationSummary? validationSummary,
     List<OpenApiValidationIssue> validationErrors,
@@ -241,6 +249,7 @@ class __$$OpenApiAnalysisImplCopyWithImpl<$Res>
     Object? specificationName = null,
     Object? version = freezed,
     Object? valid = null,
+    Object? description = freezed,
     Object? metadata = null,
     Object? validationSummary = freezed,
     Object? validationErrors = null,
@@ -268,6 +277,10 @@ class __$$OpenApiAnalysisImplCopyWithImpl<$Res>
             ? _value.valid
             : valid // ignore: cast_nullable_to_non_nullable
                   as bool,
+        description: freezed == description
+            ? _value.description
+            : description // ignore: cast_nullable_to_non_nullable
+                  as String?,
         metadata: null == metadata
             ? _value._metadata
             : metadata // ignore: cast_nullable_to_non_nullable
@@ -328,6 +341,7 @@ class _$OpenApiAnalysisImpl implements _OpenApiAnalysis {
     required this.specificationName,
     this.version,
     required this.valid,
+    this.description,
     final Map<String, dynamic> metadata = const <String, dynamic>{},
     this.validationSummary,
     final List<OpenApiValidationIssue> validationErrors =
@@ -359,6 +373,8 @@ class _$OpenApiAnalysisImpl implements _OpenApiAnalysis {
   final String? version;
   @override
   final bool valid;
+  @override
+  final String? description;
   final Map<String, dynamic> _metadata;
   @override
   @JsonKey()
@@ -437,7 +453,7 @@ class _$OpenApiAnalysisImpl implements _OpenApiAnalysis {
 
   @override
   String toString() {
-    return 'OpenApiAnalysis(specificationName: $specificationName, version: $version, valid: $valid, metadata: $metadata, validationSummary: $validationSummary, validationErrors: $validationErrors, endpointCount: $endpointCount, schemaCount: $schemaCount, operationsByMethod: $operationsByMethod, endpoints: $endpoints, schemas: $schemas, securityIssues: $securityIssues, recommendations: $recommendations, openapiContent: $openapiContent, analyzedAt: $analyzedAt)';
+    return 'OpenApiAnalysis(specificationName: $specificationName, version: $version, valid: $valid, description: $description, metadata: $metadata, validationSummary: $validationSummary, validationErrors: $validationErrors, endpointCount: $endpointCount, schemaCount: $schemaCount, operationsByMethod: $operationsByMethod, endpoints: $endpoints, schemas: $schemas, securityIssues: $securityIssues, recommendations: $recommendations, openapiContent: $openapiContent, analyzedAt: $analyzedAt)';
   }
 
   @override
@@ -449,6 +465,8 @@ class _$OpenApiAnalysisImpl implements _OpenApiAnalysis {
                 other.specificationName == specificationName) &&
             (identical(other.version, version) || other.version == version) &&
             (identical(other.valid, valid) || other.valid == valid) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
             const DeepCollectionEquality().equals(other._metadata, _metadata) &&
             (identical(other.validationSummary, validationSummary) ||
                 other.validationSummary == validationSummary) &&
@@ -490,6 +508,7 @@ class _$OpenApiAnalysisImpl implements _OpenApiAnalysis {
     specificationName,
     version,
     valid,
+    description,
     const DeepCollectionEquality().hash(_metadata),
     validationSummary,
     const DeepCollectionEquality().hash(_validationErrors),
@@ -526,6 +545,7 @@ abstract class _OpenApiAnalysis implements OpenApiAnalysis {
     required final String specificationName,
     final String? version,
     required final bool valid,
+    final String? description,
     final Map<String, dynamic> metadata,
     final OpenApiValidationSummary? validationSummary,
     final List<OpenApiValidationIssue> validationErrors,
@@ -549,6 +569,8 @@ abstract class _OpenApiAnalysis implements OpenApiAnalysis {
   String? get version;
   @override
   bool get valid;
+  @override
+  String? get description;
   @override
   Map<String, dynamic> get metadata;
   @override

@@ -8,8 +8,9 @@ providers:
     model: tngtech/deepseek-r1t-chimera:free
     enabled: true
   - id: ollama
-    displayName: Ollama Cloud (qwen3-coder)
-    mode: remote
+    displayName: Ollama Provider
+    mode: local
+    # mode: remote
     baseUrl: http://localhost:11434
     # model: "codellama:7b-instruct-q4_0"
     model: "qwen3-coder:480b-cloud"

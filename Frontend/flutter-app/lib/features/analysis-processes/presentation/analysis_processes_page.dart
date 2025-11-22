@@ -26,7 +26,6 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
   }
 
   void _loadProcesses() {
-    // Assuming provider for AnalysisProcessService is defined
     final service = ref.read(analysisProcessServiceProvider);
     _processesFuture = service.getProcesses();
   }
@@ -34,14 +33,11 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
   Future<void> _deleteProcess(AnalysisProcess process) async {
     final id = process.id;
     if (id == null) return;
-    final service = ref.read(analysisProcessServiceProvider);
     final messenger = ScaffoldMessenger.of(context);
     try {
-      await service.deleteProcess(id);
+      await ref.read(analysisProcessServiceProvider).deleteProcess(id);
       if (!mounted) return;
-      setState(() {
-        _loadProcesses();
-      });
+      setState(_loadProcesses);
       messenger.showSnackBar(
         SnackBar(content: Text('Процесс "${process.name}" удалён')),
       );
@@ -79,7 +75,6 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
   }
 
   Future<void> _showCreateProcessDialog() async {
-    // Assuming provider for CreateAnalysisProcessUseCase is defined
     final createUseCase = ref.read(createAnalysisProcessUseCaseProvider);
 
     final result = await showDialog<AnalysisProcess>(
@@ -89,138 +84,94 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
     );
 
     if (result != null) {
-      // Refresh the list
-      setState(() {
-        _loadProcesses();
-      });
+      setState(_loadProcesses);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
         title: const Text('Процессы анализа'),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadProcesses,
+            tooltip: 'Обновить',
+          ),
+        ],
       ),
-      body: FutureBuilder<List<AnalysisProcess>>(
-        future: _processesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text('Ошибка загрузки процессов: ${snapshot.error}'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadProcesses,
-                    child: const Text('Повторить'),
-                  ),
-                ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Column(
+          children: [
+            _PageHeader(onCreate: _showCreateProcessDialog),
+            const SizedBox(height: 16),
+            Expanded(
+              child: FutureBuilder<List<AnalysisProcess>>(
+                future: _processesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return _InfoPlaceholder(
+                      title: 'Ошибка загрузки процессов',
+                      message: '${snapshot.error}',
+                      icon: Icons.error,
+                      actionLabel: 'Повторить',
+                      onAction: _loadProcesses,
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return _InfoPlaceholder(
+                      title: 'Аналитические процессы не найдены',
+                      message: 'Создайте первый анализ, загрузив BPMN и OpenAPI.',
+                      icon: Icons.list_alt,
+                      actionLabel: 'Создать процесс',
+                      onAction: _showCreateProcessDialog,
+                    );
+                  }
+                  final processes = snapshot.data!;
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final crossAxis = constraints.maxWidth > 900 ? 2 : 1;
+                      return GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxis,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 3,
+                        ),
+                        itemCount: processes.length,
+                        itemBuilder: (context, index) {
+                          final process = processes[index];
+                          return _ProcessTile(
+                            process: process,
+                            onDelete: () => _confirmDeleteProcess(process),
+                            onTap: process.id == null
+                                ? null
+                                : () async {
+                                    final deleted = await context.push<bool>(
+                                      '/processes/${process.id}',
+                                    );
+                                    if (deleted == true) {
+                                      if (!mounted) return;
+                                      setState(_loadProcesses);
+                                    }
+                                  },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
               ),
-            );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.list_alt, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  const Text('Аналитические процессы не найдены'),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: _showCreateProcessDialog,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Создать первый процесс'),
-                  ),
-                ],
-              ),
-            );
-          } else {
-            final processes = snapshot.data!;
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: processes.length,
-              itemBuilder: (context, index) {
-                final process = processes[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    title: Text(process.name),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${process.type.displayName} - ${process.status.displayName}',
-                        ),
-                        const SizedBox(height: 6),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
-                          children: [
-                            _buildArtifactChip(
-                              label: 'BPMN',
-                              available: process.hasBpmn,
-                            ),
-                            _buildArtifactChip(
-                              label: 'OpenAPI',
-                              available: process.hasOpenApi,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          process.status == ProcessStatus.running
-                              ? Icons.play_arrow
-                              : process.status == ProcessStatus.completed
-                              ? Icons.check_circle
-                              : process.status == ProcessStatus.failed
-                              ? Icons.error
-                              : Icons.schedule,
-                          color: process.status == ProcessStatus.running
-                              ? Colors.blue
-                              : process.status == ProcessStatus.completed
-                              ? Colors.green
-                              : process.status == ProcessStatus.failed
-                              ? Colors.red
-                              : Colors.grey,
-                        ),
-                        if (process.id != null)
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            color: Colors.red.shade400,
-                            tooltip: 'Удалить',
-                            onPressed: () => _confirmDeleteProcess(process),
-                          ),
-                      ],
-                    ),
-                    onTap: process.id == null
-                        ? null
-                        : () async {
-                            final deleted = await context.push<bool>(
-                              '/processes/${process.id}',
-                            );
-                            if (deleted == true) {
-                              if (!mounted) return;
-                              setState(() => _loadProcesses());
-                            }
-                          },
-                  ),
-                );
-              },
-            );
-          }
-        },
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreateProcessDialog,
@@ -241,6 +192,199 @@ class _AnalysisProcessesPageState extends ConsumerState<AnalysisProcessesPage> {
           ? Colors.green.withOpacity(0.1)
           : Colors.grey.withOpacity(0.1),
       label: Text('$label ${available ? '✓' : '✗'}'),
+    );
+  }
+}
+
+class _PageHeader extends StatelessWidget {
+  final VoidCallback onCreate;
+
+  const _PageHeader({required this.onCreate});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 20,
+            color: Colors.grey.withOpacity(0.12),
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Аналитические процессы',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Управляйте BPMN/ OpenAPI артефактами и сопровождайте анализ.',
+                style:
+                    Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+              ),
+            ],
+          ),
+          const Spacer(),
+          FilledButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Новый процесс'),
+            onPressed: onCreate,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProcessTile extends StatelessWidget {
+  final AnalysisProcess process;
+  final VoidCallback onDelete;
+  final VoidCallback? onTap;
+
+  const _ProcessTile({
+    required this.process,
+    required this.onDelete,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      borderRadius: BorderRadius.circular(20),
+      elevation: 4,
+      shadowColor: Colors.black.withOpacity(0.1),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      process.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    color: Colors.red.shade400,
+                    tooltip: 'Удалить',
+                    onPressed: onDelete,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${process.type.displayName} · ${process.status.displayName}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  _buildArtifactBadge(
+                    label: 'BPMN',
+                    available: process.hasBpmn,
+                  ),
+                  _buildArtifactBadge(
+                    label: 'OpenAPI',
+                    available: process.hasOpenApi,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildArtifactBadge({required String label, required bool available}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: available ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        '$label ${available ? '✓' : '✗'}',
+        style: TextStyle(
+          color: available ? Colors.green[800] : Colors.grey[600],
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoPlaceholder extends StatelessWidget {
+  final String title;
+  final String message;
+  final IconData icon;
+  final String actionLabel;
+  final VoidCallback onAction;
+
+  const _InfoPlaceholder({
+    required this.title,
+    required this.message,
+    required this.icon,
+    required this.actionLabel,
+    required this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        constraints: const BoxConstraints(maxWidth: 420),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.grey.withOpacity(0.2)),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 20,
+              color: Colors.grey.withOpacity(0.1),
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 48, color: Colors.grey),
+            const SizedBox(height: 12),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: onAction,
+              child: Text(actionLabel),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -2,10 +2,11 @@
 
 ## Исполнительное резюме
 
-**Дата**: 2025-11-08  
-**Версия**: 1.0.0  
-**Статус**: Production Ready  
-**Платформа**: SecurityOrchestrator Automated Testing System  
+**Дата**: 2025-11-21
+**Версия**: 2.0.0
+**Статус**: Production Ready
+**Платформа**: SecurityOrchestrator Automated Testing System
+**Архитектура**: Микросервисная с LLM интеграцией
 
 ---
 
@@ -566,51 +567,573 @@ sudo systemctl enable nginx
 
 ---
 
-## 5. LLM сервисы
+## 5. LLM сервисы в Production
 
-### 5.1 Установка Ollama (локальные LLM)
-
-```bash
-# Добавление репозитория Ollama
-curl -fsSL https://ollama.ai/install.sh | sh
-
-# Запуск Ollama сервиса
-sudo systemctl start ollama
-sudo systemctl enable ollama
-
-# Загрузка базовых моделей
-ollama pull llama2
-ollama pull codellama
-ollama pull mistral
-
-# Проверка статуса
-ollama list
-```
-
-### 5.2 Настройка OpenRouter (облачные LLM)
+### 5.1 Ollama в Production с qwen3-coder:480b-cloud
 
 ```bash
-# Создание файла с API ключом
-mkdir -p ~/.config/ollama
-cat > ~/.config/ollama/config.json << 'EOF'
+# Создание Ollama systemd service для production
+sudo tee /etc/systemd/system/ollama.service << 'EOF'
+[Unit]
+Description=Ollama LLM Service
+After=network.target
+
+[Service]
+Type=simple
+User=ollama
+Group=ollama
+WorkingDirectory=/var/lib/ollama
+ExecStart=/usr/local/bin/ollama serve --host 0.0.0.0 --port 11434
+Restart=always
+RestartSec=3
+Environment="OLLAMA_HOST=0.0.0.0:11434"
+Environment="OLLAMA_ORIGINS=https://yourdomain.com https://app.yourdomain.com"
+
+# Security settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/ollama /tmp
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Настройка пользователя
+sudo useradd -r -s /bin/false -d /var/lib/ollama ollama
+sudo mkdir -p /var/lib/ollama
+sudo chown -R ollama:ollama /var/lib/ollama
+
+# Создание конфигурационного файла Ollama
+sudo tee /etc/ollama/config.json << 'EOF'
 {
-  "api_base": "https://openrouter.ai/api/v1",
-  "default_headers": {
-    "Authorization": "Bearer YOUR_OPENROUTER_API_KEY"
-  }
+  "host": "0.0.0.0:11434",
+  "origins": [
+    "https://yourdomain.com",
+    "https://app.yourdomain.com",
+    "https://api.yourdomain.com"
+  ],
+  "timeout": 300,
+  "num_ctx": 32768,
+  "num_batch": 512,
+  "num_gpu": 1,
+  "gpu_layers": 35,
+  "main_gpu": 0,
+  "f16_kv": true,
+  "use_mlock": false,
+  "use_mmap": true,
+  "low_vram": false,
+  "log_level": "info"
 }
 EOF
 
-# Создание environment переменной
-echo 'export OPENROUTER_API_KEY="your_api_key_here"' >> ~/.bashrc
-source ~/.bashrc
+# Создание скрипта загрузки моделей
+sudo tee /opt/ollama-setup.sh << 'EOF'
+#!/bin/bash
+
+echo "Загрузка LLM моделей для SecurityOrchestrator..."
+
+# Основная модель для кода
+ollama pull qwen3-coder:480b-cloud
+
+# Дополнительные модели для анализа безопасности
+ollama pull codellama:7b-instruct-q4_0
+ollama pull llama3.2:3b-instruct-q4_0
+ollama pull mistral:7b-instruct-v0.3-q4_0
+
+# Модель для анализа документации
+ollama pull deepseek-r1t-chimera:free
+
+echo "Проверка загруженных моделей:"
+ollama list
+
+# Создание модельных профилей
+cat > /etc/ollama/profiles.json << 'PROFILE_EOF'
+{
+  "profiles": {
+    "security_analysis": {
+      "model": "qwen3-coder:480b-cloud",
+      "parameters": {
+        "temperature": 0.1,
+        "top_p": 0.9,
+        "num_ctx": 32768,
+        "repeat_penalty": 1.1
+      }
+    },
+    "code_review": {
+      "model": "codellama:7b-instruct-q4_0",
+      "parameters": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "num_ctx": 8192
+      }
+    },
+    "documentation": {
+      "model": "deepseek-r1t-chimera:free",
+      "parameters": {
+        "temperature": 0.3,
+        "top_p": 0.9,
+        "num_ctx": 16384
+      }
+    }
+  }
+}
+PROFILE_EOF
+
+echo "Профили моделей созданы"
+EOF
+
+chmod +x /opt/ollama-setup.sh
+
+# Запуск и включение сервиса
+sudo systemctl daemon-reload
+sudo systemctl enable ollama
+sudo systemctl start ollama
+
+# Загрузка моделей
+sudo /opt/ollama-setup.sh
+```
+
+### 5.2 OpenRouter для облачных LLM
+
+```bash
+# Установка переменных окружения для OpenRouter
+sudo tee -a /etc/environment << 'EOF'
+# LLM Configuration
+LLM_OPENROUTER_API_KEY=your_openrouter_api_key_here
+OLLAMA_HOST=http://localhost:11434
+EOF
+
+# Создание конфигурации для security orchestrator
+sudo tee -a /etc/ollama/llm-providers.yml << 'EOF'
+activeProvider: ollama
+providers:
+  - id: openrouter
+    displayName: OpenRouter Community
+    mode: remote
+    baseUrl: https://openrouter.ai/api/v1
+    apiKey: "${LLM_OPENROUTER_API_KEY}"
+    model: tngtech/deepseek-r1t-chimera:free
+    enabled: true
+    timeout: 90
+  - id: ollama
+    displayName: Ollama Cloud (qwen3-coder)
+    mode: remote
+    baseUrl: http://localhost:11434
+    model: "qwen3-coder:480b-cloud"
+    enabled: true
+    timeout: 300
+    profiles:
+      - security_analysis
+      - code_review
+      - documentation
+EOF
+
+# Проверка работы Ollama
+curl -X POST http://localhost:11434/api/generate -d '{
+  "model": "qwen3-coder:480b-cloud",
+  "prompt": "Hello, test security analysis model",
+  "stream": false
+}'
+```
+
+### 5.3 Мониторинг LLM сервисов
+
+```bash
+# Мониторинг производительности Ollama
+sudo tee /etc/prometheus/rules/ollama-alerts.yml << 'EOF'
+groups:
+  - name: ollama
+    rules:
+      - alert: OllamaDown
+        expr: up{job="ollama"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Ollama LLM service is down"
+          description: "Ollama service has been down for more than 1 minute."
+
+      - alert: HighLLMLatency
+        expr: histogram_quantile(0.95, rate(ollama_request_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High LLM request latency"
+          description: "95th percentile request latency is above 30 seconds."
+
+      - alert: OllamaMemoryUsage
+        expr: (ollama_memory_usage_bytes / ollama_memory_limit_bytes) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Ollama memory usage"
+          description: "Ollama memory usage is above 80%."
+EOF
+
+# Добавление LLM метрик в prometheus.yml
+sudo tee -a /etc/prometheus/prometheus.yml << 'EOF'
+  - job_name: 'ollama'
+    static_configs:
+      - targets: ['localhost:11434']
+    metrics_path: '/api/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+EOF
 ```
 
 ---
 
-## 6. Мониторинг и логирование
+---
 
-### 6.1 Установка Prometheus
+## 6. Микросервисная архитектура
+
+### 6.1 Kubernetes Deployment
+
+```yaml
+# namespace.yml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: security-orchestrator
+
+---
+# configmap.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: security-orchestrator-config
+  namespace: security-orchestrator
+data:
+  application-production.properties: |
+    spring.datasource.url=jdbc:postgresql://postgres-service:5432/security_orchestrator
+    spring.datasource.username=${DATABASE_USERNAME}
+    spring.datasource.password=${DATABASE_PASSWORD}
+    
+    # LLM Configuration
+    llm.config-file=/config/llm-providers.yml
+    
+    # Redis Configuration
+    spring.redis.host=${REDIS_SERVICE_HOST}
+    spring.redis.port=${REDIS_SERVICE_PORT}
+    
+    # Microservice Configuration
+    spring.cloud.discovery.enabled=true
+    spring.cloud.discovery.service-registry.enabled=true
+
+  llm-providers.yml: |
+    activeProvider: ollama
+    providers:
+      - id: openrouter
+        displayName: OpenRouter Community
+        mode: remote
+        baseUrl: https://openrouter.ai/api/v1
+        apiKey: "${LLM_OPENROUTER_API_KEY}"
+        model: tngtech/deepseek-r1t-chimera:free
+        enabled: true
+      - id: ollama
+        displayName: Ollama Cloud (qwen3-coder)
+        mode: remote
+        baseUrl: http://ollama-service:11434
+        model: "qwen3-coder:480b-cloud"
+        enabled: true
+
+---
+# postgres-deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: security-orchestrator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        env:
+        - name: POSTGRES_DB
+          value: security_orchestrator
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+
+---
+# security-orchestrator-deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: security-orchestrator
+  namespace: security-orchestrator
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: security-orchestrator
+  template:
+    metadata:
+      labels:
+        app: security-orchestrator
+    spec:
+      containers:
+      - name: security-orchestrator
+        image: security-orchestrator:latest
+        ports:
+        - containerPort: 8090
+        envFrom:
+        - configMapRef:
+            name: security-orchestrator-config
+        - secretRef:
+            name: app-secrets
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8090
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8090
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+      volumes:
+      - name: config-volume
+        configMap:
+          name: security-orchestrator-config
+
+---
+# ingress.yml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: security-orchestrator-ingress
+  namespace: security-orchestrator
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - yourdomain.com
+    - api.yourdomain.com
+    secretName: security-orchestrator-tls
+  rules:
+  - host: yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: security-orchestrator-service
+            port:
+              number: 8090
+  - host: api.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: security-orchestrator-service
+            port:
+              number: 8090
+```
+
+### 6.2 Docker Compose для development
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # LLM Service
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Database
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=security_orchestrator
+      - POSTGRES_USER=security_user
+      - POSTGRES_PASSWORD=secure_password_change_me
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U security_user -d security_orchestrator"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Security Orchestrator App
+  app:
+    build: .
+    ports:
+      - "8090:8090"
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/security_orchestrator
+      - SPRING_DATASOURCE_USERNAME=security_user
+      - SPRING_DATASOURCE_PASSWORD=secure_password_change_me
+      - OLLAMA_HOST=http://ollama:11434
+      - REDIS_HOST=redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: 2
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin_password_change_me
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+
+volumes:
+  postgres_data:
+  redis_data:
+  ollama_data:
+  prometheus_data:
+  grafana_data:
+```
+
+---
+
+## 7. Мониторинг и логирование
+
+### 7.1 Установка Prometheus
 
 ```bash
 # Создание пользователя Prometheus
@@ -1455,6 +1978,6 @@ sudo du -sh /opt/backups
 - Обновляйте SSL сертификаты
 - Проверяйте целостность резервных копий
 
-**Статус**: Система готова к production использованию  
-**Дата**: 2025-11-08  
-**Версия**: 1.0.0
+**Статус**: Система готова к production использованию
+**Дата**: 2025-11-21
+**Версия**: 2.0.0

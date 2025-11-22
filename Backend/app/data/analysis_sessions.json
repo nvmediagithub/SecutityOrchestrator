@@ -1752,7 +1752,7 @@
   "id" : "f6ee341b-456b-4137-9e6a-28bf671ffa08",
   "processId" : "2baf005b-2ef6-415d-a77e-ea3723362e7b",
   "status" : "running",
-  "currentStepId" : "2f70549f-8d2c-4e31-a7bd-98ea758211f6",
+  "currentStepId" : "ff330bf0-da9a-4639-b40d-80e593ffa011",
   "steps" : [ {
     "id" : "ef3c1d45-f660-4a4e-b570-f3ec3b0a6135",
     "title" : "Collect additional inputs",
@@ -1817,8 +1817,101 @@
     "title" : "Run LLM analysis",
     "description" : "Use the collected parameters to ask the LLM for a test plan",
     "type" : "llm_analysis",
-    "status" : "waiting",
+    "status" : "completed",
     "metadata" : { }
+  }, {
+    "id" : "ff330bf0-da9a-4639-b40d-80e593ffa011",
+    "title" : "Execute HTTP request: Аутентификация",
+    "description" : "Получение токена доступа для дальнейших запросов к API.",
+    "type" : "http_request",
+    "status" : "waiting",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Аутентификация",
+        "method" : "POST",
+        "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+        "headers" : {
+          "Content-Type" : "application/x-www-form-urlencoded"
+        },
+        "body" : "client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials",
+        "description" : "Получение токена доступа для дальнейших запросов к API."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "02e80069-3244-4654-8288-f29408293c2a",
+    "title" : "Execute HTTP request: Получение списка счетов",
+    "description" : "Запрос списка счетов клиента для последующего выбора бонусного счёта.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Получение списка счетов",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/accounts",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Запрос списка счетов клиента для последующего выбора бонусного счёта."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "89af6d5c-68ef-4cec-90a7-87bdfcb36511",
+    "title" : "Execute HTTP request: Проверка баланса бонусного счёта",
+    "description" : "Проверка баланса выбранного бонусного счёта перед инициацией платежа.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка баланса бонусного счёта",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/accounts/{account_id}/balances",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Проверка баланса выбранного бонусного счёта перед инициацией платежа."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "396f7e46-831c-4aeb-bf84-251e571b304e",
+    "title" : "Execute HTTP request: Инициация платежа",
+    "description" : "Создание нового платежа с использованием бонусов.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Инициация платежа",
+        "method" : "POST",
+        "url" : "https://vbank.open.bankingapi.ru/payments",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}",
+          "Content-Type" : "application/json"
+        },
+        "body" : "{\n  \"accountId\": \"{{account_id}}\",\n  \"amount\": 100,\n  \"currency\": \"RUB\",\n  \"description\": \"Оплата бонусами\"\n}",
+        "description" : "Создание нового платежа с использованием бонусов."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "ea7fd94b-65aa-4ed1-8a42-6949a916f5a2",
+    "title" : "Execute HTTP request: Проверка статуса платежа",
+    "description" : "Проверка статуса инициированного платежа.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка статуса платежа",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/payments/{payment_id}",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Проверка статуса инициированного платежа."
+      },
+      "requiresAdditionalInput" : false
+    }
   }, {
     "id" : "0c76a409-0375-4b02-805d-68e4d079ffc7",
     "title" : "Execute test script",
@@ -1832,8 +1925,2519 @@
       "base_url" : "https://vbank.open.bankingapi.ru/",
       "client_id" : "team134",
       "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
-    }
+    },
+    "llmPlan" : "1. Аутентификация клиента через POST /auth/bank-token для получения токена доступа.\n2. Получение списка счетов клиента через GET /accounts.\n3. Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.\n4. Инициация платежа через POST /payments.\n5. Проверка статуса платежа через GET /payments/{payment_id}.",
+    "llmSummary" : "Процесс оплаты бонусами включает аутентификацию, получение счетов, проверку баланса, инициацию и подтверждение платежа.",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация клиента через POST /auth/bank-token для получения токена доступа.",
+      "detail" : "Аутентификация клиента через POST /auth/bank-token для получения токена доступа.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение списка счетов клиента через GET /accounts.",
+      "detail" : "Получение списка счетов клиента через GET /accounts.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.",
+      "detail" : "Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Инициация платежа через POST /payments.",
+      "detail" : "Инициация платежа через POST /payments.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверка статуса платежа через GET /payments/{payment_id}.",
+      "detail" : "Проверка статуса платежа через GET /payments/{payment_id}.",
+      "relatedArtifact" : "/cards"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "httpRequests" : [ {
+      "name" : "Аутентификация",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "headers" : {
+        "Content-Type" : "application/x-www-form-urlencoded"
+      },
+      "body" : "client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials",
+      "description" : "Получение токена доступа для дальнейших запросов к API."
+    }, {
+      "name" : "Получение списка счетов",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/accounts",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Запрос списка счетов клиента для последующего выбора бонусного счёта."
+    }, {
+      "name" : "Проверка баланса бонусного счёта",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/accounts/{account_id}/balances",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Проверка баланса выбранного бонусного счёта перед инициацией платежа."
+    }, {
+      "name" : "Инициация платежа",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/payments",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}",
+        "Content-Type" : "application/json"
+      },
+      "body" : "{\n  \"accountId\": \"{{account_id}}\",\n  \"amount\": 100,\n  \"currency\": \"RUB\",\n  \"description\": \"Оплата бонусами\"\n}",
+      "description" : "Создание нового платежа с использованием бонусов."
+    }, {
+      "name" : "Проверка статуса платежа",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/payments/{payment_id}",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Проверка статуса инициированного платежа."
+    } ],
+    "llmPrompt" : "Process name: Testttt\nDescription: tttt\nCreated at: 2025-11-21T17:33:36\n\nUser inputs:\n- base_url: https://vbank.open.bankingapi.ru/\n- client_secret: 9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4\n- client_id: team134\n\nBPMN excerpt:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\n                  xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\"\n                  xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\"\n                  id=\"Definitions_01\"\n                  targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"Process_01_bonus_payment\" isExecutable=\"false\">\n    <bpmn:startEvent id=\"StartEvent_01\" name=\"Клиент выбирает услугу и решает оплатить бонусами\">\n      <bpmn:outgoing>Flow_01_1</bpmn:outgoing>\n    </bpmn:startEvent>\n    <bpmn:task id=\"Task_01_Auth\" name=\"Аутентификация: POST /auth/bank-token\">\n      <bpmn:incoming>Flow_01_1</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_2</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetAccs\" name=\"Получение списка счетов: GET /accounts\">\n      <bpmn:incoming>Flow_01_2</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_3</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetBal\" name=\"Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances\">\n      <bpmn:incoming>Flow_01_3</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_4</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_InitPay\" name=\"Инициация платежа: POST /payments\">\n      <bpmn:incoming>Flow_01_4</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_5</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_CheckPay\" name...\n\nOpenAPI endpoints:\n- /cards\n- /account-consents/{consent_id}\n- /payment-consents/request\n- /product-agreements\n- /accounts/{account_id}/transactions\n\nRequired output: JSON with keys plan (markdown list of actions), httpRequests (array of HTTP steps containing name, method, url, headers, body, description), summary (short text). Use user inputs to populate headers or payloads as needed.\n",
+    "llmRawResponse" : "{\n  \"plan\": \"1. Аутентификация клиента через POST /auth/bank-token для получения токена доступа.\\n2. Получение списка счетов клиента через GET /accounts.\\n3. Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.\\n4. Инициация платежа через POST /payments.\\n5. Проверка статуса платежа через GET /payments/{payment_id}.\",\n  \"httpRequests\": [\n    {\n      \"name\": \"Аутентификация\",\n      \"method\": \"POST\",\n      \"url\": \"https://vbank.open.bankingapi.ru/auth/bank-token\",\n      \"headers\": {\n        \"Content-Type\": \"application/x-www-form-urlencoded\"\n      },\n      \"body\": \"client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials\",\n      \"description\": \"Получение токена доступа для дальнейших запросов к API.\"\n    },\n    {\n      \"name\": \"Получение списка счетов\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/accounts\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Запрос списка счетов клиента для последующего выбора бонусного счёта.\"\n    },\n    {\n      \"name\": \"Проверка баланса бонусного счёта\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/accounts/{account_id}/balances\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка баланса выбранного бонусного счёта перед инициацией платежа.\"\n    },\n    {\n      \"name\": \"Инициация платежа\",\n      \"method\": \"POST\",\n      \"url\": \"https://vbank.open.bankingapi.ru/payments\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\",\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": \"{\\n  \\\"accountId\\\": \\\"{{account_id}}\\\",\\n  \\\"amount\\\": 100,\\n  \\\"currency\\\": \\\"RUB\\\",\\n  \\\"description\\\": \\\"Оплата бонусами\\\"\\n}\",\n      \"description\": \"Создание нового платежа с использованием бонусов.\"\n    },\n    {\n      \"name\": \"Проверка статуса платежа\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/payments/{payment_id}\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка статуса инициированного платежа.\"\n    }\n  ],\n  \"summary\": \"Процесс оплаты бонусами включает аутентификацию, получение счетов, проверку баланса, инициацию и подтверждение платежа.\"\n}",
+    "requiresAdditionalInput" : false,
+    "requiredInputFields" : [ ],
+    "baseUrl" : "http://localhost:8080"
   },
   "createdAt" : "2025-11-21T17:34:11",
-  "updatedAt" : "2025-11-21T17:34:34"
+  "updatedAt" : "2025-11-22T09:57:27"
+}, {
+  "id" : "948bc9bb-f3f7-4b27-862a-5934b59b9350",
+  "processId" : "c334a9d1-d04b-47c9-ad24-187a4cca0123",
+  "status" : "running",
+  "currentStepId" : "0f2347c8-3f01-4d2d-99da-111b84550f1b",
+  "steps" : [ {
+    "id" : "826753b9-16e4-48d2-a78b-1e648bba44be",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "60b229d4-a743-444a-9c82-8cf568efb91e",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "0f2347c8-3f01-4d2d-99da-111b84550f1b",
+    "title" : "Execute HTTP request: Аутентификация",
+    "description" : "Аутентификация клиента по банковскому токену для получения доступа к API.",
+    "type" : "http_request",
+    "status" : "waiting",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Аутентификация",
+        "method" : "POST",
+        "url" : "/auth/bank-token",
+        "headers" : {
+          "Content-Type" : "application/json"
+        },
+        "body" : "{token={{bank_token}}}",
+        "description" : "Аутентификация клиента по банковскому токену для получения доступа к API."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "e1d50e83-2f91-410c-8b5f-df15c9659e0d",
+    "title" : "Execute HTTP request: Получение списка счетов",
+    "description" : "Получение всех доступных счетов клиента.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Получение списка счетов",
+        "method" : "GET",
+        "url" : "/accounts",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Получение всех доступных счетов клиента."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "bbf049e4-79b0-4f93-937a-abeb719c8ce7",
+    "title" : "Execute HTTP request: Проверка баланса бонусного счёта",
+    "description" : "Проверка текущего баланса выбранного бонусного счёта.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка баланса бонусного счёта",
+        "method" : "GET",
+        "url" : "/accounts/{account_id}/balances",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Проверка текущего баланса выбранного бонусного счёта."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "a29a7f89-90d7-4226-9b4b-d566b8bc4334",
+    "title" : "Execute HTTP request: Инициация платежа",
+    "description" : "Создание нового платежа с использованием бонусных средств.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Инициация платежа",
+        "method" : "POST",
+        "url" : "/payments",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}",
+          "Content-Type" : "application/json"
+        },
+        "body" : "{account_id={{account_id}}, amount={{payment_amount}}, currency=RUB, payment_method=bonus}",
+        "description" : "Создание нового платежа с использованием бонусных средств."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "86a8a749-4d8d-4baf-b6b4-eeed11aa237e",
+    "title" : "Execute HTTP request: Проверка статуса платежа",
+    "description" : "Проверка статуса инициированного платежа.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка статуса платежа",
+        "method" : "GET",
+        "url" : "/payments/{payment_id}",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Проверка статуса инициированного платежа."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "9abfec74-b48b-4863-8f5c-556239e54f8e",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "userInputs" : { },
+    "llmPlan" : "1. Аутентифицировать клиента через банковский токен.\n2. Получить список счетов клиента.\n3. Проверить баланс бонусного счёта.\n4. Инициировать платёж с использованием бонусов.\n5. Подтвердить статус платежа.",
+    "llmSummary" : "Процесс оплаты услуги с использованием бонусных баллов клиента, включающий аутентификацию, проверку баланса и инициацию платежа.",
+    "llmPlanActions" : [ {
+      "title" : "Аутентифицировать клиента через банковский токен.",
+      "detail" : "Аутентифицировать клиента через банковский токен.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получить список счетов клиента.",
+      "detail" : "Получить список счетов клиента.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверить баланс бонусного счёта.",
+      "detail" : "Проверить баланс бонусного счёта.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Инициировать платёж с использованием бонусов.",
+      "detail" : "Инициировать платёж с использованием бонусов.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Подтвердить статус платежа.",
+      "detail" : "Подтвердить статус платежа.",
+      "relatedArtifact" : "/cards"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "httpRequests" : [ {
+      "name" : "Аутентификация",
+      "method" : "POST",
+      "url" : "/auth/bank-token",
+      "headers" : {
+        "Content-Type" : "application/json"
+      },
+      "body" : "{token={{bank_token}}}",
+      "description" : "Аутентификация клиента по банковскому токену для получения доступа к API."
+    }, {
+      "name" : "Получение списка счетов",
+      "method" : "GET",
+      "url" : "/accounts",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Получение всех доступных счетов клиента."
+    }, {
+      "name" : "Проверка баланса бонусного счёта",
+      "method" : "GET",
+      "url" : "/accounts/{account_id}/balances",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Проверка текущего баланса выбранного бонусного счёта."
+    }, {
+      "name" : "Инициация платежа",
+      "method" : "POST",
+      "url" : "/payments",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}",
+        "Content-Type" : "application/json"
+      },
+      "body" : "{account_id={{account_id}}, amount={{payment_amount}}, currency=RUB, payment_method=bonus}",
+      "description" : "Создание нового платежа с использованием бонусных средств."
+    }, {
+      "name" : "Проверка статуса платежа",
+      "method" : "GET",
+      "url" : "/payments/{payment_id}",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Проверка статуса инициированного платежа."
+    } ],
+    "llmPrompt" : "Process name: Test8\nDescription: Description\nCreated at: 2025-11-21T17:26:00\n\nUser inputs:\n\nBPMN excerpt:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\n                  xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\"\n                  xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\"\n                  id=\"Definitions_01\"\n                  targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"Process_01_bonus_payment\" isExecutable=\"false\">\n    <bpmn:startEvent id=\"StartEvent_01\" name=\"Клиент выбирает услугу и решает оплатить бонусами\">\n      <bpmn:outgoing>Flow_01_1</bpmn:outgoing>\n    </bpmn:startEvent>\n    <bpmn:task id=\"Task_01_Auth\" name=\"Аутентификация: POST /auth/bank-token\">\n      <bpmn:incoming>Flow_01_1</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_2</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetAccs\" name=\"Получение списка счетов: GET /accounts\">\n      <bpmn:incoming>Flow_01_2</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_3</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetBal\" name=\"Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances\">\n      <bpmn:incoming>Flow_01_3</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_4</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_InitPay\" name=\"Инициация платежа: POST /payments\">\n      <bpmn:incoming>Flow_01_4</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_5</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_CheckPay\" name...\n\nOpenAPI endpoints:\n- /cards\n- /account-consents/{consent_id}\n- /payment-consents/request\n- /product-agreements\n- /accounts/{account_id}/transactions\n\nRequired output: JSON with keys plan (markdown list of actions), httpRequests (array of HTTP steps containing name, method, url, headers, body, description), summary (short text). Use user inputs to populate headers or payloads as needed.\n",
+    "llmRawResponse" : "{\n  \"plan\": \"1. Аутентифицировать клиента через банковский токен.\\n2. Получить список счетов клиента.\\n3. Проверить баланс бонусного счёта.\\n4. Инициировать платёж с использованием бонусов.\\n5. Подтвердить статус платежа.\",\n  \"httpRequests\": [\n    {\n      \"name\": \"Аутентификация\",\n      \"method\": \"POST\",\n      \"url\": \"/auth/bank-token\",\n      \"headers\": {\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"token\": \"{{bank_token}}\"\n      },\n      \"description\": \"Аутентификация клиента по банковскому токену для получения доступа к API.\"\n    },\n    {\n      \"name\": \"Получение списка счетов\",\n      \"method\": \"GET\",\n      \"url\": \"/accounts\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Получение всех доступных счетов клиента.\"\n    },\n    {\n      \"name\": \"Проверка баланса бонусного счёта\",\n      \"method\": \"GET\",\n      \"url\": \"/accounts/{account_id}/balances\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка текущего баланса выбранного бонусного счёта.\"\n    },\n    {\n      \"name\": \"Инициация платежа\",\n      \"method\": \"POST\",\n      \"url\": \"/payments\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\",\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"account_id\": \"{{account_id}}\",\n        \"amount\": \"{{payment_amount}}\",\n        \"currency\": \"RUB\",\n        \"payment_method\": \"bonus\"\n      },\n      \"description\": \"Создание нового платежа с использованием бонусных средств.\"\n    },\n    {\n      \"name\": \"Проверка статуса платежа\",\n      \"method\": \"GET\",\n      \"url\": \"/payments/{payment_id}\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка статуса инициированного платежа.\"\n    }\n  ],\n  \"summary\": \"Процесс оплаты услуги с использованием бонусных баллов клиента, включающий аутентификацию, проверку баланса и инициацию платежа.\"\n}",
+    "requiresAdditionalInput" : false,
+    "requiredInputFields" : [ ],
+    "baseUrl" : "http://localhost:8080"
+  },
+  "createdAt" : "2025-11-21T20:16:13",
+  "updatedAt" : "2025-11-22T10:36:53"
+}, {
+  "id" : "0516d4c8-02e2-49eb-8c45-602bf78c4fab",
+  "processId" : "bb2db02d-19da-44b3-82d2-073f269091c2",
+  "status" : "running",
+  "currentStepId" : "6c35259f-e53f-48ef-aa0e-fd57bd1a04fb",
+  "steps" : [ {
+    "id" : "34c2e002-7822-4d8a-a8ba-97026b54d346",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "be9e94e8-d19e-435d-9bb5-10d6ffa42959",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "6f4a0f95-bfc1-4172-babc-a03c73d53b25",
+    "title" : "Execute HTTP request: Аутентификация",
+    "description" : "Получение токена доступа для дальнейших запросов к API.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Аутентификация",
+        "stepId" : "6f4a0f95-bfc1-4172-babc-a03c73d53b25",
+        "method" : "POST",
+        "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+        "headers" : {
+          "Content-Type" : "application/x-www-form-urlencoded"
+        },
+        "body" : "client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials",
+        "description" : "Получение токена доступа для дальнейших запросов к API."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "7a2ad4ee-9592-438d-bf47-2bade1578515",
+    "title" : "Execute HTTP request: Получение списка счетов",
+    "description" : "Запрос списка банковских счетов клиента.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Получение списка счетов",
+        "stepId" : "7a2ad4ee-9592-438d-bf47-2bade1578515",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/accounts",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Запрос списка банковских счетов клиента."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "6c35259f-e53f-48ef-aa0e-fd57bd1a04fb",
+    "title" : "Execute HTTP request: Проверка баланса бонусного счёта",
+    "description" : "Проверка текущего баланса выбранного бонусного счёта.",
+    "type" : "http_request",
+    "status" : "waiting",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка баланса бонусного счёта",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/accounts/{account_id}/balances",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Проверка текущего баланса выбранного бонусного счёта."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "8bfd4610-9314-47d1-b7ba-fe9dc79fdee7",
+    "title" : "Execute HTTP request: Инициация платежа",
+    "description" : "Создание нового платежа с использованием бонусов.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Инициация платежа",
+        "method" : "POST",
+        "url" : "https://vbank.open.bankingapi.ru/payments",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}",
+          "Content-Type" : "application/json"
+        },
+        "body" : "{\n  \"accountId\": \"{{account_id}}\",\n  \"amount\": 100,\n  \"currency\": \"RUB\",\n  \"description\": \"Оплата бонусами\"\n}",
+        "description" : "Создание нового платежа с использованием бонусов."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "57630fe3-eece-439d-8af5-1c0262563126",
+    "title" : "Execute HTTP request: Проверка статуса платежа",
+    "description" : "Проверка статуса инициированного платежа.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка статуса платежа",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/payments/{payment_id}",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Проверка статуса инициированного платежа."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "2078919d-5d30-4866-8d3d-b0351ab636f2",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Процесс оплаты бонусами включает аутентификацию, получение счетов, проверку баланса и инициацию платежа.",
+    "httpRequests" : [ {
+      "name" : "Аутентификация",
+      "stepId" : "6f4a0f95-bfc1-4172-babc-a03c73d53b25",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "headers" : {
+        "Content-Type" : "application/x-www-form-urlencoded"
+      },
+      "body" : "client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials",
+      "description" : "Получение токена доступа для дальнейших запросов к API."
+    }, {
+      "name" : "Получение списка счетов",
+      "stepId" : "7a2ad4ee-9592-438d-bf47-2bade1578515",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/accounts",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Запрос списка банковских счетов клиента."
+    }, {
+      "name" : "Проверка баланса бонусного счёта",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/accounts/{account_id}/balances",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Проверка текущего баланса выбранного бонусного счёта."
+    }, {
+      "name" : "Инициация платежа",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/payments",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}",
+        "Content-Type" : "application/json"
+      },
+      "body" : "{\n  \"accountId\": \"{{account_id}}\",\n  \"amount\": 100,\n  \"currency\": \"RUB\",\n  \"description\": \"Оплата бонусами\"\n}",
+      "description" : "Создание нового платежа с использованием бонусов."
+    }, {
+      "name" : "Проверка статуса платежа",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/payments/{payment_id}",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Проверка статуса инициированного платежа."
+    } ],
+    "llmPlan" : "1. Аутентификация клиента через POST /auth/bank-token для получения токена доступа.\n2. Получение списка счетов клиента с помощью GET /accounts.\n3. Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.\n4. Инициация платежа с использованием POST /payments.\n5. Проверка статуса платежа (предположительно через GET /payments/{payment_id}).",
+    "requiredInputFields" : [ ],
+    "llmRawResponse" : "{\n  \"plan\": \"1. Аутентификация клиента через POST /auth/bank-token для получения токена доступа.\\n2. Получение списка счетов клиента с помощью GET /accounts.\\n3. Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.\\n4. Инициация платежа с использованием POST /payments.\\n5. Проверка статуса платежа (предположительно через GET /payments/{payment_id}).\",\n  \"httpRequests\": [\n    {\n      \"name\": \"Аутентификация\",\n      \"method\": \"POST\",\n      \"url\": \"https://vbank.open.bankingapi.ru/auth/bank-token\",\n      \"headers\": {\n        \"Content-Type\": \"application/x-www-form-urlencoded\"\n      },\n      \"body\": \"client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials\",\n      \"description\": \"Получение токена доступа для дальнейших запросов к API.\"\n    },\n    {\n      \"name\": \"Получение списка счетов\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/accounts\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Запрос списка банковских счетов клиента.\"\n    },\n    {\n      \"name\": \"Проверка баланса бонусного счёта\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/accounts/{account_id}/balances\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка текущего баланса выбранного бонусного счёта.\"\n    },\n    {\n      \"name\": \"Инициация платежа\",\n      \"method\": \"POST\",\n      \"url\": \"https://vbank.open.bankingapi.ru/payments\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\",\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": \"{\\n  \\\"accountId\\\": \\\"{{account_id}}\\\",\\n  \\\"amount\\\": 100,\\n  \\\"currency\\\": \\\"RUB\\\",\\n  \\\"description\\\": \\\"Оплата бонусами\\\"\\n}\",\n      \"description\": \"Создание нового платежа с использованием бонусов.\"\n    },\n    {\n      \"name\": \"Проверка статуса платежа\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/payments/{payment_id}\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка статуса инициированного платежа.\"\n    }\n  ],\n  \"summary\": \"Процесс оплаты бонусами включает аутентификацию, получение счетов, проверку баланса и инициацию платежа.\"\n}",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация клиента через POST /auth/bank-token для получения токена доступа.",
+      "detail" : "Аутентификация клиента через POST /auth/bank-token для получения токена доступа.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение списка счетов клиента с помощью GET /accounts.",
+      "detail" : "Получение списка счетов клиента с помощью GET /accounts.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.",
+      "detail" : "Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Инициация платежа с использованием POST /payments.",
+      "detail" : "Инициация платежа с использованием POST /payments.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверка статуса платежа (предположительно через GET /payments/{payment_id}).",
+      "detail" : "Проверка статуса платежа (предположительно через GET /payments/{payment_id}).",
+      "relatedArtifact" : "/cards"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "llmPrompt" : "Process name: yfshdfhasjdkh\nDescription: djfisidufhsaiuj\nCreated at: 2025-11-22T10:04:49.674\n\nUser inputs:\n- base_url: https://vbank.open.bankingapi.ru/\n- client_secret: 9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4\n- client_id: team134\n\nBPMN excerpt:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\n                  xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\"\n                  xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\"\n                  id=\"Definitions_01\"\n                  targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"Process_01_bonus_payment\" isExecutable=\"false\">\n    <bpmn:startEvent id=\"StartEvent_01\" name=\"Клиент выбирает услугу и решает оплатить бонусами\">\n      <bpmn:outgoing>Flow_01_1</bpmn:outgoing>\n    </bpmn:startEvent>\n    <bpmn:task id=\"Task_01_Auth\" name=\"Аутентификация: POST /auth/bank-token\">\n      <bpmn:incoming>Flow_01_1</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_2</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetAccs\" name=\"Получение списка счетов: GET /accounts\">\n      <bpmn:incoming>Flow_01_2</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_3</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetBal\" name=\"Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances\">\n      <bpmn:incoming>Flow_01_3</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_4</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_InitPay\" name=\"Инициация платежа: POST /payments\">\n      <bpmn:incoming>Flow_01_4</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_5</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_CheckPay\" name...\n\nOpenAPI endpoints:\n- /cards\n- /account-consents/{consent_id}\n- /payment-consents/request\n- /product-agreements\n- /accounts/{account_id}/transactions\n\nRequired output: JSON with keys plan (markdown list of actions), httpRequests (array of HTTP steps containing name, method, url, headers, body, description), summary (short text). Use user inputs to populate headers or payloads as needed.\n",
+    "baseUrl" : "http://localhost:8080",
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team134",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    },
+    "httpResults" : [ {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "6f4a0f95-bfc1-4172-babc-a03c73d53b25",
+      "body" : "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"client_id\"],\"msg\":\"Field required\",\"input\":null},{\"type\":\"missing\",\"loc\":[\"query\",\"client_secret\"],\"msg\":\"Field required\",\"input\":null}]}",
+      "durationMs" : 852,
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "status" : 422
+    }, {
+      "method" : "GET",
+      "name" : "Получение списка счетов",
+      "stepId" : "7a2ad4ee-9592-438d-bf47-2bade1578515",
+      "body" : "{\"detail\":\"Could not validate credentials\"}",
+      "durationMs" : 169,
+      "url" : "https://vbank.open.bankingapi.ru/accounts",
+      "status" : 401
+    } ],
+    "lastHttpResult" : {
+      "method" : "GET",
+      "name" : "Получение списка счетов",
+      "stepId" : "7a2ad4ee-9592-438d-bf47-2bade1578515",
+      "body" : "{\"detail\":\"Could not validate credentials\"}",
+      "durationMs" : 169,
+      "url" : "https://vbank.open.bankingapi.ru/accounts",
+      "status" : 401
+    },
+    "requiresAdditionalInput" : false
+  },
+  "createdAt" : "2025-11-22T10:05:26",
+  "updatedAt" : "2025-11-22T10:06:51"
+}, {
+  "id" : "d6cde915-4891-4834-bdf1-ca56aa55a562",
+  "processId" : "cf147221-f14c-461f-89c3-b7bc9a97ca40",
+  "status" : "running",
+  "currentStepId" : "2d1b33c7-f4e7-4c17-8770-4ed40a492b71",
+  "steps" : [ {
+    "id" : "c237c54c-e21d-4a34-849e-576337b287ba",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "a68f19e7-d15d-4e61-9788-f35b80fdc02b",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "40967c5f-9f99-45a6-91c6-a4b106af06cc",
+    "title" : "Execute HTTP request: Аутентификация",
+    "description" : "Получение токена доступа для дальнейших запросов к API.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Аутентификация",
+        "stepId" : "40967c5f-9f99-45a6-91c6-a4b106af06cc",
+        "method" : "POST",
+        "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+        "headers" : {
+          "Content-Type" : "application/x-www-form-urlencoded"
+        },
+        "body" : "client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials",
+        "description" : "Получение токена доступа для дальнейших запросов к API."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "2d1b33c7-f4e7-4c17-8770-4ed40a492b71",
+    "title" : "Execute HTTP request: Получение списка счетов",
+    "description" : "Запрос списка банковских счетов клиента.",
+    "type" : "http_request",
+    "status" : "waiting",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Получение списка счетов",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/accounts",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Запрос списка банковских счетов клиента."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "f5b99e60-f240-43a9-a086-a18203fcf4ae",
+    "title" : "Execute HTTP request: Проверка баланса бонусного счёта",
+    "description" : "Получение текущего баланса выбранного бонусного счёта.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка баланса бонусного счёта",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/accounts/{account_id}/balances",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Получение текущего баланса выбранного бонусного счёта."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "9262d605-bc60-4cef-ae1c-d8b75a3d3efa",
+    "title" : "Execute HTTP request: Инициация платежа",
+    "description" : "Создание нового платежа с использованием бонусов.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Инициация платежа",
+        "method" : "POST",
+        "url" : "https://vbank.open.bankingapi.ru/payments",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}",
+          "Content-Type" : "application/json"
+        },
+        "body" : "{\n  \"accountId\": \"{{account_id}}\",\n  \"amount\": 100,\n  \"currency\": \"RUB\",\n  \"description\": \"Оплата бонусами\"\n}",
+        "description" : "Создание нового платежа с использованием бонусов."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "0213affb-7846-43e8-b839-55f8a5cdcb06",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Процесс оплаты услуги бонусами включает аутентификацию, проверку счетов и баланса, а также инициацию платежа через API банка.",
+    "httpRequests" : [ {
+      "name" : "Аутентификация",
+      "stepId" : "40967c5f-9f99-45a6-91c6-a4b106af06cc",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "headers" : {
+        "Content-Type" : "application/x-www-form-urlencoded"
+      },
+      "body" : "client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials",
+      "description" : "Получение токена доступа для дальнейших запросов к API."
+    }, {
+      "name" : "Получение списка счетов",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/accounts",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Запрос списка банковских счетов клиента."
+    }, {
+      "name" : "Проверка баланса бонусного счёта",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/accounts/{account_id}/balances",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Получение текущего баланса выбранного бонусного счёта."
+    }, {
+      "name" : "Инициация платежа",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/payments",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}",
+        "Content-Type" : "application/json"
+      },
+      "body" : "{\n  \"accountId\": \"{{account_id}}\",\n  \"amount\": 100,\n  \"currency\": \"RUB\",\n  \"description\": \"Оплата бонусами\"\n}",
+      "description" : "Создание нового платежа с использованием бонусов."
+    } ],
+    "llmPlan" : "1. Аутентификация клиента через POST /auth/bank-token для получения токена доступа.\n2. Получение списка счетов клиента с помощью GET /accounts.\n3. Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.\n4. Инициация платежа с использованием бонусов через POST /payments.\n5. Проверка статуса платежа (не завершено в BPMN, но логично добавить).\n6. Подтверждение или завершение процесса.",
+    "requiredInputFields" : [ ],
+    "llmRawResponse" : "{\n  \"plan\": \"1. Аутентификация клиента через POST /auth/bank-token для получения токена доступа.\\n2. Получение списка счетов клиента с помощью GET /accounts.\\n3. Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.\\n4. Инициация платежа с использованием бонусов через POST /payments.\\n5. Проверка статуса платежа (не завершено в BPMN, но логично добавить).\\n6. Подтверждение или завершение процесса.\",\n  \"httpRequests\": [\n    {\n      \"name\": \"Аутентификация\",\n      \"method\": \"POST\",\n      \"url\": \"https://vbank.open.bankingapi.ru/auth/bank-token\",\n      \"headers\": {\n        \"Content-Type\": \"application/x-www-form-urlencoded\"\n      },\n      \"body\": \"client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials\",\n      \"description\": \"Получение токена доступа для дальнейших запросов к API.\"\n    },\n    {\n      \"name\": \"Получение списка счетов\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/accounts\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Запрос списка банковских счетов клиента.\"\n    },\n    {\n      \"name\": \"Проверка баланса бонусного счёта\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/accounts/{account_id}/balances\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Получение текущего баланса выбранного бонусного счёта.\"\n    },\n    {\n      \"name\": \"Инициация платежа\",\n      \"method\": \"POST\",\n      \"url\": \"https://vbank.open.bankingapi.ru/payments\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\",\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": \"{\\n  \\\"accountId\\\": \\\"{{account_id}}\\\",\\n  \\\"amount\\\": 100,\\n  \\\"currency\\\": \\\"RUB\\\",\\n  \\\"description\\\": \\\"Оплата бонусами\\\"\\n}\",\n      \"description\": \"Создание нового платежа с использованием бонусов.\"\n    }\n  ],\n  \"summary\": \"Процесс оплаты услуги бонусами включает аутентификацию, проверку счетов и баланса, а также инициацию платежа через API банка.\"\n}",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация клиента через POST /auth/bank-token для получения токена доступа.",
+      "detail" : "Аутентификация клиента через POST /auth/bank-token для получения токена доступа.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение списка счетов клиента с помощью GET /accounts.",
+      "detail" : "Получение списка счетов клиента с помощью GET /accounts.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.",
+      "detail" : "Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Инициация платежа с использованием бонусов через POST /payments.",
+      "detail" : "Инициация платежа с использованием бонусов через POST /payments.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверка статуса платежа (не завершено в BPMN, но логично добавить).",
+      "detail" : "Проверка статуса платежа (не завершено в BPMN, но логично добавить).",
+      "relatedArtifact" : "/cards"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "llmPrompt" : "Process name: лваколкощк3ошк\nDescription: еропуоадлуок\nCreated at: 2025-11-22T10:22:44.781\n\nUser inputs:\n- base_url: https://vbank.open.bankingapi.ru/\n- client_secret: 9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4\n- client_id: team134\n\nBPMN excerpt:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\n                  xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\"\n                  xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\"\n                  id=\"Definitions_01\"\n                  targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"Process_01_bonus_payment\" isExecutable=\"false\">\n    <bpmn:startEvent id=\"StartEvent_01\" name=\"Клиент выбирает услугу и решает оплатить бонусами\">\n      <bpmn:outgoing>Flow_01_1</bpmn:outgoing>\n    </bpmn:startEvent>\n    <bpmn:task id=\"Task_01_Auth\" name=\"Аутентификация: POST /auth/bank-token\">\n      <bpmn:incoming>Flow_01_1</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_2</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetAccs\" name=\"Получение списка счетов: GET /accounts\">\n      <bpmn:incoming>Flow_01_2</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_3</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetBal\" name=\"Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances\">\n      <bpmn:incoming>Flow_01_3</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_4</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_InitPay\" name=\"Инициация платежа: POST /payments\">\n      <bpmn:incoming>Flow_01_4</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_5</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_CheckPay\" name...\n\nOpenAPI endpoints:\n- /cards\n- /account-consents/{consent_id}\n- /payment-consents/request\n- /product-agreements\n- /accounts/{account_id}/transactions\n\nRequired output: JSON with keys plan (markdown list of actions), httpRequests (array of HTTP steps containing name, method, url, headers, body, description), summary (short text). Use user inputs to populate headers or payloads as needed.\n",
+    "baseUrl" : "http://localhost:8080",
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team134",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    },
+    "httpResults" : [ {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "40967c5f-9f99-45a6-91c6-a4b106af06cc",
+      "body" : "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"client_id\"],\"msg\":\"Field required\",\"input\":null},{\"type\":\"missing\",\"loc\":[\"query\",\"client_secret\"],\"msg\":\"Field required\",\"input\":null}]}",
+      "durationMs" : 1885,
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "status" : 422
+    } ],
+    "lastHttpResult" : {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "40967c5f-9f99-45a6-91c6-a4b106af06cc",
+      "body" : "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"client_id\"],\"msg\":\"Field required\",\"input\":null},{\"type\":\"missing\",\"loc\":[\"query\",\"client_secret\"],\"msg\":\"Field required\",\"input\":null}]}",
+      "durationMs" : 1885,
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "status" : 422
+    },
+    "requiresAdditionalInput" : false
+  },
+  "createdAt" : "2025-11-22T10:23:19",
+  "updatedAt" : "2025-11-22T10:24:11"
+}, {
+  "id" : "9d14b26a-e4ee-4919-8cc8-45ca04ea32a1",
+  "processId" : "3365a7f8-d833-4de6-a3a7-d499f3fc83ef",
+  "status" : "running",
+  "currentStepId" : "113630bb-aaf4-454a-b579-cf17c222e207",
+  "steps" : [ {
+    "id" : "db126199-c422-439d-96a0-04d25b48c508",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "f4f32e0c-3326-4e09-975e-a2d6c3b4da0c",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "633d46a3-9c02-43d1-b31a-9ab0b1ce847d",
+    "title" : "Execute HTTP request: Аутентификация",
+    "description" : "Получение токена доступа для дальнейших запросов к API.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Аутентификация",
+        "stepId" : "633d46a3-9c02-43d1-b31a-9ab0b1ce847d",
+        "method" : "POST",
+        "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+        "headers" : {
+          "Content-Type" : "application/x-www-form-urlencoded"
+        },
+        "body" : "client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials",
+        "description" : "Получение токена доступа для дальнейших запросов к API."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "113630bb-aaf4-454a-b579-cf17c222e207",
+    "title" : "Execute HTTP request: Получение списка счетов",
+    "description" : "Запрос списка счетов клиента для определения бонусного счёта.",
+    "type" : "http_request",
+    "status" : "waiting",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Получение списка счетов",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/accounts",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Запрос списка счетов клиента для определения бонусного счёта."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "e8919bf3-bbec-4380-8f02-b0a9dce088c6",
+    "title" : "Execute HTTP request: Проверка баланса бонусного счёта",
+    "description" : "Проверка баланса выбранного бонусного счёта перед инициацией платежа.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка баланса бонусного счёта",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/accounts/{account_id}/balances",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Проверка баланса выбранного бонусного счёта перед инициацией платежа."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "10f3398c-2488-4da9-beda-c4fed7bf537d",
+    "title" : "Execute HTTP request: Инициация платежа",
+    "description" : "Создание нового платежа с использованием бонусов.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Инициация платежа",
+        "method" : "POST",
+        "url" : "https://vbank.open.bankingapi.ru/payments",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}",
+          "Content-Type" : "application/json"
+        },
+        "body" : "{\n  \"accountId\": \"{{account_id}}\",\n  \"amount\": 1000,\n  \"currency\": \"RUB\",\n  \"description\": \"Оплата бонусами за услугу\"\n}",
+        "description" : "Создание нового платежа с использованием бонусов."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "17e685b2-779c-40fd-82bf-42e13394ab38",
+    "title" : "Execute HTTP request: Проверка статуса платежа",
+    "description" : "Проверка текущего статуса инициированного платежа.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка статуса платежа",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/payments/{payment_id}",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Проверка текущего статуса инициированного платежа."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "31f7b2c3-35b0-41e7-b37d-66524259fc2b",
+    "title" : "Execute HTTP request: Подтверждение платежа",
+    "description" : "Подтверждение платежа после проверки баланса и статуса.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Подтверждение платежа",
+        "method" : "PUT",
+        "url" : "https://vbank.open.bankingapi.ru/payments/{payment_id}/confirm",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}",
+          "Content-Type" : "application/json"
+        },
+        "body" : "{}",
+        "description" : "Подтверждение платежа после проверки баланса и статуса."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "770d5b52-76af-4930-8c9e-1ea9b97b2122",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Процесс оплаты услуги с использованием бонусов включает аутентификацию, проверку баланса и подтверждение платежа через API банка.",
+    "httpRequests" : [ {
+      "name" : "Аутентификация",
+      "stepId" : "633d46a3-9c02-43d1-b31a-9ab0b1ce847d",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "headers" : {
+        "Content-Type" : "application/x-www-form-urlencoded"
+      },
+      "body" : "client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials",
+      "description" : "Получение токена доступа для дальнейших запросов к API."
+    }, {
+      "name" : "Получение списка счетов",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/accounts",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Запрос списка счетов клиента для определения бонусного счёта."
+    }, {
+      "name" : "Проверка баланса бонусного счёта",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/accounts/{account_id}/balances",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Проверка баланса выбранного бонусного счёта перед инициацией платежа."
+    }, {
+      "name" : "Инициация платежа",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/payments",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}",
+        "Content-Type" : "application/json"
+      },
+      "body" : "{\n  \"accountId\": \"{{account_id}}\",\n  \"amount\": 1000,\n  \"currency\": \"RUB\",\n  \"description\": \"Оплата бонусами за услугу\"\n}",
+      "description" : "Создание нового платежа с использованием бонусов."
+    }, {
+      "name" : "Проверка статуса платежа",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/payments/{payment_id}",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Проверка текущего статуса инициированного платежа."
+    }, {
+      "name" : "Подтверждение платежа",
+      "method" : "PUT",
+      "url" : "https://vbank.open.bankingapi.ru/payments/{payment_id}/confirm",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}",
+        "Content-Type" : "application/json"
+      },
+      "body" : "{}",
+      "description" : "Подтверждение платежа после проверки баланса и статуса."
+    } ],
+    "llmPlan" : "1. Аутентификация клиента через POST /auth/bank-token для получения токена доступа.\n2. Получение списка счетов клиента с помощью GET /accounts.\n3. Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.\n4. Инициация платежа с использованием бонусов через POST /payments.\n5. Проверка статуса платежа через GET /payments/{payment_id}.\n6. Подтверждение платежа через PUT /payments/{payment_id}/confirm.",
+    "requiredInputFields" : [ ],
+    "llmRawResponse" : "{\n  \"plan\": \"1. Аутентификация клиента через POST /auth/bank-token для получения токена доступа.\\n2. Получение списка счетов клиента с помощью GET /accounts.\\n3. Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.\\n4. Инициация платежа с использованием бонусов через POST /payments.\\n5. Проверка статуса платежа через GET /payments/{payment_id}.\\n6. Подтверждение платежа через PUT /payments/{payment_id}/confirm.\",\n  \"httpRequests\": [\n    {\n      \"name\": \"Аутентификация\",\n      \"method\": \"POST\",\n      \"url\": \"https://vbank.open.bankingapi.ru/auth/bank-token\",\n      \"headers\": {\n        \"Content-Type\": \"application/x-www-form-urlencoded\"\n      },\n      \"body\": \"client_id=team134&client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4&grant_type=client_credentials\",\n      \"description\": \"Получение токена доступа для дальнейших запросов к API.\"\n    },\n    {\n      \"name\": \"Получение списка счетов\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/accounts\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Запрос списка счетов клиента для определения бонусного счёта.\"\n    },\n    {\n      \"name\": \"Проверка баланса бонусного счёта\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/accounts/{account_id}/balances\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка баланса выбранного бонусного счёта перед инициацией платежа.\"\n    },\n    {\n      \"name\": \"Инициация платежа\",\n      \"method\": \"POST\",\n      \"url\": \"https://vbank.open.bankingapi.ru/payments\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\",\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": \"{\\n  \\\"accountId\\\": \\\"{{account_id}}\\\",\\n  \\\"amount\\\": 1000,\\n  \\\"currency\\\": \\\"RUB\\\",\\n  \\\"description\\\": \\\"Оплата бонусами за услугу\\\"\\n}\",\n      \"description\": \"Создание нового платежа с использованием бонусов.\"\n    },\n    {\n      \"name\": \"Проверка статуса платежа\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/payments/{payment_id}\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка текущего статуса инициированного платежа.\"\n    },\n    {\n      \"name\": \"Подтверждение платежа\",\n      \"method\": \"PUT\",\n      \"url\": \"https://vbank.open.bankingapi.ru/payments/{payment_id}/confirm\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\",\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": \"{}\",\n      \"description\": \"Подтверждение платежа после проверки баланса и статуса.\"\n    }\n  ],\n  \"summary\": \"Процесс оплаты услуги с использованием бонусов включает аутентификацию, проверку баланса и подтверждение платежа через API банка.\"\n}",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация клиента через POST /auth/bank-token для получения токена доступа.",
+      "detail" : "Аутентификация клиента через POST /auth/bank-token для получения токена доступа.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение списка счетов клиента с помощью GET /accounts.",
+      "detail" : "Получение списка счетов клиента с помощью GET /accounts.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.",
+      "detail" : "Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Инициация платежа с использованием бонусов через POST /payments.",
+      "detail" : "Инициация платежа с использованием бонусов через POST /payments.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверка статуса платежа через GET /payments/{payment_id}.",
+      "detail" : "Проверка статуса платежа через GET /payments/{payment_id}.",
+      "relatedArtifact" : "/cards"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "llmPrompt" : "Process name: 6783267sad\nDescription: khdkjas\nCreated at: 2025-11-22T10:37:39.021\n\nUser inputs:\n- base_url: https://vbank.open.bankingapi.ru/\n- client_secret: 9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4\n- client_id: team134\n\nBPMN excerpt:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\n                  xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\"\n                  xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\"\n                  id=\"Definitions_01\"\n                  targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"Process_01_bonus_payment\" isExecutable=\"false\">\n    <bpmn:startEvent id=\"StartEvent_01\" name=\"Клиент выбирает услугу и решает оплатить бонусами\">\n      <bpmn:outgoing>Flow_01_1</bpmn:outgoing>\n    </bpmn:startEvent>\n    <bpmn:task id=\"Task_01_Auth\" name=\"Аутентификация: POST /auth/bank-token\">\n      <bpmn:incoming>Flow_01_1</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_2</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetAccs\" name=\"Получение списка счетов: GET /accounts\">\n      <bpmn:incoming>Flow_01_2</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_3</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetBal\" name=\"Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances\">\n      <bpmn:incoming>Flow_01_3</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_4</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_InitPay\" name=\"Инициация платежа: POST /payments\">\n      <bpmn:incoming>Flow_01_4</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_5</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_CheckPay\" name...\n\nOpenAPI endpoints:\n- /cards\n- /account-consents/{consent_id}\n- /payment-consents/request\n- /product-agreements\n- /accounts/{account_id}/transactions\n\nRequired output: JSON with keys plan (markdown list of actions), httpRequests (array of HTTP steps containing name, method, url, headers, body, description), summary (short text). Use user inputs to populate headers or payloads as needed.\n",
+    "baseUrl" : "http://localhost:8080",
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team134",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    },
+    "httpResults" : [ {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "633d46a3-9c02-43d1-b31a-9ab0b1ce847d",
+      "body" : "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"client_id\"],\"msg\":\"Field required\",\"input\":null},{\"type\":\"missing\",\"loc\":[\"query\",\"client_secret\"],\"msg\":\"Field required\",\"input\":null}]}",
+      "durationMs" : 528,
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "status" : 422
+    } ],
+    "lastHttpResult" : {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "633d46a3-9c02-43d1-b31a-9ab0b1ce847d",
+      "body" : "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"client_id\"],\"msg\":\"Field required\",\"input\":null},{\"type\":\"missing\",\"loc\":[\"query\",\"client_secret\"],\"msg\":\"Field required\",\"input\":null}]}",
+      "durationMs" : 528,
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "status" : 422
+    },
+    "requiresAdditionalInput" : false
+  },
+  "createdAt" : "2025-11-22T10:38:11",
+  "updatedAt" : "2025-11-22T10:39:46"
+}, {
+  "id" : "471fc17d-432d-4e33-a0af-de77aff0c5f8",
+  "processId" : "9f9553d9-806e-4194-97e8-da4cc60fcf43",
+  "status" : "running",
+  "currentStepId" : "666f3c44-9491-43ed-8591-13e28845ed2d",
+  "steps" : [ {
+    "id" : "2052737b-34b8-4c3b-847d-586e887d1bc4",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "client_id",
+        "label" : "Client id",
+        "description" : "ID вашей команды от организаторов (например: team001, team153)",
+        "required" : true
+      }, {
+        "name" : "client_secret",
+        "label" : "Client secret",
+        "description" : "Secret вашей команды из памятки организаторов",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "ID счета",
+        "required" : true
+      }, {
+        "name" : "card_id",
+        "label" : "Card id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "consent_id",
+        "label" : "Consent id",
+        "description" : "ID согласия",
+        "required" : true
+      }, {
+        "name" : "payment_id",
+        "label" : "Payment id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "product_id",
+        "label" : "Product id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "agreement_id",
+        "label" : "Agreement id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "bearer_token",
+        "label" : "Bearer token",
+        "description" : "Token used for Authorization: Bearer ... header",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "f855a2ad-bdc0-4816-8775-9d11259feff9",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "2e000396-3f19-414c-8db7-2126ed7a20f7",
+    "title" : "Execute HTTP request: Аутентификация",
+    "description" : "Аутентификация клиента для получения токена доступа.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Аутентификация",
+        "stepId" : "2e000396-3f19-414c-8db7-2126ed7a20f7",
+        "method" : "POST",
+        "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+        "headers" : {
+          "Content-Type" : "application/json"
+        },
+        "body" : "{client_id=team134, client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4}",
+        "description" : "Аутентификация клиента для получения токена доступа."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "5eb3701b-4232-4d68-a722-af5b490f34fd",
+    "title" : "Execute HTTP request: Получение списка счетов",
+    "description" : "Получение списка всех счетов клиента.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Получение списка счетов",
+        "stepId" : "5eb3701b-4232-4d68-a722-af5b490f34fd",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/accounts",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Получение списка всех счетов клиента."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "666f3c44-9491-43ed-8591-13e28845ed2d",
+    "title" : "Execute HTTP request: Проверка баланса бонусного счёта",
+    "description" : "Проверка баланса выбранного бонусного счёта.",
+    "type" : "http_request",
+    "status" : "running",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка баланса бонусного счёта",
+        "stepId" : "666f3c44-9491-43ed-8591-13e28845ed2d",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/accounts/{account_id}/balances",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Проверка баланса выбранного бонусного счёта."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "fb4b1009-1203-4019-8ca2-ff3610f95a56",
+    "title" : "Execute HTTP request: Инициация платежа",
+    "description" : "Инициация платежа с использованием бонусов.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Инициация платежа",
+        "method" : "POST",
+        "url" : "https://vbank.open.bankingapi.ru/payments",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}",
+          "Content-Type" : "application/json"
+        },
+        "body" : "{accountId={account_id}, amount={amount}, currency=RUB, description=Оплата бонусами}",
+        "description" : "Инициация платежа с использованием бонусов."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "6dfc0330-817b-473c-b82f-4e05a9765904",
+    "title" : "Execute HTTP request: Проверка статуса платежа",
+    "description" : "Проверка статуса инициированного платежа.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка статуса платежа",
+        "method" : "GET",
+        "url" : "https://vbank.open.bankingapi.ru/payments/{payment_id}",
+        "headers" : {
+          "Authorization" : "Bearer {{access_token}}"
+        },
+        "description" : "Проверка статуса инициированного платежа."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "8c073c50-bd5e-4894-8d31-c3388951a09b",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Процесс оплаты бонусами включает аутентификацию, проверку счетов и баланса, инициацию и подтверждение платежа.",
+    "httpRequests" : [ {
+      "name" : "Аутентификация",
+      "stepId" : "2e000396-3f19-414c-8db7-2126ed7a20f7",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "headers" : {
+        "Content-Type" : "application/json"
+      },
+      "body" : "{client_id=team134, client_secret=9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4}",
+      "description" : "Аутентификация клиента для получения токена доступа."
+    }, {
+      "name" : "Получение списка счетов",
+      "stepId" : "5eb3701b-4232-4d68-a722-af5b490f34fd",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/accounts",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Получение списка всех счетов клиента."
+    }, {
+      "name" : "Проверка баланса бонусного счёта",
+      "stepId" : "666f3c44-9491-43ed-8591-13e28845ed2d",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/accounts/{account_id}/balances",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Проверка баланса выбранного бонусного счёта."
+    }, {
+      "name" : "Инициация платежа",
+      "method" : "POST",
+      "url" : "https://vbank.open.bankingapi.ru/payments",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}",
+        "Content-Type" : "application/json"
+      },
+      "body" : "{accountId={account_id}, amount={amount}, currency=RUB, description=Оплата бонусами}",
+      "description" : "Инициация платежа с использованием бонусов."
+    }, {
+      "name" : "Проверка статуса платежа",
+      "method" : "GET",
+      "url" : "https://vbank.open.bankingapi.ru/payments/{payment_id}",
+      "headers" : {
+        "Authorization" : "Bearer {{access_token}}"
+      },
+      "description" : "Проверка статуса инициированного платежа."
+    } ],
+    "llmPlan" : "1. Аутентификация клиента через POST /auth/bank-token.\n2. Получение списка счетов клиента через GET /accounts.\n3. Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.\n4. Инициация платежа через POST /payments.\n5. Проверка статуса платежа (предположительно через GET /payments/{payment_id}).",
+    "requiredInputFields" : [ ],
+    "llmRawResponse" : "{\n  \"plan\": \"1. Аутентификация клиента через POST /auth/bank-token.\\n2. Получение списка счетов клиента через GET /accounts.\\n3. Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.\\n4. Инициация платежа через POST /payments.\\n5. Проверка статуса платежа (предположительно через GET /payments/{payment_id}).\",\n  \"httpRequests\": [\n    {\n      \"name\": \"Аутентификация\",\n      \"method\": \"POST\",\n      \"url\": \"https://vbank.open.bankingapi.ru/auth/bank-token\",\n      \"headers\": {\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"client_id\": \"team134\",\n        \"client_secret\": \"9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4\"\n      },\n      \"description\": \"Аутентификация клиента для получения токена доступа.\"\n    },\n    {\n      \"name\": \"Получение списка счетов\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/accounts\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Получение списка всех счетов клиента.\"\n    },\n    {\n      \"name\": \"Проверка баланса бонусного счёта\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/accounts/{account_id}/balances\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка баланса выбранного бонусного счёта.\"\n    },\n    {\n      \"name\": \"Инициация платежа\",\n      \"method\": \"POST\",\n      \"url\": \"https://vbank.open.bankingapi.ru/payments\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\",\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"accountId\": \"{account_id}\",\n        \"amount\": \"{amount}\",\n        \"currency\": \"RUB\",\n        \"description\": \"Оплата бонусами\"\n      },\n      \"description\": \"Инициация платежа с использованием бонусов.\"\n    },\n    {\n      \"name\": \"Проверка статуса платежа\",\n      \"method\": \"GET\",\n      \"url\": \"https://vbank.open.bankingapi.ru/payments/{payment_id}\",\n      \"headers\": {\n        \"Authorization\": \"Bearer {{access_token}}\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка статуса инициированного платежа.\"\n    }\n  ],\n  \"summary\": \"Процесс оплаты бонусами включает аутентификацию, проверку счетов и баланса, инициацию и подтверждение платежа.\"\n}",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация клиента через POST /auth/bank-token.",
+      "detail" : "Аутентификация клиента через POST /auth/bank-token.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Получение списка счетов клиента через GET /accounts.",
+      "detail" : "Получение списка счетов клиента через GET /accounts.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.",
+      "detail" : "Проверка баланса бонусного счёта через GET /accounts/{account_id}/balances.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Инициация платежа через POST /payments.",
+      "detail" : "Инициация платежа через POST /payments.",
+      "relatedArtifact" : "/cards"
+    }, {
+      "title" : "Проверка статуса платежа (предположительно через GET /payments/{payment_id}).",
+      "detail" : "Проверка статуса платежа (предположительно через GET /payments/{payment_id}).",
+      "relatedArtifact" : "/cards"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "llmPrompt" : "Process name: 8973894759834\nDescription: выоалывл\nCreated at: 2025-11-22T10:46:14.016\n\nUser inputs:\n- base_url: https://vbank.open.bankingapi.ru/\n- client_secret: 9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4\n- client_id: team134\n\nBPMN excerpt:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\n                  xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\"\n                  xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\"\n                  id=\"Definitions_01\"\n                  targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"Process_01_bonus_payment\" isExecutable=\"false\">\n    <bpmn:startEvent id=\"StartEvent_01\" name=\"Клиент выбирает услугу и решает оплатить бонусами\">\n      <bpmn:outgoing>Flow_01_1</bpmn:outgoing>\n    </bpmn:startEvent>\n    <bpmn:task id=\"Task_01_Auth\" name=\"Аутентификация: POST /auth/bank-token\">\n      <bpmn:incoming>Flow_01_1</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_2</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetAccs\" name=\"Получение списка счетов: GET /accounts\">\n      <bpmn:incoming>Flow_01_2</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_3</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetBal\" name=\"Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances\">\n      <bpmn:incoming>Flow_01_3</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_4</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_InitPay\" name=\"Инициация платежа: POST /payments\">\n      <bpmn:incoming>Flow_01_4</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_5</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_CheckPay\" name...\n\nOpenAPI endpoints:\n- /cards\n- /account-consents/{consent_id}\n- /payment-consents/request\n- /product-agreements\n- /accounts/{account_id}/transactions\n\nRequired output: JSON with keys plan (markdown list of actions), httpRequests (array of HTTP steps containing name, method, url, headers, body, description), summary (short text). Use user inputs to populate headers or payloads as needed.\n",
+    "baseUrl" : "http://localhost:8080",
+    "userInputs" : {
+      "base_url" : "https://vbank.open.bankingapi.ru/",
+      "client_id" : "team134",
+      "client_secret" : "9rloz5k3b9CeHlzvx3WaNwT0tpUw09B4"
+    },
+    "httpResults" : [ {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "2e000396-3f19-414c-8db7-2126ed7a20f7",
+      "body" : "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"client_id\"],\"msg\":\"Field required\",\"input\":null},{\"type\":\"missing\",\"loc\":[\"query\",\"client_secret\"],\"msg\":\"Field required\",\"input\":null}]}",
+      "durationMs" : 730,
+      "url" : "https://vbank.open.bankingapi.ru/auth/bank-token",
+      "status" : 422
+    }, {
+      "method" : "GET",
+      "name" : "Получение списка счетов",
+      "stepId" : "5eb3701b-4232-4d68-a722-af5b490f34fd",
+      "body" : "{\"detail\":\"Could not validate credentials\"}",
+      "durationMs" : 186,
+      "url" : "https://vbank.open.bankingapi.ru/accounts",
+      "status" : 401
+    } ],
+    "lastHttpResult" : {
+      "method" : "GET",
+      "name" : "Получение списка счетов",
+      "stepId" : "5eb3701b-4232-4d68-a722-af5b490f34fd",
+      "body" : "{\"detail\":\"Could not validate credentials\"}",
+      "durationMs" : 186,
+      "url" : "https://vbank.open.bankingapi.ru/accounts",
+      "status" : 401
+    },
+    "requiresAdditionalInput" : false
+  },
+  "createdAt" : "2025-11-22T10:46:41",
+  "updatedAt" : "2025-11-22T10:48:11"
+}, {
+  "id" : "0ba2a70f-df44-4716-865c-0a9b1ec6b847",
+  "processId" : "61fc07a9-07e9-4a46-b52b-5092737b3001",
+  "status" : "running",
+  "currentStepId" : "50639a1b-dfd1-4e87-9857-9cb364e000e9",
+  "steps" : [ {
+    "id" : "87e88a87-1fc6-4b96-9b5c-1c5d80ebfc7f",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "Authorization",
+        "label" : "Authorization",
+        "description" : "TIAA-US External token",
+        "required" : true
+      }, {
+        "name" : "externalAccountID",
+        "label" : "ExternalAccountID",
+        "description" : "Уникальный идентификатор (аналог UUID), созданный для каждой учетной записи клиента.",
+        "required" : true
+      }, {
+        "name" : "Correlation-ID",
+        "label" : "Correlation ID",
+        "description" : "Уникальный идентификатор для каждого входящего запроса. Вызывающий API должен передать это в заголовке, который будет каскадно передан через стек вызовов API. Это необходимо для обеспечения соответствия текущим стандартам REST.",
+        "required" : true
+      }, {
+        "name" : "Content-Type",
+        "label" : "Content Type",
+        "description" : "Content-Type",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "0d9dbdf4-f3a8-4631-a271-b34a438f9130",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "af2aeb5b-f9d4-4172-b730-404ab8e9406c",
+    "title" : "Execute HTTP request: Аутентификация",
+    "description" : "Аутентификация клиента по токену для получения доступа к банковским операциям.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Аутентификация",
+        "stepId" : "af2aeb5b-f9d4-4172-b730-404ab8e9406c",
+        "method" : "POST",
+        "url" : "/auth/bank-token",
+        "headers" : {
+          "Authorization" : "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw"
+        },
+        "body" : "{}",
+        "description" : "Аутентификация клиента по токену для получения доступа к банковским операциям."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "eda9d4de-d4dc-4122-b41b-1dd21c4e020f",
+    "title" : "Execute HTTP request: Получение списка счетов",
+    "description" : "Получение списка всех доступных счетов клиента.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Получение списка счетов",
+        "stepId" : "eda9d4de-d4dc-4122-b41b-1dd21c4e020f",
+        "method" : "GET",
+        "url" : "/accounts",
+        "headers" : {
+          "Authorization" : "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw"
+        },
+        "body" : "{}",
+        "description" : "Получение списка всех доступных счетов клиента."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "50639a1b-dfd1-4e87-9857-9cb364e000e9",
+    "title" : "Execute HTTP request: Проверка баланса бонусного счёта",
+    "description" : "Проверка текущего баланса бонусного счёта клиента.",
+    "type" : "http_request",
+    "status" : "waiting",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка баланса бонусного счёта",
+        "method" : "GET",
+        "url" : "/cards/accounts/external/0dbcb7ee-6c59-483b-966a-44d11557665b/rewards/balance",
+        "headers" : {
+          "Authorization" : "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw"
+        },
+        "body" : "{}",
+        "description" : "Проверка текущего баланса бонусного счёта клиента."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "ea9ab14a-5cbc-4d5e-8e0d-ae0e6136e528",
+    "title" : "Execute HTTP request: Инициация платежа",
+    "description" : "Инициация платежа с использованием бонусов со счёта клиента.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Инициация платежа",
+        "method" : "POST",
+        "url" : "/payments",
+        "headers" : {
+          "Authorization" : "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw"
+        },
+        "body" : "{accountId=0dbcb7ee-6c59-483b-966a-44d11557665b, amount=100, currency=BON}",
+        "description" : "Инициация платежа с использованием бонусов со счёта клиента."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "05c3b217-b7c5-4748-afc0-4cb8677de2d4",
+    "title" : "Execute HTTP request: Проверка статуса платежа",
+    "description" : "Проверка статуса инициированного платежа.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка статуса платежа",
+        "method" : "GET",
+        "url" : "/payments/{payment_id}",
+        "headers" : {
+          "Authorization" : "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw"
+        },
+        "body" : "{}",
+        "description" : "Проверка статуса инициированного платежа."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "63a0796b-3500-416e-85fd-8d5cb350a6d3",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Процесс оплаты бонусами включает аутентификацию клиента, проверку баланса бонусного счёта и инициацию платежа.",
+    "httpRequests" : [ {
+      "name" : "Аутентификация",
+      "stepId" : "af2aeb5b-f9d4-4172-b730-404ab8e9406c",
+      "method" : "POST",
+      "url" : "/auth/bank-token",
+      "headers" : {
+        "Authorization" : "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw"
+      },
+      "body" : "{}",
+      "description" : "Аутентификация клиента по токену для получения доступа к банковским операциям."
+    }, {
+      "name" : "Получение списка счетов",
+      "stepId" : "eda9d4de-d4dc-4122-b41b-1dd21c4e020f",
+      "method" : "GET",
+      "url" : "/accounts",
+      "headers" : {
+        "Authorization" : "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw"
+      },
+      "body" : "{}",
+      "description" : "Получение списка всех доступных счетов клиента."
+    }, {
+      "name" : "Проверка баланса бонусного счёта",
+      "method" : "GET",
+      "url" : "/cards/accounts/external/0dbcb7ee-6c59-483b-966a-44d11557665b/rewards/balance",
+      "headers" : {
+        "Authorization" : "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw"
+      },
+      "body" : "{}",
+      "description" : "Проверка текущего баланса бонусного счёта клиента."
+    }, {
+      "name" : "Инициация платежа",
+      "method" : "POST",
+      "url" : "/payments",
+      "headers" : {
+        "Authorization" : "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw"
+      },
+      "body" : "{accountId=0dbcb7ee-6c59-483b-966a-44d11557665b, amount=100, currency=BON}",
+      "description" : "Инициация платежа с использованием бонусов со счёта клиента."
+    }, {
+      "name" : "Проверка статуса платежа",
+      "method" : "GET",
+      "url" : "/payments/{payment_id}",
+      "headers" : {
+        "Authorization" : "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw"
+      },
+      "body" : "{}",
+      "description" : "Проверка статуса инициированного платежа."
+    } ],
+    "llmPlan" : "1. Аутентификация клиента через банковский токен.\n2. Получение списка счетов клиента.\n3. Проверка баланса бонусного счёта.\n4. Инициация платежа с использованием бонусов.\n5. Проверка статуса платежа.",
+    "requiredInputFields" : [ ],
+    "llmRawResponse" : "{\n  \"plan\": \"1. Аутентификация клиента через банковский токен.\\n2. Получение списка счетов клиента.\\n3. Проверка баланса бонусного счёта.\\n4. Инициация платежа с использованием бонусов.\\n5. Проверка статуса платежа.\",\n  \"httpRequests\": [\n    {\n      \"name\": \"Аутентификация\",\n      \"method\": \"POST\",\n      \"url\": \"/auth/bank-token\",\n      \"headers\": {\n        \"Authorization\": \"Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw\"\n      },\n      \"body\": {},\n      \"description\": \"Аутентификация клиента по токену для получения доступа к банковским операциям.\"\n    },\n    {\n      \"name\": \"Получение списка счетов\",\n      \"method\": \"GET\",\n      \"url\": \"/accounts\",\n      \"headers\": {\n        \"Authorization\": \"Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw\"\n      },\n      \"body\": {},\n      \"description\": \"Получение списка всех доступных счетов клиента.\"\n    },\n    {\n      \"name\": \"Проверка баланса бонусного счёта\",\n      \"method\": \"GET\",\n      \"url\": \"/cards/accounts/external/0dbcb7ee-6c59-483b-966a-44d11557665b/rewards/balance\",\n      \"headers\": {\n        \"Authorization\": \"Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw\"\n      },\n      \"body\": {},\n      \"description\": \"Проверка текущего баланса бонусного счёта клиента.\"\n    },\n    {\n      \"name\": \"Инициация платежа\",\n      \"method\": \"POST\",\n      \"url\": \"/payments\",\n      \"headers\": {\n        \"Authorization\": \"Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw\"\n      },\n      \"body\": {\n        \"accountId\": \"0dbcb7ee-6c59-483b-966a-44d11557665b\",\n        \"amount\": 100,\n        \"currency\": \"BON\"\n      },\n      \"description\": \"Инициация платежа с использованием бонусов со счёта клиента.\"\n    },\n    {\n      \"name\": \"Проверка статуса платежа\",\n      \"method\": \"GET\",\n      \"url\": \"/payments/{payment_id}\",\n      \"headers\": {\n        \"Authorization\": \"Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw\"\n      },\n      \"body\": {},\n      \"description\": \"Проверка статуса инициированного платежа.\"\n    }\n  ],\n  \"summary\": \"Процесс оплаты бонусами включает аутентификацию клиента, проверку баланса бонусного счёта и инициацию платежа.\"\n}",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация клиента через банковский токен.",
+      "detail" : "Аутентификация клиента через банковский токен.",
+      "relatedArtifact" : "/cards/accounts/external/{externalAccountID}/rewards/balance"
+    }, {
+      "title" : "Получение списка счетов клиента.",
+      "detail" : "Получение списка счетов клиента.",
+      "relatedArtifact" : "/cards/accounts/external/{externalAccountID}/rewards/balance"
+    }, {
+      "title" : "Проверка баланса бонусного счёта.",
+      "detail" : "Проверка баланса бонусного счёта.",
+      "relatedArtifact" : "/cards/accounts/external/{externalAccountID}/rewards/balance"
+    }, {
+      "title" : "Инициация платежа с использованием бонусов.",
+      "detail" : "Инициация платежа с использованием бонусов.",
+      "relatedArtifact" : "/cards/accounts/external/{externalAccountID}/rewards/balance"
+    }, {
+      "title" : "Проверка статуса платежа.",
+      "detail" : "Проверка статуса платежа.",
+      "relatedArtifact" : "/cards/accounts/external/{externalAccountID}/rewards/balance"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /cards/accounts/external/{externalAccountID}/rewards/balance"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "llmPrompt" : "Process name: Оплата бонусами\nDescription: ыфв\nCreated at: 2025-11-22T11:25:25.062\n\nUser inputs:\n- Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw\n- externalAccountID: 0dbcb7ee-6c59-483b-966a-44d11557665b\n\nBPMN excerpt:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\n                  xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\"\n                  xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\"\n                  id=\"Definitions_01\"\n                  targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"Process_01_bonus_payment\" isExecutable=\"false\">\n    <bpmn:startEvent id=\"StartEvent_01\" name=\"Клиент выбирает услугу и решает оплатить бонусами\">\n      <bpmn:outgoing>Flow_01_1</bpmn:outgoing>\n    </bpmn:startEvent>\n    <bpmn:task id=\"Task_01_Auth\" name=\"Аутентификация: POST /auth/bank-token\">\n      <bpmn:incoming>Flow_01_1</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_2</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetAccs\" name=\"Получение списка счетов: GET /accounts\">\n      <bpmn:incoming>Flow_01_2</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_3</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetBal\" name=\"Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances\">\n      <bpmn:incoming>Flow_01_3</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_4</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_InitPay\" name=\"Инициация платежа: POST /payments\">\n      <bpmn:incoming>Flow_01_4</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_5</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_CheckPay\" name...\n\nOpenAPI endpoints:\n- /cards/accounts/external/{externalAccountID}/rewards/balance\n- /cards/accounts/external/{externalAccountID}/rewards/redemption\n\nRequired output: JSON with keys plan (markdown list of actions), httpRequests (array of HTTP steps containing name, method, url, headers, body, description), summary (short text). Use user inputs to populate headers or payloads as needed.\n",
+    "baseUrl" : "http://localhost:8080",
+    "userInputs" : {
+      "Authorization" : "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Imctb09kUnc1TWFlTmcwbWpsN1VpczlXT010NCIsInBpLmF0bSI6IjQ2N3YifQ.eyJzY29wZSI6ImFjY291bnRzIiwiY2xpZW50X2lkIjoiR2FwQ2xpZW50IiwiaXNzIjoiVElBQSBERVYiLCJhdWQiOiJCRE4tVVMtREVWIiwianRpIjoia0F0c2JYYW5CdnZOSFBacVd6WEs4TlhzczlPSXozamdBT090IiwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiU21pdGgiLCJmcmF1ZFRva2VuIjoiOThjYmVlNWEtOTU4MS00NTdlLTk3NTEtZjVlYzNlNWZiYTUwIiwiZnJhdWRUb2tlbklzc3VlVGltZSI6IjE2MzAwMDMyNTQiLCJhY2NvdW50cyI6WyIxMjM0NTY3OCIsIjk4NzY1NDMyIl0sInBhcnR5SWQiOiIxMjM0NTYiLCJ1c2VybmFtZSI6ImJhcmNsYXlzdXNlciIsImV4cCI6MTYzMDAwMTQ1NX0.Jkgb2A2HAOdLKaion8ff097GedtQkxtAV4Qxea538owLS8zaEvTm9kHBWOxmuNHIgP1V8mx3NUflwbY8A823Ut00wWqbUbB-cSV0idDaQJ2pKWHDFYbipvi5I7yPGj2BR-oHhQao1ZGlW6DyxYuZ12q8IK7LpKVWbCSPZ-fFAlD5HgH_FORq6Avc5oLH--Zcww63fI6gtZ48pwnXX2gM1aiSQ3lfvLXWVQ9fooAlP65LOW1MMjh5HOtrNvA7ObBSYepYzef5ykP2YvIz3OOS4hLhTo-3-iEbUDvkPx_mmz_pi7piXrMqQPfPnz5y2VkLOHTYfQJeQmVg60YTG7uPdw",
+      "externalAccountID" : "0dbcb7ee-6c59-483b-966a-44d11557665b"
+    },
+    "httpResults" : [ {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "af2aeb5b-f9d4-4172-b730-404ab8e9406c",
+      "body" : null,
+      "durationMs" : 11,
+      "url" : "/auth/bank-token",
+      "status" : 0
+    }, {
+      "method" : "GET",
+      "name" : "Получение списка счетов",
+      "stepId" : "eda9d4de-d4dc-4122-b41b-1dd21c4e020f",
+      "body" : null,
+      "durationMs" : 1,
+      "url" : "/accounts",
+      "status" : 0
+    } ],
+    "lastHttpResult" : {
+      "method" : "GET",
+      "name" : "Получение списка счетов",
+      "stepId" : "eda9d4de-d4dc-4122-b41b-1dd21c4e020f",
+      "body" : null,
+      "durationMs" : 1,
+      "url" : "/accounts",
+      "status" : 0
+    },
+    "requiresAdditionalInput" : false
+  },
+  "createdAt" : "2025-11-22T11:26:03",
+  "updatedAt" : "2025-11-22T11:29:40"
+}, {
+  "id" : "8f5df146-a205-4fbb-9656-85f07562db1e",
+  "processId" : "5c482f4f-430a-4f3b-bd99-4455eb0218a7",
+  "status" : "running",
+  "currentStepId" : "a4c24923-cbe1-4847-a884-34b4fb84c361",
+  "steps" : [ {
+    "id" : "cdadd7e9-1ae7-4aa0-9ddf-73a27a9910cc",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "team_id",
+        "label" : "Team id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "4e23ca23-0b1e-4cd0-9b0d-a162b07f0aa7",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "694876ee-ffb1-4fe7-9ed4-18697b90230c",
+    "title" : "Execute HTTP request: Аутентификация",
+    "description" : "Аутентификация клиента по токену банка для получения доступа к API.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Аутентификация",
+        "method" : "POST",
+        "url" : "/auth/bank-token",
+        "headers" : {
+          "Content-Type" : "application/json"
+        },
+        "body" : "{team_id=134555}",
+        "description" : "Аутентификация клиента по токену банка для получения доступа к API."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "4cb18a08-1142-4e2d-b768-84064f3b4121",
+    "title" : "Execute HTTP request: Получение счетов",
+    "description" : "Получение списка всех счетов клиента.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Получение счетов",
+        "method" : "GET",
+        "url" : "/accounts",
+        "headers" : {
+          "Authorization" : "Bearer <token>"
+        },
+        "description" : "Получение списка всех счетов клиента."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "a4c24923-cbe1-4847-a884-34b4fb84c361",
+    "title" : "Execute HTTP request: Проверка баланса",
+    "description" : "Проверка баланса выбранного бонусного счёта.",
+    "type" : "http_request",
+    "status" : "running",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка баланса",
+        "method" : "GET",
+        "url" : "/accounts/{account_id}/balances",
+        "headers" : {
+          "Authorization" : "Bearer <token>"
+        },
+        "description" : "Проверка баланса выбранного бонусного счёта."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "cee55888-69e3-4dfd-a7e3-352ed8a7cd42",
+    "title" : "Execute HTTP request: Инициация платежа",
+    "description" : "Инициация платежа с использованием бонусов.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Инициация платежа",
+        "method" : "POST",
+        "url" : "/payments",
+        "headers" : {
+          "Authorization" : "Bearer <token>",
+          "Content-Type" : "application/json"
+        },
+        "body" : "{account_id={account_id}, amount=0, currency=bonus}",
+        "description" : "Инициация платежа с использованием бонусов."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "4dafd52e-a235-4613-a12d-3484f6c39585",
+    "title" : "Execute HTTP request: Проверка статуса платежа",
+    "description" : "Проверка статуса инициированного платежа.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка статуса платежа",
+        "method" : "GET",
+        "url" : "/payments/{payment_id}",
+        "headers" : {
+          "Authorization" : "Bearer <token>"
+        },
+        "description" : "Проверка статуса инициированного платежа."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "0f776503-af28-4b06-8df1-f5e1c30b162f",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Процесс оплаты услуги бонусами включает аутентификацию, проверку счетов и баланса, инициацию и подтверждение платежа.",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация пользователя через банковский токен.",
+      "detail" : "Аутентификация пользователя через банковский токен.",
+      "relatedArtifact" : "/teams"
+    }, {
+      "title" : "Получение списка счетов пользователя.",
+      "detail" : "Получение списка счетов пользователя.",
+      "relatedArtifact" : "/teams"
+    }, {
+      "title" : "Проверка баланса бонусного счёта.",
+      "detail" : "Проверка баланса бонусного счёта.",
+      "relatedArtifact" : "/teams"
+    }, {
+      "title" : "Инициация платежа с использованием бонусов.",
+      "detail" : "Инициация платежа с использованием бонусов.",
+      "relatedArtifact" : "/teams"
+    }, {
+      "title" : "Проверка статуса платежа.",
+      "detail" : "Проверка статуса платежа.",
+      "relatedArtifact" : "/teams"
+    } ],
+    "httpRequests" : [ {
+      "name" : "Аутентификация",
+      "method" : "POST",
+      "url" : "/auth/bank-token",
+      "headers" : {
+        "Content-Type" : "application/json"
+      },
+      "body" : "{team_id=134555}",
+      "description" : "Аутентификация клиента по токену банка для получения доступа к API."
+    }, {
+      "name" : "Получение счетов",
+      "method" : "GET",
+      "url" : "/accounts",
+      "headers" : {
+        "Authorization" : "Bearer <token>"
+      },
+      "description" : "Получение списка всех счетов клиента."
+    }, {
+      "name" : "Проверка баланса",
+      "method" : "GET",
+      "url" : "/accounts/{account_id}/balances",
+      "headers" : {
+        "Authorization" : "Bearer <token>"
+      },
+      "description" : "Проверка баланса выбранного бонусного счёта."
+    }, {
+      "name" : "Инициация платежа",
+      "method" : "POST",
+      "url" : "/payments",
+      "headers" : {
+        "Authorization" : "Bearer <token>",
+        "Content-Type" : "application/json"
+      },
+      "body" : "{account_id={account_id}, amount=0, currency=bonus}",
+      "description" : "Инициация платежа с использованием бонусов."
+    }, {
+      "name" : "Проверка статуса платежа",
+      "method" : "GET",
+      "url" : "/payments/{payment_id}",
+      "headers" : {
+        "Authorization" : "Bearer <token>"
+      },
+      "description" : "Проверка статуса инициированного платежа."
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /teams"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "llmPrompt" : "Process name: мокапи\nDescription: лвлфов\nCreated at: 2025-11-22T12:10:14.008\n\nUser inputs:\n- team_id: 134555\n\nBPMN excerpt:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\n                  xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\"\n                  xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\"\n                  id=\"Definitions_01\"\n                  targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"Process_01_bonus_payment\" isExecutable=\"false\">\n    <bpmn:startEvent id=\"StartEvent_01\" name=\"Клиент выбирает услугу и решает оплатить бонусами\">\n      <bpmn:outgoing>Flow_01_1</bpmn:outgoing>\n    </bpmn:startEvent>\n    <bpmn:task id=\"Task_01_Auth\" name=\"Аутентификация: POST /auth/bank-token\">\n      <bpmn:incoming>Flow_01_1</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_2</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetAccs\" name=\"Получение списка счетов: GET /accounts\">\n      <bpmn:incoming>Flow_01_2</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_3</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetBal\" name=\"Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances\">\n      <bpmn:incoming>Flow_01_3</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_4</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_InitPay\" name=\"Инициация платежа: POST /payments\">\n      <bpmn:incoming>Flow_01_4</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_5</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_CheckPay\" name...\n\nOpenAPI endpoints:\n- /teams\n- /accounts/{account_id}/balances\n- /account-consents/request\n- /teams/{team_id}/secret\n- /payments\n\nRequired output: JSON with keys plan (markdown list of actions), httpRequests (array of HTTP steps containing name, method, url, headers, body, description), summary (short text). Use user inputs to populate headers or payloads as needed.\n",
+    "baseUrl" : "http://localhost:8080",
+    "userInputs" : {
+      "team_id" : "134555"
+    },
+    "llmPlan" : "1. Аутентификация пользователя через банковский токен.\n2. Получение списка счетов пользователя.\n3. Проверка баланса бонусного счёта.\n4. Инициация платежа с использованием бонусов.\n5. Проверка статуса платежа.",
+    "requiredInputFields" : [ ],
+    "llmRawResponse" : "{\n  \"plan\": \"1. Аутентификация пользователя через банковский токен.\\n2. Получение списка счетов пользователя.\\n3. Проверка баланса бонусного счёта.\\n4. Инициация платежа с использованием бонусов.\\n5. Проверка статуса платежа.\",\n  \"httpRequests\": [\n    {\n      \"name\": \"Аутентификация\",\n      \"method\": \"POST\",\n      \"url\": \"/auth/bank-token\",\n      \"headers\": {\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"team_id\": 134555\n      },\n      \"description\": \"Аутентификация клиента по токену банка для получения доступа к API.\"\n    },\n    {\n      \"name\": \"Получение счетов\",\n      \"method\": \"GET\",\n      \"url\": \"/accounts\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <token>\"\n      },\n      \"body\": null,\n      \"description\": \"Получение списка всех счетов клиента.\"\n    },\n    {\n      \"name\": \"Проверка баланса\",\n      \"method\": \"GET\",\n      \"url\": \"/accounts/{account_id}/balances\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <token>\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка баланса выбранного бонусного счёта.\"\n    },\n    {\n      \"name\": \"Инициация платежа\",\n      \"method\": \"POST\",\n      \"url\": \"/payments\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <token>\",\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"account_id\": \"{account_id}\",\n        \"amount\": 0,\n        \"currency\": \"bonus\"\n      },\n      \"description\": \"Инициация платежа с использованием бонусов.\"\n    },\n    {\n      \"name\": \"Проверка статуса платежа\",\n      \"method\": \"GET\",\n      \"url\": \"/payments/{payment_id}\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <token>\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка статуса инициированного платежа.\"\n    }\n  ],\n  \"summary\": \"Процесс оплаты услуги бонусами включает аутентификацию, проверку счетов и баланса, инициацию и подтверждение платежа.\"\n}",
+    "requiresAdditionalInput" : false,
+    "httpResults" : [ {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "694876ee-ffb1-4fe7-9ed4-18697b90230c",
+      "body" : null,
+      "durationMs" : 19,
+      "url" : "/auth/bank-token",
+      "status" : 0
+    }, {
+      "method" : "GET",
+      "name" : "Получение счетов",
+      "stepId" : "4cb18a08-1142-4e2d-b768-84064f3b4121",
+      "body" : null,
+      "durationMs" : 1,
+      "url" : "/accounts",
+      "status" : 0
+    } ],
+    "lastHttpResult" : {
+      "method" : "GET",
+      "name" : "Получение счетов",
+      "stepId" : "4cb18a08-1142-4e2d-b768-84064f3b4121",
+      "body" : null,
+      "durationMs" : 1,
+      "url" : "/accounts",
+      "status" : 0
+    }
+  },
+  "createdAt" : "2025-11-22T12:18:42",
+  "updatedAt" : "2025-11-22T12:22:30"
+}, {
+  "id" : "841eb6fb-1a97-43fe-a1c8-7b9ecdb20a74",
+  "processId" : "08fb7834-1158-44ca-a170-f9e99f955363",
+  "status" : "running",
+  "currentStepId" : "f7b64327-5f68-40c6-96fd-2a5b1f9593f7",
+  "steps" : [ {
+    "id" : "9a99abef-eab3-4e1d-a7be-4d6467e1d63a",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "team_id",
+        "label" : "Team id",
+        "description" : "",
+        "required" : true
+      }, {
+        "name" : "account_id",
+        "label" : "Account id",
+        "description" : "",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "1aa1d961-ca7d-4336-be34-6a32109d822a",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "c9c09be4-6e60-4d24-bc04-c0ef1e607ae7",
+    "title" : "Execute HTTP request: Аутентификация",
+    "description" : "Аутентификация клиента по банковскому токену для получения доступа к API.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Аутентификация",
+        "stepId" : "c9c09be4-6e60-4d24-bc04-c0ef1e607ae7",
+        "method" : "POST",
+        "url" : "https://localhost:9080/auth/bank-token",
+        "headers" : {
+          "Content-Type" : "application/json"
+        },
+        "body" : "{team_id=134000}",
+        "description" : "Аутентификация клиента по банковскому токену для получения доступа к API."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "f7b64327-5f68-40c6-96fd-2a5b1f9593f7",
+    "title" : "Execute HTTP request: Получение счетов",
+    "description" : "Получение списка счетов клиента для дальнейшей проверки баланса.",
+    "type" : "http_request",
+    "status" : "waiting",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Получение счетов",
+        "method" : "GET",
+        "url" : "https://localhost:9080/accounts",
+        "headers" : {
+          "Authorization" : "Bearer <auth_token>"
+        },
+        "description" : "Получение списка счетов клиента для дальнейшей проверки баланса."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "66b400af-6764-47f0-adce-dfa72e993dd0",
+    "title" : "Execute HTTP request: Проверка баланса",
+    "description" : "Проверка баланса выбранного бонусного счёта клиента.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка баланса",
+        "method" : "GET",
+        "url" : "https://localhost:9080/accounts/{account_id}/balances",
+        "headers" : {
+          "Authorization" : "Bearer <auth_token>"
+        },
+        "description" : "Проверка баланса выбранного бонусного счёта клиента."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "911e54f5-0619-48bf-aa68-d54115985244",
+    "title" : "Execute HTTP request: Инициация платежа",
+    "description" : "Инициация платежа с использованием бонусов со счёта клиента.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Инициация платежа",
+        "method" : "POST",
+        "url" : "https://localhost:9080/payments",
+        "headers" : {
+          "Authorization" : "Bearer <auth_token>",
+          "Content-Type" : "application/json"
+        },
+        "body" : "{account_id={account_id}, amount={bonus_amount}, currency=BONUS}",
+        "description" : "Инициация платежа с использованием бонусов со счёта клиента."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "85488350-f7d7-46cb-ad6c-80f773e2b9b3",
+    "title" : "Execute HTTP request: Проверка статуса платежа",
+    "description" : "Проверка статуса инициированного платежа для подтверждения успешности операции.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка статуса платежа",
+        "method" : "GET",
+        "url" : "https://localhost:9080/payments/{payment_id}",
+        "headers" : {
+          "Authorization" : "Bearer <auth_token>"
+        },
+        "description" : "Проверка статуса инициированного платежа для подтверждения успешности операции."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "a61833a4-32d7-47ef-a748-a3ae1d10630d",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Процесс обработки оплаты бонусами клиента включает аутентификацию, проверку счетов и баланса, инициацию и подтверждение платежа.",
+    "httpRequests" : [ {
+      "name" : "Аутентификация",
+      "stepId" : "c9c09be4-6e60-4d24-bc04-c0ef1e607ae7",
+      "method" : "POST",
+      "url" : "https://localhost:9080/auth/bank-token",
+      "headers" : {
+        "Content-Type" : "application/json"
+      },
+      "body" : "{team_id=134000}",
+      "description" : "Аутентификация клиента по банковскому токену для получения доступа к API."
+    }, {
+      "name" : "Получение счетов",
+      "method" : "GET",
+      "url" : "https://localhost:9080/accounts",
+      "headers" : {
+        "Authorization" : "Bearer <auth_token>"
+      },
+      "description" : "Получение списка счетов клиента для дальнейшей проверки баланса."
+    }, {
+      "name" : "Проверка баланса",
+      "method" : "GET",
+      "url" : "https://localhost:9080/accounts/{account_id}/balances",
+      "headers" : {
+        "Authorization" : "Bearer <auth_token>"
+      },
+      "description" : "Проверка баланса выбранного бонусного счёта клиента."
+    }, {
+      "name" : "Инициация платежа",
+      "method" : "POST",
+      "url" : "https://localhost:9080/payments",
+      "headers" : {
+        "Authorization" : "Bearer <auth_token>",
+        "Content-Type" : "application/json"
+      },
+      "body" : "{account_id={account_id}, amount={bonus_amount}, currency=BONUS}",
+      "description" : "Инициация платежа с использованием бонусов со счёта клиента."
+    }, {
+      "name" : "Проверка статуса платежа",
+      "method" : "GET",
+      "url" : "https://localhost:9080/payments/{payment_id}",
+      "headers" : {
+        "Authorization" : "Bearer <auth_token>"
+      },
+      "description" : "Проверка статуса инициированного платежа для подтверждения успешности операции."
+    } ],
+    "llmPlan" : "1. Аутентификация пользователя через банковский токен.\n2. Получение списка счетов клиента.\n3. Проверка баланса бонусного счёта.\n4. Инициация платежа с использованием бонусов.\n5. Проверка статуса платежа.",
+    "requiredInputFields" : [ ],
+    "llmRawResponse" : "{\n  \"plan\": \"1. Аутентификация пользователя через банковский токен.\\n2. Получение списка счетов клиента.\\n3. Проверка баланса бонусного счёта.\\n4. Инициация платежа с использованием бонусов.\\n5. Проверка статуса платежа.\",\n  \"httpRequests\": [\n    {\n      \"name\": \"Аутентификация\",\n      \"method\": \"POST\",\n      \"url\": \"https://localhost:9080/auth/bank-token\",\n      \"headers\": {\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"team_id\": 134000\n      },\n      \"description\": \"Аутентификация клиента по банковскому токену для получения доступа к API.\"\n    },\n    {\n      \"name\": \"Получение счетов\",\n      \"method\": \"GET\",\n      \"url\": \"https://localhost:9080/accounts\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <auth_token>\"\n      },\n      \"body\": null,\n      \"description\": \"Получение списка счетов клиента для дальнейшей проверки баланса.\"\n    },\n    {\n      \"name\": \"Проверка баланса\",\n      \"method\": \"GET\",\n      \"url\": \"https://localhost:9080/accounts/{account_id}/balances\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <auth_token>\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка баланса выбранного бонусного счёта клиента.\"\n    },\n    {\n      \"name\": \"Инициация платежа\",\n      \"method\": \"POST\",\n      \"url\": \"https://localhost:9080/payments\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <auth_token>\",\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"account_id\": \"{account_id}\",\n        \"amount\": \"{bonus_amount}\",\n        \"currency\": \"BONUS\"\n      },\n      \"description\": \"Инициация платежа с использованием бонусов со счёта клиента.\"\n    },\n    {\n      \"name\": \"Проверка статуса платежа\",\n      \"method\": \"GET\",\n      \"url\": \"https://localhost:9080/payments/{payment_id}\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <auth_token>\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка статуса инициированного платежа для подтверждения успешности операции.\"\n    }\n  ],\n  \"summary\": \"Процесс обработки оплаты бонусами клиента включает аутентификацию, проверку счетов и баланса, инициацию и подтверждение платежа.\"\n}",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация пользователя через банковский токен.",
+      "detail" : "Аутентификация пользователя через банковский токен.",
+      "relatedArtifact" : "/teams"
+    }, {
+      "title" : "Получение списка счетов клиента.",
+      "detail" : "Получение списка счетов клиента.",
+      "relatedArtifact" : "/teams"
+    }, {
+      "title" : "Проверка баланса бонусного счёта.",
+      "detail" : "Проверка баланса бонусного счёта.",
+      "relatedArtifact" : "/teams"
+    }, {
+      "title" : "Инициация платежа с использованием бонусов.",
+      "detail" : "Инициация платежа с использованием бонусов.",
+      "relatedArtifact" : "/teams"
+    }, {
+      "title" : "Проверка статуса платежа.",
+      "detail" : "Проверка статуса платежа.",
+      "relatedArtifact" : "/teams"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /teams"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "llmPrompt" : "Process name: dufyiousdoifu9\nDescription: ljkfkl\nCreated at: 2025-11-22T12:23:06.625\n\nUser inputs:\n- base_url: https://localhost:9080\n- team_id: 134000\n\nBPMN excerpt:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\n                  xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\"\n                  xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\"\n                  id=\"Definitions_01\"\n                  targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"Process_01_bonus_payment\" isExecutable=\"false\">\n    <bpmn:startEvent id=\"StartEvent_01\" name=\"Клиент выбирает услугу и решает оплатить бонусами\">\n      <bpmn:outgoing>Flow_01_1</bpmn:outgoing>\n    </bpmn:startEvent>\n    <bpmn:task id=\"Task_01_Auth\" name=\"Аутентификация: POST /auth/bank-token\">\n      <bpmn:incoming>Flow_01_1</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_2</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetAccs\" name=\"Получение списка счетов: GET /accounts\">\n      <bpmn:incoming>Flow_01_2</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_3</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetBal\" name=\"Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances\">\n      <bpmn:incoming>Flow_01_3</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_4</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_InitPay\" name=\"Инициация платежа: POST /payments\">\n      <bpmn:incoming>Flow_01_4</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_5</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_CheckPay\" name...\n\nOpenAPI endpoints:\n- /teams\n- /accounts/{account_id}/balances\n- /account-consents/request\n- /teams/{team_id}/secret\n- /payments\n\nRequired output: JSON with keys plan (markdown list of actions), httpRequests (array of HTTP steps containing name, method, url, headers, body, description), summary (short text). Use user inputs to populate headers or payloads as needed.\n",
+    "baseUrl" : "http://localhost:8080",
+    "userInputs" : {
+      "base_url" : "https://localhost:9080",
+      "team_id" : "134000"
+    },
+    "httpResults" : [ {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "c9c09be4-6e60-4d24-bc04-c0ef1e607ae7",
+      "body" : "Unrecognized SSL message, plaintext connection?",
+      "durationMs" : 53,
+      "url" : "https://localhost:9080/auth/bank-token",
+      "status" : 0
+    } ],
+    "lastHttpResult" : {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "c9c09be4-6e60-4d24-bc04-c0ef1e607ae7",
+      "body" : "Unrecognized SSL message, plaintext connection?",
+      "durationMs" : 53,
+      "url" : "https://localhost:9080/auth/bank-token",
+      "status" : 0
+    },
+    "requiresAdditionalInput" : false
+  },
+  "createdAt" : "2025-11-22T12:23:38",
+  "updatedAt" : "2025-11-22T12:24:28"
+}, {
+  "id" : "b52d222d-0b35-4795-8012-10928705d392",
+  "processId" : "61cbe22f-92a0-49ba-9588-132b8cc5e1cf",
+  "status" : "running",
+  "currentStepId" : "a6684c4a-5072-45ee-be63-758cb1d985ea",
+  "steps" : [ {
+    "id" : "67f0b288-730a-45eb-9e04-0bd85e49095b",
+    "title" : "Collect additional inputs",
+    "description" : "Provide extra parameters the LLM needs before starting the analysis",
+    "type" : "collect_inputs",
+    "status" : "completed",
+    "metadata" : {
+      "requiredInputs" : [ {
+        "name" : "base_url",
+        "label" : "Base URL",
+        "description" : "Target environment URL, e.g. https://service.example.com",
+        "required" : true
+      }, {
+        "name" : "id",
+        "label" : "Id",
+        "description" : "",
+        "required" : true
+      } ]
+    }
+  }, {
+    "id" : "8b335988-e650-477d-9dfb-965b64c2dcdf",
+    "title" : "Run LLM analysis",
+    "description" : "Use the collected parameters to ask the LLM for a test plan",
+    "type" : "llm_analysis",
+    "status" : "completed",
+    "metadata" : { }
+  }, {
+    "id" : "9aae197c-61da-4dcd-ab30-b3c1c69e3b2c",
+    "title" : "Execute HTTP request: Аутентификация",
+    "description" : "Аутентификация клиента по банковскому токену.",
+    "type" : "http_request",
+    "status" : "completed",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Аутентификация",
+        "stepId" : "9aae197c-61da-4dcd-ab30-b3c1c69e3b2c",
+        "method" : "POST",
+        "url" : "http://localhost:9080/auth/bank-token",
+        "headers" : {
+          "Content-Type" : "application/json"
+        },
+        "body" : "{id=2313123}",
+        "description" : "Аутентификация клиента по банковскому токену."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "a6684c4a-5072-45ee-be63-758cb1d985ea",
+    "title" : "Execute HTTP request: Получение счетов",
+    "description" : "Получение списка счетов клиента.",
+    "type" : "http_request",
+    "status" : "waiting",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Получение счетов",
+        "method" : "GET",
+        "url" : "http://localhost:9080/accounts",
+        "headers" : {
+          "Authorization" : "Bearer <token>"
+        },
+        "description" : "Получение списка счетов клиента."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "20d437ed-a302-468e-847a-9e99bb77d569",
+    "title" : "Execute HTTP request: Проверка баланса",
+    "description" : "Проверка баланса выбранного бонусного счёта.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка баланса",
+        "method" : "GET",
+        "url" : "http://localhost:9080/accounts/{account_id}/balances",
+        "headers" : {
+          "Authorization" : "Bearer <token>"
+        },
+        "description" : "Проверка баланса выбранного бонусного счёта."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "a2e814e2-6db5-4bf0-a5fa-90c41e6e6f84",
+    "title" : "Execute HTTP request: Инициация платежа",
+    "description" : "Инициация платежа с использованием бонусов.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Инициация платежа",
+        "method" : "POST",
+        "url" : "http://localhost:9080/payments",
+        "headers" : {
+          "Authorization" : "Bearer <token>",
+          "Content-Type" : "application/json"
+        },
+        "body" : "{accountId={account_id}, amount=<bonus_amount>}",
+        "description" : "Инициация платежа с использованием бонусов."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "abf6bfad-f93f-44a7-ae87-098aaaeb7044",
+    "title" : "Execute HTTP request: Проверка статуса платежа",
+    "description" : "Проверка статуса инициированного платежа.",
+    "type" : "http_request",
+    "status" : "pending",
+    "metadata" : {
+      "httpRequest" : {
+        "name" : "Проверка статуса платежа",
+        "method" : "GET",
+        "url" : "http://localhost:9080/payments/{payment_id}",
+        "headers" : {
+          "Authorization" : "Bearer <token>"
+        },
+        "description" : "Проверка статуса инициированного платежа."
+      },
+      "requiresAdditionalInput" : false
+    }
+  }, {
+    "id" : "75eb853d-dbd3-464f-86a5-8987c906d31d",
+    "title" : "Execute test script",
+    "description" : "Run the LLM-provided script and submit the execution result",
+    "type" : "test_execution",
+    "status" : "pending",
+    "metadata" : { }
+  } ],
+  "context" : {
+    "llmSummary" : "Процесс оплаты услуги бонусами включает аутентификацию, проверку счетов и баланса, инициацию и подтверждение платежа.",
+    "httpRequests" : [ {
+      "name" : "Аутентификация",
+      "stepId" : "9aae197c-61da-4dcd-ab30-b3c1c69e3b2c",
+      "method" : "POST",
+      "url" : "http://localhost:9080/auth/bank-token",
+      "headers" : {
+        "Content-Type" : "application/json"
+      },
+      "body" : "{id=2313123}",
+      "description" : "Аутентификация клиента по банковскому токену."
+    }, {
+      "name" : "Получение счетов",
+      "method" : "GET",
+      "url" : "http://localhost:9080/accounts",
+      "headers" : {
+        "Authorization" : "Bearer <token>"
+      },
+      "description" : "Получение списка счетов клиента."
+    }, {
+      "name" : "Проверка баланса",
+      "method" : "GET",
+      "url" : "http://localhost:9080/accounts/{account_id}/balances",
+      "headers" : {
+        "Authorization" : "Bearer <token>"
+      },
+      "description" : "Проверка баланса выбранного бонусного счёта."
+    }, {
+      "name" : "Инициация платежа",
+      "method" : "POST",
+      "url" : "http://localhost:9080/payments",
+      "headers" : {
+        "Authorization" : "Bearer <token>",
+        "Content-Type" : "application/json"
+      },
+      "body" : "{accountId={account_id}, amount=<bonus_amount>}",
+      "description" : "Инициация платежа с использованием бонусов."
+    }, {
+      "name" : "Проверка статуса платежа",
+      "method" : "GET",
+      "url" : "http://localhost:9080/payments/{payment_id}",
+      "headers" : {
+        "Authorization" : "Bearer <token>"
+      },
+      "description" : "Проверка статуса инициированного платежа."
+    } ],
+    "llmPlan" : "1. Аутентификация пользователя через банковский токен.\n2. Получение списка счетов клиента.\n3. Проверка баланса бонусного счёта.\n4. Инициация платежа с использованием бонусов.\n5. Проверка статуса платежа.",
+    "requiredInputFields" : [ ],
+    "llmRawResponse" : "{\n  \"plan\": \"1. Аутентификация пользователя через банковский токен.\\n2. Получение списка счетов клиента.\\n3. Проверка баланса бонусного счёта.\\n4. Инициация платежа с использованием бонусов.\\n5. Проверка статуса платежа.\",\n  \"httpRequests\": [\n    {\n      \"name\": \"Аутентификация\",\n      \"method\": \"POST\",\n      \"url\": \"http://localhost:9080/auth/bank-token\",\n      \"headers\": {\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"id\": \"2313123\"\n      },\n      \"description\": \"Аутентификация клиента по банковскому токену.\"\n    },\n    {\n      \"name\": \"Получение счетов\",\n      \"method\": \"GET\",\n      \"url\": \"http://localhost:9080/accounts\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <token>\"\n      },\n      \"body\": null,\n      \"description\": \"Получение списка счетов клиента.\"\n    },\n    {\n      \"name\": \"Проверка баланса\",\n      \"method\": \"GET\",\n      \"url\": \"http://localhost:9080/accounts/{account_id}/balances\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <token>\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка баланса выбранного бонусного счёта.\"\n    },\n    {\n      \"name\": \"Инициация платежа\",\n      \"method\": \"POST\",\n      \"url\": \"http://localhost:9080/payments\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <token>\",\n        \"Content-Type\": \"application/json\"\n      },\n      \"body\": {\n        \"accountId\": \"{account_id}\",\n        \"amount\": \"<bonus_amount>\"\n      },\n      \"description\": \"Инициация платежа с использованием бонусов.\"\n    },\n    {\n      \"name\": \"Проверка статуса платежа\",\n      \"method\": \"GET\",\n      \"url\": \"http://localhost:9080/payments/{payment_id}\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <token>\"\n      },\n      \"body\": null,\n      \"description\": \"Проверка статуса инициированного платежа.\"\n    }\n  ],\n  \"summary\": \"Процесс оплаты услуги бонусами включает аутентификацию, проверку счетов и баланса, инициацию и подтверждение платежа.\"\n}",
+    "llmPlanActions" : [ {
+      "title" : "Аутентификация пользователя через банковский токен.",
+      "detail" : "Аутентификация пользователя через банковский токен.",
+      "relatedArtifact" : "/pets/{id}"
+    }, {
+      "title" : "Получение списка счетов клиента.",
+      "detail" : "Получение списка счетов клиента.",
+      "relatedArtifact" : "/pets/{id}"
+    }, {
+      "title" : "Проверка баланса бонусного счёта.",
+      "detail" : "Проверка баланса бонусного счёта.",
+      "relatedArtifact" : "/pets/{id}"
+    }, {
+      "title" : "Инициация платежа с использованием бонусов.",
+      "detail" : "Инициация платежа с использованием бонусов.",
+      "relatedArtifact" : "/pets/{id}"
+    }, {
+      "title" : "Проверка статуса платежа.",
+      "detail" : "Проверка статуса платежа.",
+      "relatedArtifact" : "/pets/{id}"
+    } ],
+    "llmTestAssertions" : [ {
+      "check" : "Endpoint responds with 2xx",
+      "expected" : "Call completes successfully for /pets/{id}"
+    }, {
+      "check" : "Response body is captured",
+      "expected" : "Payload is logged for triage"
+    }, {
+      "check" : "Auth token accepted",
+      "expected" : "No HTTP 401 for configured Authorization header"
+    } ],
+    "llmPrompt" : "Process name: 398нгшцурв\nDescription: ылдвоад\nCreated at: 2025-11-22T12:34:41.955\n\nUser inputs:\n- base_url: http://localhost:9080\n- id: 2313123\n\nBPMN excerpt:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n                  xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\"\n                  xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\"\n                  xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\"\n                  id=\"Definitions_01\"\n                  targetNamespace=\"http://bpmn.io/schema/bpmn\">\n  <bpmn:process id=\"Process_01_bonus_payment\" isExecutable=\"false\">\n    <bpmn:startEvent id=\"StartEvent_01\" name=\"Клиент выбирает услугу и решает оплатить бонусами\">\n      <bpmn:outgoing>Flow_01_1</bpmn:outgoing>\n    </bpmn:startEvent>\n    <bpmn:task id=\"Task_01_Auth\" name=\"Аутентификация: POST /auth/bank-token\">\n      <bpmn:incoming>Flow_01_1</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_2</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetAccs\" name=\"Получение списка счетов: GET /accounts\">\n      <bpmn:incoming>Flow_01_2</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_3</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_GetBal\" name=\"Проверка баланса бонусного счёта: GET /accounts/{account_id}/balances\">\n      <bpmn:incoming>Flow_01_3</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_4</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_InitPay\" name=\"Инициация платежа: POST /payments\">\n      <bpmn:incoming>Flow_01_4</bpmn:incoming>\n      <bpmn:outgoing>Flow_01_5</bpmn:outgoing>\n    </bpmn:task>\n    <bpmn:task id=\"Task_01_CheckPay\" name...\n\nOpenAPI endpoints:\n- /pets/{id}\n- /pets\n\nRequired output: JSON with keys plan (markdown list of actions), httpRequests (array of HTTP steps containing name, method, url, headers, body, description), summary (short text). Use user inputs to populate headers or payloads as needed.\n",
+    "baseUrl" : "http://localhost:8080",
+    "userInputs" : {
+      "base_url" : "http://localhost:9080",
+      "id" : "2313123"
+    },
+    "httpResults" : [ {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "9aae197c-61da-4dcd-ab30-b3c1c69e3b2c",
+      "body" : "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"client_id\"],\"msg\":\"Обязателен\"},{\"type\":\"missing\",\"loc\":[\"query\",\"client_secret\"],\"msg\":\"Обязателен\"}]}",
+      "durationMs" : 104,
+      "url" : "http://localhost:9080/auth/bank-token",
+      "status" : 422
+    } ],
+    "lastHttpResult" : {
+      "method" : "POST",
+      "name" : "Аутентификация",
+      "stepId" : "9aae197c-61da-4dcd-ab30-b3c1c69e3b2c",
+      "body" : "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"client_id\"],\"msg\":\"Обязателен\"},{\"type\":\"missing\",\"loc\":[\"query\",\"client_secret\"],\"msg\":\"Обязателен\"}]}",
+      "durationMs" : 104,
+      "url" : "http://localhost:9080/auth/bank-token",
+      "status" : 422
+    },
+    "requiresAdditionalInput" : false
+  },
+  "createdAt" : "2025-11-22T12:35:09",
+  "updatedAt" : "2025-11-22T12:36:37"
 } ]

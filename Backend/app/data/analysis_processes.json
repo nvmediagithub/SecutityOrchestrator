@@ -26,19 +26,6 @@
   "openapiSpecName" : "openapi_test.json",
   "openapiUploadedAt" : "2025-11-19T22:30:37"
 }, {
-  "id" : "2f3e6058-1384-4e93-b00c-59e17c06063e",
-  "name" : "2qweqwe",
-  "description" : "2vsvdsfv",
-  "createdAt" : "2025-11-19T22:41:12",
-  "status" : "pending",
-  "type" : "securityAnalysis",
-  "bpmnDiagramPath" : "E:\\GitRepositoties\\llm_projects\\SecutityOrchestrator\\Backend\\app\\data\\analysis_processes\\bpmn\\2f3e6058-1384-4e93-b00c-59e17c06063e.bpmn",
-  "bpmnDiagramName" : "01_bonus_payment.bpmn",
-  "bpmnUploadedAt" : "2025-11-19T22:41:29",
-  "openapiSpecPath" : "E:\\GitRepositoties\\llm_projects\\SecutityOrchestrator\\Backend\\app\\data\\analysis_processes\\openapi\\2f3e6058-1384-4e93-b00c-59e17c06063e-208abe49-c934-4eee-a8b1-0858808d6755.json",
-  "openapiSpecName" : "openapi_test.json",
-  "openapiUploadedAt" : "2025-11-19T22:41:39"
-}, {
   "id" : "4bd4f923-f0cb-4348-b0c7-a7ed8d73aa03",
   "name" : "3ыфвфы",
   "description" : "333",
@@ -117,23 +104,55 @@
   "openapiSpecName" : "openapi_test.json",
   "openapiUploadedAt" : "2025-11-21T16:48:12"
 }, {
-  "id" : "c334a9d1-d04b-47c9-ad24-187a4cca0123",
-  "name" : "Test8",
-  "description" : "Description",
-  "createdAt" : "2025-11-21T17:26:00",
-  "status" : "pending",
-  "type" : "integrationTest"
-}, {
-  "id" : "2baf005b-2ef6-415d-a77e-ea3723362e7b",
-  "name" : "Testttt",
-  "description" : "tttt",
-  "createdAt" : "2025-11-21T17:33:36",
+  "id" : "61fc07a9-07e9-4a46-b52b-5092737b3001",
+  "name" : "Оплата бонусами",
+  "description" : "ыфв",
+  "createdAt" : "2025-11-22T11:25:25",
   "status" : "pending",
   "type" : "integrationTest",
-  "bpmnDiagramPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/bpmn/2baf005b-2ef6-415d-a77e-ea3723362e7b.bpmn",
+  "bpmnDiagramPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/bpmn/61fc07a9-07e9-4a46-b52b-5092737b3001.bpmn",
   "bpmnDiagramName" : "01_bonus_payment.bpmn",
-  "bpmnUploadedAt" : "2025-11-21T17:33:45",
-  "openapiSpecPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/openapi/2baf005b-2ef6-415d-a77e-ea3723362e7b-b5ab62f6-59e0-4c1f-9313-c0429b2f4d59.json",
-  "openapiSpecName" : "openapi_test.json",
-  "openapiUploadedAt" : "2025-11-21T17:33:56"
+  "bpmnUploadedAt" : "2025-11-22T11:25:34",
+  "openapiSpecPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/openapi/61fc07a9-07e9-4a46-b52b-5092737b3001-4f3f9635-4b4b-45a9-9701-095e1f2b3ef6.json",
+  "openapiSpecName" : "Оплата баллами бонусов.oas3.json",
+  "openapiUploadedAt" : "2025-11-22T11:25:44"
+}, {
+  "id" : "5c482f4f-430a-4f3b-bd99-4455eb0218a7",
+  "name" : "мокапи",
+  "description" : "лвлфов",
+  "createdAt" : "2025-11-22T12:10:14",
+  "status" : "pending",
+  "type" : "securityAnalysis",
+  "bpmnDiagramPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/bpmn/5c482f4f-430a-4f3b-bd99-4455eb0218a7.bpmn",
+  "bpmnDiagramName" : "01_bonus_payment.bpmn",
+  "bpmnUploadedAt" : "2025-11-22T12:18:17",
+  "openapiSpecPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/openapi/5c482f4f-430a-4f3b-bd99-4455eb0218a7-59c7a503-d348-474f-bd57-32f307972bcb.json",
+  "openapiSpecName" : "openapi.json",
+  "openapiUploadedAt" : "2025-11-22T12:14:19"
+}, {
+  "id" : "08fb7834-1158-44ca-a170-f9e99f955363",
+  "name" : "dufyiousdoifu9",
+  "description" : "ljkfkl",
+  "createdAt" : "2025-11-22T12:23:06",
+  "status" : "pending",
+  "type" : "integrationTest",
+  "bpmnDiagramPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/bpmn/08fb7834-1158-44ca-a170-f9e99f955363.bpmn",
+  "bpmnDiagramName" : "01_bonus_payment.bpmn",
+  "bpmnUploadedAt" : "2025-11-22T12:23:19",
+  "openapiSpecPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/openapi/08fb7834-1158-44ca-a170-f9e99f955363-014877ed-b896-4117-9e96-1f1b75ba529a.json",
+  "openapiSpecName" : "openapi.json",
+  "openapiUploadedAt" : "2025-11-22T12:23:29"
+}, {
+  "id" : "61cbe22f-92a0-49ba-9588-132b8cc5e1cf",
+  "name" : "398нгшцурв",
+  "description" : "ылдвоад",
+  "createdAt" : "2025-11-22T12:34:41",
+  "status" : "pending",
+  "type" : "securityAnalysis",
+  "bpmnDiagramPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/bpmn/61cbe22f-92a0-49ba-9588-132b8cc5e1cf.bpmn",
+  "bpmnDiagramName" : "01_bonus_payment.bpmn",
+  "bpmnUploadedAt" : "2025-11-22T12:34:50",
+  "openapiSpecPath" : "/Users/user/Documents/Repositories/migration_folder/SecutityOrchestrator/Backend/app/data/analysis_processes/openapi/61cbe22f-92a0-49ba-9588-132b8cc5e1cf-fb172488-94d9-4a62-95d1-fcbc4d5ef4f1.yaml",
+  "openapiSpecName" : "petstore.yaml",
+  "openapiUploadedAt" : "2025-11-22T12:34:57"
 } ]

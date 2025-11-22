@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://example.com/bpmn">
+  <process id="TeamRegistration" name="Team Registration Flow" isExecutable="true">
+    <startEvent id="Start" name="Новая команда"/>
+    <sequenceFlow id="flow1" sourceRef="Start" targetRef="CollectMetadata"/>
+    <userTask id="CollectMetadata" name="Собрать имя и данные команды"/>
+    <sequenceFlow id="flow2" sourceRef="CollectMetadata" targetRef="RegisterTeam"/>
+    <serviceTask id="RegisterTeam" name="POST /teams"/>
+    <sequenceFlow id="flow3" sourceRef="RegisterTeam" targetRef="RetrieveSecret"/>
+    <serviceTask id="RetrieveSecret" name="GET /teams/{team_id}/secret"/>
+    <sequenceFlow id="flow4" sourceRef="RetrieveSecret" targetRef="StoreSecret"/>
+    <serviceTask id="StoreSecret" name="Сохранить client_secret в vault"/>
+    <sequenceFlow id="flow5" sourceRef="StoreSecret" targetRef="End"/>
+    <endEvent id="End" name="Команда зарегистрирована"/>
+  </process>
+</definitions>

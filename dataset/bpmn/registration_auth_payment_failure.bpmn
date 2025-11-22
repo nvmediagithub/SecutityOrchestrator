@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://example.com/bpmn">
+  <process id="RegistrationAuthPaymentFailure" name="Registration + Payment Failure Due To Funds" isExecutable="true">
+    <startEvent id="Start" name="Новая регистрация"/>
+    <sequenceFlow id="flow1" sourceRef="Start" targetRef="RegisterTeam"/>
+    <serviceTask id="RegisterTeam" name="POST /teams"/>
+    <sequenceFlow id="flow2" sourceRef="RegisterTeam" targetRef="RetrieveSecret"/>
+    <serviceTask id="RetrieveSecret" name="GET /teams/{team_id}/secret"/>
+    <sequenceFlow id="flow3" sourceRef="RetrieveSecret" targetRef="Authenticate"/>
+    <serviceTask id="Authenticate" name="POST /auth/bank-token"/>
+    <sequenceFlow id="flow4" sourceRef="Authenticate" targetRef="AttemptPayment"/>
+    <serviceTask id="AttemptPayment" name="POST /payments"/>
+    <sequenceFlow id="flow5" sourceRef="AttemptPayment" targetRef="FundsGateway"/>
+    <exclusiveGateway id="FundsGateway" name="Достаточно средств?"/>
+    <sequenceFlow id="flow6" sourceRef="FundsGateway" targetRef="PaymentSuccess">
+      <conditionExpression xsi:type="tFormalExpression">approved</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow7" sourceRef="FundsGateway" targetRef="NotifyInsufficient">
+      <conditionExpression xsi:type="tFormalExpression">declined</conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="PaymentSuccess" name="Trace /payments response"/>
+    <sequenceFlow id="flow8" sourceRef="PaymentSuccess" targetRef="EndSuccess"/>
+    <serviceTask id="NotifyInsufficient" name="Отправить отказ — недостаточно средств"/>
+    <sequenceFlow id="flow9" sourceRef="NotifyInsufficient" targetRef="EndFailure"/>
+    <endEvent id="EndSuccess" name="Платёж завершён"/>
+    <endEvent id="EndFailure" name="Оплата отклонена"/>
+  </process>
+</definitions>

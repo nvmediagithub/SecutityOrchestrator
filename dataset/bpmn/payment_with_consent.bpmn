@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://example.com/bpmn">
+  <process id="PaymentWithConsent" name="Payment With Consent" isExecutable="true">
+    <startEvent id="StartPayment" name="Запрос платежа"/>
+    <sequenceFlow id="flow1" sourceRef="StartPayment" targetRef="VerifyToken"/>
+    <serviceTask id="VerifyToken" name="Проверить токен (POST /auth/bank-token)"/>
+    <sequenceFlow id="flow2" sourceRef="VerifyToken" targetRef="CheckConsent"/>
+    <exclusiveGateway id="CheckConsent" name="Согласие есть?"/>
+    <sequenceFlow id="flow3" sourceRef="CheckConsent" targetRef="RequestConsent">
+      <conditionExpression xsi:type="tFormalExpression">${consentNeeded}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow4" sourceRef="CheckConsent" targetRef="ProcessPayment">
+      <conditionExpression xsi:type="tFormalExpression">${!consentNeeded}</conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="RequestConsent" name="POST /account-consents/request"/>
+    <sequenceFlow id="flow5" sourceRef="RequestConsent" targetRef="ProcessPayment"/>
+    <serviceTask id="ProcessPayment" name="POST /payments"/>
+    <sequenceFlow id="flow6" sourceRef="ProcessPayment" targetRef="TraceTransaction"/>
+    <serviceTask id="TraceTransaction" name="GET /accounts/{id}/transactions"/>
+    <sequenceFlow id="flow7" sourceRef="TraceTransaction" targetRef="EndPayment"/>
+    <endEvent id="EndPayment" name="Платёж завершён"/>
+  </process>
+</definitions>

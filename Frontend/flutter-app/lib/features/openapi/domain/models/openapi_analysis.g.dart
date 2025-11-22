@@ -12,6 +12,7 @@ _$OpenApiAnalysisImpl _$$OpenApiAnalysisImplFromJson(
   specificationName: json['specificationName'] as String,
   version: json['version'] as String?,
   valid: json['valid'] as bool,
+  description: json['description'] as String?,
   metadata:
       json['metadata'] as Map<String, dynamic>? ?? const <String, dynamic>{},
   validationSummary: json['validationSummary'] == null
@@ -59,6 +60,7 @@ Map<String, dynamic> _$$OpenApiAnalysisImplToJson(
   'specificationName': instance.specificationName,
   'version': instance.version,
   'valid': instance.valid,
+  'description': instance.description,
   'metadata': instance.metadata,
   'validationSummary': instance.validationSummary,
   'validationErrors': instance.validationErrors,

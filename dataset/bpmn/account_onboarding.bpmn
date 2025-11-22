@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://example.com/bpmn">
+  <process id="AccountOnboarding" name="Account Onboarding" isExecutable="true">
+    <startEvent id="StartOnboarding" name="Начало"/>
+    <sequenceFlow id="flow1" sourceRef="StartOnboarding" targetRef="CollectDocs"/>
+    <userTask id="CollectDocs" name="Собрать документы клиента"/>
+    <sequenceFlow id="flow2" sourceRef="CollectDocs" targetRef="VerifyKYC"/>
+    <userTask id="VerifyKYC" name="Проверка KYC"/>
+    <sequenceFlow id="flow3" sourceRef="VerifyKYC" targetRef="CreateAccount"/>
+    <serviceTask id="CreateAccount" name="Создать счёт"/>
+    <sequenceFlow id="flow4" sourceRef="CreateAccount" targetRef="EndOnboarding"/>
+    <endEvent id="EndOnboarding" name="Готово"/>
+  </process>
+</definitions>
